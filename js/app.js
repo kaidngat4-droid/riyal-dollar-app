@@ -1506,3 +1506,48 @@ function throttle(fn, ms) {
    ============================================ */
 window.deleteConversion = deleteConversion;
 
+
+// ============ تسجيل Periodic Sync ============
+async function registerPeriodicSync() {
+    if ('serviceWorker' in navigator && 'periodicSync' in navigator.serviceWorker) {
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            await registration.periodicSync.register('update-rates', {
+                minInterval: 60 * 60 * 1000 // كل ساعة
+            });
+            console.log('✅ Periodic Sync registered');
+        } catch (err) {
+            console.log('⚠️ Periodic Sync not supported:', err);
+        }
+    }
+}
+
+// ============ تسجيل Background Sync ============
+async function registerBackgroundSync() {
+    if ('serviceWorker' in navigator && 'SyncManager' in window) {
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            await registration.sync.register('sync-rates');
+            console.log('✅ Background Sync registered');
+        } catch (err) {
+            console.log('⚠️ Background Sync not supported');
+        }
+    }
+}
+
+// ============ طلب إذن الإشعارات ============
+async function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        const result = await Notification.requestPermission();
+        if (result === 'granted') {
+            console.log('✅ Push notifications granted');
+        }
+    }
+}
+
+// استدعاء عند التحميل
+document.addEventListener('DOMContentLoaded', () => {
+    registerPeriodicSync();
+    registerBackgroundSync();
+    setTimeout(requestNotificationPermission, 5000); // بعد 5 ثواني
+});
