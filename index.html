@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ريال ودولار - تطبيق احترافي لأسعار الصرف والذهب والفضة بشكل فوري ودقيق. يدعم أكثر من 170 عملة وأسعار المعادن الثمينة محدثة لحظياً.">
+    <meta name="keywords" content="أسعار الصرف, تحويل العملات, الذهب, الفضة, الريال اليمني, الدولار, اليمن, صرف العملات">
+    <meta name="author" content="Estsharion Team">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#f59e0b">
+    <meta name="msapplication-TileColor" content="#f59e0b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ريال ودولار">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="ريال ودولار">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://riyal-dollar.app">
+    <meta property="og:title" content="ريال ودولار | أسعار الصرف والذهب والفضة">
+    <meta property="og:description" content="تطبيق احترافي لأسعار الصرف والذهب والفضة بشكل فوري ودقيق">
+    <meta property="og:image" content="images/og-image.png">
+    <meta property="og:locale" content="ar_AR">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://riyal-dollar.app">
+    <meta property="twitter:title" content="ريال ودولار | أسعار الصرف والذهب والفضة">
+    <meta property="twitter:description" content="تطبيق احترافي لأسعار الصرف والذهب والفضة بشكل فوري ودقيق">
+    <meta property="twitter:image" content="images/og-image.png">
+    
+    <title>ريال ودولار | أسعار الصرف والذهب والفضة</title>
+    
+    <!-- Preconnect & Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="images/icon-152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="images/icon-120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="images/icon-76.png">
+    <link rel="mask-icon" href="images/safari-pinned-tab.svg" color="#f59e0b">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/app.js" as="script">
+</head>
+<body>
+    <!-- Splash Screen for PWA -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="splash-icon">🪙</div>
+                <div class="splash-brand">ريال ودولار</div>
+            </div>
+            <div class="splash-loader">
+                <div class="splash-spinner"></div>
+            </div>
+            <div class="splash-text">جاري التحميل...</div>
+        </div>
+    </div>
+
+    <!-- Loading Screen (post-splash) -->
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <div class="logo-icon">🪙</div>
+                <div class="logo-text">ريال ودولار</div>
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-text">جاري تحديث البيانات...</div>
+        </div>
+    </div>
+
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="offline-banner">
+        <span class="offline-icon">📡</span>
+        <span class="offline-text">أنت غير متصل بالإنترنت. البيانات قد لا تكون محدثة.</span>
+        <button class="offline-close" onclick="document.getElementById('offline-banner').classList.remove('show')">✕</button>
+    </div>
+
+    <!-- Update Available Banner -->
+    <div id="update-banner" class="update-banner">
+        <span class="update-icon">🔄</span>
+        <span class="update-text">تحديث جديد متاح!</span>
+        <button class="update-btn" id="update-app-btn">تحديث الآن</button>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-icon">🪙</div>
+                <div class="logo-text">
+                    <span class="logo-main">ريال ودولار</span>
+                    <span class="logo-sub">أسعار الصرف والذهب</span>
+                </div>
+            </div>
+            <nav class="nav-desktop" id="nav-desktop">
+                <a href="#converter" class="nav-link active" data-section="converter">محول العملات</a>
+                <a href="#gold-silver" class="nav-link" data-section="gold-silver">الذهب والفضة</a>
+                <a href="#rates" class="nav-link" data-section="rates">أسعار الصرف</a>
+                <a href="#trends" class="nav-link" data-section="trends">التحليلات</a>
+                <a href="#calculator" class="nav-link" data-section="calculator">الحاسبة</a>
+            </nav>
+            <div class="header-actions">
+                <button class="btn-icon" id="theme-toggle" title="تغيير الوضع" aria-label="تغيير الوضع">
+                    <span class="icon-moon">🌙</span>
+                    <span class="icon-sun">☀️</span>
+                </button>
+                <button class="btn-icon" id="refresh-btn" title="تحديث البيانات" aria-label="تحديث البيانات">
+                    <span class="refresh-icon">🔄</span>
+                </button>
+                <button class="btn-menu" id="menu-toggle" aria-label="القائمة" aria-expanded="false">
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                    <span class="menu-line"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+        <div class="mobile-menu-overlay" id="menu-overlay"></div>
+        <div class="mobile-menu-panel">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-brand">
+                    <span class="mobile-menu-icon">🪙</span>
+                    <span class="mobile-menu-title">ريال ودولار</span>
+                </div>
+                <button class="mobile-menu-close" id="menu-close" aria-label="إغلاق القائمة">✕</button>
+            </div>
+            <div class="mobile-menu-content">
+                <a href="#converter" class="mobile-link active" data-section="converter">
+                    <span class="mobile-link-icon">💱</span>
+                    <span class="mobile-link-text">محول العملات</span>
+                </a>
+                <a href="#gold-silver" class="mobile-link" data-section="gold-silver">
+                    <span class="mobile-link-icon">🥇</span>
+                    <span class="mobile-link-text">الذهب والفضة</span>
+                </a>
+                <a href="#rates" class="mobile-link" data-section="rates">
+                    <span class="mobile-link-icon">📊</span>
+                    <span class="mobile-link-text">أسعار الصرف</span>
+                </a>
+                <a href="#trends" class="mobile-link" data-section="trends">
+                    <span class="mobile-link-icon">📈</span>
+                    <span class="mobile-link-text">التحليلات</span>
+                </a>
+                <a href="#calculator" class="mobile-link" data-section="calculator">
+                    <span class="mobile-link-icon">🧮</span>
+                    <span class="mobile-link-text">الحاسبة</span>
+                </a>
+            </div>
+            <div class="mobile-menu-footer">
+                <div class="mobile-menu-version">الإصدار 1.0.0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main" id="main">
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="hero-bg">
+                <div class="hero-gradient"></div>
+                <div class="hero-particles" id="particles"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-dot"></span>
+                    <span>محدث لحظياً</span>
+                </div>
+                <h1 class="hero-title">
+                    أسعار الصرف
+                    <span class="gradient-text">والذهب والفضة</span>
+                </h1>
+                <p class="hero-desc">
+                    تابع أسعار العملات والذهب والفضة بشكل آني. تحويل فوري بين أكثر من 170 عملة مع أسعار المعادن الثمينة.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-currencies">170+</div>
+                        <div class="stat-label">عملة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-metals">6</div>
+                        <div class="stat-label">معادن ثمينة</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-update">60s</div>
+                        <div class="stat-label">تحديث</div>
+                    </div>
+                </div>
+                <div class="hero-cta">
+                    <a href="#converter" class="btn-hero-primary">ابدأ التحويل</a>
+                    <a href="#gold-silver" class="btn-hero-secondary">أسعار الذهب</a>
+                </div>
+            </div>
+            <div class="hero-scroll">
+                <div class="scroll-indicator">
+                    <span class="scroll-mouse"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Currency Converter Section -->
+        <section class="section" id="converter">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge">المحول</span>
+                    <h2 class="section-title">محول العملات</h2>
+                    <p class="section-desc">حوّل بين أي عملتين بشكل فوري ودقيق</p>
+                </div>
+                
+                <div class="converter-card reveal">
+                    <div class="converter-tabs">
+                        <button class="tab-btn active" data-tab="global">عالمي</button>
+                        <button class="tab-btn" data-tab="local">محلي (اليمن)</button>
+                    </div>
+                    
+                    <div class="converter-body">
+                        <!-- Global Converter -->
+                        <div class="converter-panel active" id="panel-global">
+                            <div class="converter-inputs">
+                                <div class="input-group">
+                                    <label class="input-label" for="amount-global">المبلغ</label>
+                                    <div class="amount-input-wrapper">
+                                        <input type="number" id="amount-global" class="amount-input" value="1" min="0" step="0.01" inputmode="decimal" aria-label="المبلغ">
+                                        <button class="btn-clear" id="clear-amount" aria-label="مسح">✕</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="currency-selectors">
+                                    <div class="currency-selector">
+                                        <label class="input-label">من</label>
+                                        <div class="currency-dropdown" id="from-currency" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="اختر العملة المصدر">
+                                            <div class="currency-selected">
+                                                <span class="currency-flag" id="from-flag">🇺🇸</span>
+                                                <div class="currency-info">
+                                                    <span class="currency-code" id="from-code">USD</span>
+                                                    <span class="currency-name" id="from-name">دولار أمريكي</span>
+                                                </div>
+                                                <span class="dropdown-arrow">▼</span>
+                                            </div>
+                                            <div class="currency-options" id="from-options" role="listbox" aria-label="العملات المصدر"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="btn-swap" id="swap-currencies" title="تبديل العملات" aria-label="تبديل العملات">
+                                        <span>⇄</span>
+                                    </button>
+                                    
+                                    <div class="currency-selector">
+                                        <label class="input-label">إلى</label>
+                                        <div class="currency-dropdown" id="to-currency" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="اختر العملة الهدف">
+                                            <div class="currency-selected">
+                                                <span class="currency-flag" id="to-flag">🇾🇪</span>
+                                                <div class="currency-info">
+                                                    <span class="currency-code" id="to-code">YER</span>
+                                                    <span class="currency-name" id="to-name">ريال يمني</span>
+                                                </div>
+                                                <span class="dropdown-arrow">▼</span>
+                                            </div>
+                                            <div class="currency-options" id="to-options" role="listbox" aria-label="العملات الهدف"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="converter-result">
+                                <div class="result-display">
+                                    <div class="result-amount" id="result-amount">--</div>
+                                    <div class="result-info">
+                                        <span id="result-rate">1 USD = -- YER</span>
+                                        <span class="result-time" id="result-time">آخر تحديث: --</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="converter-actions">
+                                <button class="btn-primary" id="convert-btn">
+                                    <span class="btn-icon">⚡</span>
+                                    <span>تحويل</span>
+                                </button>
+                                <button class="btn-secondary" id="save-conversion">
+                                    <span class="btn-icon">💾</span>
+                                    <span>حفظ</span>
+                                </button>
+                                <button class="btn-secondary" id="share-conversion">
+                                    <span class="btn-icon">📤</span>
+                                    <span>مشاركة</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Local Converter (Yemen) -->
+                        <div class="converter-panel" id="panel-local">
+                            <div class="yemen-notice">
+                                <div class="notice-icon">📍</div>
+                                <div class="notice-content">
+                                    <h4>أسعار الصرف في اليمن</h4>
+                                    <p>الأسعار المعروضة هي متوسطات السوق المحلية وقد تختلف حسب المنطقة</p>
+                                </div>
+                            </div>
+                            
+                            <div class="converter-inputs">
+                                <div class="input-group">
+                                    <label class="input-label" for="amount-local">المبلغ</label>
+                                    <div class="amount-input-wrapper">
+                                        <input type="number" id="amount-local" class="amount-input" value="100" min="0" step="1" inputmode="numeric" aria-label="المبلغ المحلي">
+                                    </div>
+                                </div>
+                                
+                                <div class="local-currency-selectors">
+                                    <div class="local-selector">
+                                        <label class="input-label" for="local-currency">العملة</label>
+                                        <select id="local-currency" class="local-select" aria-label="العملة المحلية">
+                                            <option value="USD">💵 دولار أمريكي (USD)</option>
+                                            <option value="SAR">🇸🇦 ريال سعودي (SAR)</option>
+                                            <option value="EUR">🇪🇺 يورو (EUR)</option>
+                                            <option value="AED">🇦🇪 درهم إماراتي (AED)</option>
+                                            <option value="GBP">🇬🇧 جنيه إسترليني (GBP)</option>
+                                            <option value="KWD">🇰🇼 دينار كويتي (KWD)</option>
+                                            <option value="QAR">🇶🇦 ريال قطري (QAR)</option>
+                                            <option value="OMR">🇴🇲 ريال عماني (OMR)</option>
+                                            <option value="BHD">🇧🇭 دينار بحريني (BHD)</option>
+                                            <option value="JOD">🇯🇴 دينار أردني (JOD)</option>
+                                            <option value="EGP">🇪🇬 جنيه مصري (EGP)</option>
+                                            <option value="TRY">🇹🇷 ليرة تركية (TRY)</option>
+                                            <option value="CNY">🇨🇳 رنمينبي صيني (CNY)</option>
+                                            <option value="INR">🇮🇳 روبية هندية (INR)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button class="btn-swap" id="swap-local" aria-label="تبديل الاتجاه">
+                                        <span>⇄</span>
+                                    </button>
+                                    
+                                    <div class="local-selector">
+                                        <label class="input-label" for="local-region">المنطقة</label>
+                                        <select id="local-region" class="local-select" aria-label="المنطقة">
+                                            <option value="sanaa">صنعاء</option>
+                                            <option value="aden">عدن</option>
+                                            <option value="taiz">تعز</option>
+                                            <option value="hodeidah">الحديدة</option>
+                                            <option value="ibb">إب</option>
+                                            <option value="marib">مأرب</option>
+                                            <option value="hadramout">حضرموت</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="local-results">
+                                <div class="local-result-card">
+                                    <div class="local-result-header">
+                                        <span class="local-result-label">سعر الشراء</span>
+                                        <span class="local-result-trend" id="buy-trend">▲</span>
+                                    </div>
+                                    <div class="local-result-value" id="buy-price">--</div>
+                                    <div class="local-result-unit">ريال يمني</div>
+                                </div>
+                                <div class="local-result-card">
+                                    <div class="local-result-header">
+                                        <span class="local-result-label">سعر البيع</span>
+                                        <span class="local-result-trend" id="sell-trend">▼</span>
+                                    </div>
+                                    <div class="local-result-value" id="sell-price">--</div>
+                                    <div class="local-result-unit">ريال يمني</div>
+                                </div>
+                                <div class="local-result-card highlight">
+                                    <div class="local-result-header">
+                                        <span class="local-result-label">المجموع</span>
+                                    </div>
+                                    <div class="local-result-value" id="total-yer">--</div>
+                                    <div class="local-result-unit">ريال يمني</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Conversions -->
+                <div class="quick-conversions reveal">
+                    <h3 class="quick-title">تحويلات سريعة</h3>
+                    <div class="quick-grid" id="quick-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gold & Silver Section -->
+        <section class="section section-alt" id="gold-silver">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge">المعادن</span>
+                    <h2 class="section-title">أسعار الذهب والفضة</h2>
+                    <p class="section-desc">أسعار المعادن الثمينة محدثة لحظياً</p>
+                </div>
+
+                <div class="metals-main-grid reveal">
+                    <!-- Gold Card -->
+                    <div class="metal-card gold-card glow-hover">
+                        <div class="metal-card-header">
+                            <div class="metal-icon">🥇</div>
+                            <div class="metal-title-group">
+                                <h3 class="metal-title">الذهب</h3>
+                                <span class="metal-symbol">XAU</span>
+                            </div>
+                            <div class="metal-badge live-badge">
+                                <span class="live-dot"></span>
+                                <span>مباشر</span>
+                            </div>
+                        </div>
+                        <div class="metal-price-section">
+                            <div class="metal-main-price">
+                                <span class="metal-currency">$</span>
+                                <span class="metal-value" id="gold-price-usd">--</span>
+                                <span class="metal-unit">/ أونصة</span>
+                            </div>
+                            <div class="metal-change" id="gold-change">
+                                <span class="change-icon">▲</span>
+                                <span class="change-value">--</span>
+                                <span class="change-percent">(--%)</span>
+                            </div>
+                        </div>
+                        <div class="metal-extra-prices">
+                            <div class="extra-price-row">
+                                <span class="extra-label">جرام 24</span>
+                                <span class="extra-value" id="gold-gram-24">--</span>
+                            </div>
+                            <div class="extra-price-row">
+                                <span class="extra-label">جرام 22</span>
+                                <span class="extra-value" id="gold-gram-22">--</span>
+                            </div>
+                            <div class="extra-price-row">
+                                <span class="extra-label">جرام 21</span>
+                                <span class="extra-value" id="gold-gram-21">--</span>
+                            </div>
+                            <div class="extra-price-row">
+                                <span class="extra-label">جرام 18</span>
+                                <span class="extra-value" id="gold-gram-18">--</span>
+                            </div>
+                            <div class="extra-price-row highlight-row">
+                                <span class="extra-label">ريال يمني / جرام 21</span>
+                                <span class="extra-value" id="gold-gram-21-yer">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Silver Card -->
+                    <div class="metal-card silver-card glow-hover">
+                        <div class="metal-card-header">
+                            <div class="metal-icon">🥈</div>
+                            <div class="metal-title-group">
+                                <h3 class="metal-title">الفضة</h3>
+                                <span class="metal-symbol">XAG</span>
+                            </div>
+                            <div class="metal-badge live-badge">
+                                <span class="live-dot"></span>
+                                <span>مباشر</span>
+                            </div>
+                        </div>
+                        <div class="metal-price-section">
+                            <div class="metal-main-price">
+                                <span class="metal-currency">$</span>
+                                <span class="metal-value" id="silver-price-usd">--</span>
+                                <span class="metal-unit">/ أونصة</span>
+                            </div>
+                            <div class="metal-change" id="silver-change">
+                                <span class="change-icon">▲</span>
+                                <span class="change-value">--</span>
+                                <span class="change-percent">(--%)</span>
+                            </div>
+                        </div>
+                        <div class="metal-extra-prices">
+                            <div class="extra-price-row">
+                                <span class="extra-label">جرام فضة</span>
+                                <span class="extra-value" id="silver-gram">--</span>
+                            </div>
+                            <div class="extra-price-row">
+                                <span class="extra-label">كيلو فضة</span>
+                                <span class="extra-value" id="silver-kg">--</span>
+                            </div>
+                            <div class="extra-price-row highlight-row">
+                                <span class="extra-label">ريال يمني / جرام</span>
+                                <span class="extra-value" id="silver-gram-yer">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metals-other-grid reveal">
+                    <div class="metal-card mini platinum-card">
+                        <div class="metal-card-header">
+                            <div class="metal-icon">🪨</div>
+                            <div class="metal-title-group">
+                                <h3 class="metal-title">البلاتين</h3>
+                                <span class="metal-symbol">XPT</span>
+                            </div>
+                        </div>
+                        <div class="metal-price-section">
+                            <div class="metal-main-price mini">
+                                <span class="metal-currency">$</span>
+                                <span class="metal-value" id="platinum-price">--</span>
+                            </div>
+                            <div class="metal-change mini" id="platinum-change">
+                                <span class="change-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metal-card mini palladium-card">
+                        <div class="metal-card-header">
+                            <div class="metal-icon">🪶</div>
+                            <div class="metal-title-group">
+                                <h3 class="metal-title">البلاديوم</h3>
+                                <span class="metal-symbol">XPD</span>
+                            </div>
+                        </div>
+                        <div class="metal-price-section">
+                            <div class="metal-main-price mini">
+                                <span class="metal-currency">$</span>
+                                <span class="metal-value" id="palladium-price">--</span>
+                            </div>
+                            <div class="metal-change mini" id="palladium-change">
+                                <span class="change-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metal-card mini copper-card">
+                        <div class="metal-card-header">
+                            <div class="metal-icon">🔶</div>
+                            <div class="metal-title-group">
+                                <h3 class="metal-title">النحاس</h3>
+                                <span class="metal-symbol">HG</span>
+                            </div>
+                        </div>
+                        <div class="metal-price-section">
+                            <div class="metal-main-price mini">
+                                <span class="metal-currency">$</span>
+                                <span class="metal-value" id="copper-price">--</span>
+                            </div>
+                            <div class="metal-change mini" id="copper-change">
+                                <span class="change-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metal-card mini aluminum-card">
+                        <div class="metal-card-header">
+                            <div class="metal-icon">🔩</div>
+                            <div class="metal-title-group">
+                                <h3 class="metal-title">الألومنيوم</h3>
+                                <span class="metal-symbol">AL</span>
+                            </div>
+                        </div>
+                        <div class="metal-price-section">
+                            <div class="metal-main-price mini">
+                                <span class="metal-currency">$</span>
+                                <span class="metal-value" id="aluminum-price">--</span>
+                            </div>
+                            <div class="metal-change mini" id="aluminum-change">
+                                <span class="change-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metals-calculator reveal">
+                    <div class="metals-calc-card">
+                        <h3 class="metals-calc-title">🧮 حاسبة الذهب والفضة</h3>
+                        <div class="metals-calc-grid">
+                            <div class="metals-calc-input-group">
+                                <label class="input-label" for="metal-type">المعدن</label>
+                                <select id="metal-type" class="calc-select" aria-label="نوع المعدن">
+                                    <option value="gold-24">ذهب عيار 24</option>
+                                    <option value="gold-22">ذهب عيار 22</option>
+                                    <option value="gold-21" selected>ذهب عيار 21</option>
+                                    <option value="gold-18">ذهب عيار 18</option>
+                                    <option value="silver">فضة</option>
+                                </select>
+                            </div>
+                            <div class="metals-calc-input-group">
+                                <label class="input-label" for="metal-weight">الوزن (جرام)</label>
+                                <input type="number" id="metal-weight" class="calc-input" value="10" min="0.1" step="0.1" inputmode="decimal" aria-label="وزن المعدن">
+                            </div>
+                            <div class="metals-calc-input-group">
+                                <label class="input-label" for="metal-currency">العملة</label>
+                                <select id="metal-currency" class="calc-select" aria-label="عملة الحساب">
+                                    <option value="USD">دولار أمريكي</option>
+                                    <option value="YER">ريال يمني</option>
+                                    <option value="SAR">ريال سعودي</option>
+                                    <option value="EUR">يورو</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="metals-calc-result">
+                            <span class="calc-result-label">القيمة التقريبية:</span>
+                            <span class="calc-result-value" id="metal-calc-result">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exchange Rates Table Section -->
+        <section class="section" id="rates">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge">الأسعار</span>
+                    <h2 class="section-title">أسعار الصرف</h2>
+                    <p class="section-desc">أسعار العملات العالمية مقابل الريال اليمني</p>
+                </div>
+                
+                <div class="rates-card reveal">
+                    <div class="rates-header">
+                        <div class="rates-search">
+                            <input type="text" id="rates-search" placeholder="ابحث عن عملة..." class="search-input" aria-label="بحث عن عملة">
+                            <span class="search-icon">🔍</span>
+                        </div>
+                        <div class="rates-filters">
+                            <button class="filter-btn active" data-filter="all">الكل</button>
+                            <button class="filter-btn" data-filter="major">رئيسية</button>
+                            <button class="filter-btn" data-filter="arab">عربية</button>
+                            <button class="filter-btn" data-filter="crypto">عملات رقمية</button>
+                        </div>
+                    </div>
+                    
+                    <div class="rates-table-wrapper">
+                        <table class="rates-table" id="rates-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">العملة</th>
+                                    <th scope="col">الرمز</th>
+                                    <th scope="col">السعر</th>
+                                    <th scope="col">التغيير (24س)</th>
+                                    <th scope="col">التغيير %</th>
+                                    <th scope="col">الرسم البياني</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rates-tbody"></tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="rates-pagination">
+                        <button class="btn-page" id="prev-page" aria-label="الصفحة السابقة">← السابق</button>
+                        <div class="page-info" id="page-info">صفحة 1 من 5</div>
+                        <button class="btn-page" id="next-page" aria-label="الصفحة التالية">التالي →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trends & Charts Section -->
+        <section class="section section-alt" id="trends">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge">التحليلات</span>
+                    <h2 class="section-title">التحليلات والاتجاهات</h2>
+                    <p class="section-desc">متابعة الاتجاهات وتحليل حركة العملات والذهب</p>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-card main-chart reveal">
+                        <div class="chart-header">
+                            <h3 class="chart-title">حركة العملة / الذهب</h3>
+                            <div class="chart-periods">
+                                <button class="period-btn active" data-period="1D">يوم</button>
+                                <button class="period-btn" data-period="1W">أسبوع</button>
+                                <button class="period-btn" data-period="1M">شهر</button>
+                                <button class="period-btn" data-period="1Y">سنة</button>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="main-chart">
+                            <canvas id="main-chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card side-chart reveal">
+                        <div class="chart-header">
+                            <h3 class="chart-title">الذهب مقابل العملات</h3>
+                        </div>
+                        <div class="chart-container" id="gold-chart">
+                            <canvas id="gold-chart-canvas"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card side-chart reveal">
+                        <div class="chart-header">
+                            <h3 class="chart-title">الأكثر ارتفاعاً</h3>
+                        </div>
+                        <div class="top-movers" id="top-movers"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculator Section -->
+        <section class="section" id="calculator">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge">الحاسبة</span>
+                    <h2 class="section-title">حاسبة العملات والذهب</h2>
+                    <p class="section-desc">حسابات متقدمة للتعاملات المالية</p>
+                </div>
+                
+                <div class="calc-grid">
+                    <div class="calc-card reveal">
+                        <div class="calc-icon">💰</div>
+                        <h3 class="calc-title">حساب العمولة</h3>
+                        <p class="calc-desc">احسب عمولة التحويل والرسوم</p>
+                        <div class="calc-inputs">
+                            <input type="number" id="calc-amount" placeholder="المبلغ" class="calc-input" inputmode="decimal" aria-label="المبلغ">
+                            <input type="number" id="calc-fee" placeholder="نسبة العمولة %" class="calc-input" value="2.5" inputmode="decimal" aria-label="نسبة العمولة">
+                        </div>
+                        <div class="calc-result" id="calc-fee-result">--</div>
+                    </div>
+                    
+                    <div class="calc-card reveal">
+                        <div class="calc-icon">📊</div>
+                        <h3 class="calc-title">حساب الربح/الخسارة</h3>
+                        <p class="calc-desc">احسب ربح أو خسارة صرف العملات</p>
+                        <div class="calc-inputs">
+                            <input type="number" id="calc-buy-rate" placeholder="سعر الشراء" class="calc-input" inputmode="decimal" aria-label="سعر الشراء">
+                            <input type="number" id="calc-sell-rate" placeholder="سعر البيع" class="calc-input" inputmode="decimal" aria-label="سعر البيع">
+                            <input type="number" id="calc-invest" placeholder="المبلغ المستثمر" class="calc-input" inputmode="decimal" aria-label="المبلغ المستثمر">
+                        </div>
+                        <div class="calc-result" id="calc-profit-result">--</div>
+                    </div>
+                    
+                    <div class="calc-card reveal">
+                        <div class="calc-icon">🔄</div>
+                        <h3 class="calc-title">تحويل دفعة</h3>
+                        <p class="calc-desc">تحويل مبالغ متعددة دفعة واحدة</p>
+                        <div class="calc-inputs">
+                            <textarea id="calc-batch" placeholder="أدخل المبالغ (واحد في كل سطر)" class="calc-textarea" aria-label="المبالغ"></textarea>
+                            <select id="calc-batch-currency" class="calc-select" aria-label="العملة">
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="SAR">ريال سعودي</option>
+                                <option value="EUR">يورو</option>
+                            </select>
+                        </div>
+                        <div class="calc-result" id="calc-batch-result">--</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Saved Conversions -->
+        <section class="section section-alt" id="saved">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-badge">المحفوظات</span>
+                    <h2 class="section-title">التحويلات المحفوظة</h2>
+                </div>
+                <div class="saved-list" id="saved-list">
+                    <div class="saved-empty">
+                        <div class="saved-empty-icon">📋</div>
+                        <p>لا توجد تحويلات محفوظة بعد</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="footer-logo-icon">🪙</span>
+                        <span class="footer-logo-text">ريال ودولار</span>
+                    </div>
+                    <p class="footer-desc">
+                        منصتك الشاملة لأسعار الصرف والذهب والفضة. تحويلات فورية وأسعار محدثة لحظياً.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link" aria-label="تويتر">🐦</a>
+                        <a href="#" class="social-link" aria-label="تيليجرام">✈️</a>
+                        <a href="#" class="social-link" aria-label="واتساب">💬</a>
+                        <a href="#" class="social-link" aria-label="بريد إلكتروني">📧</a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4 class="footer-title">روابط سريعة</h4>
+                    <a href="#converter">محول العملات</a>
+                    <a href="#gold-silver">الذهب والفضة</a>
+                    <a href="#rates">أسعار الصرف</a>
+                    <a href="#trends">التحليلات</a>
+                </div>
+                <div class="footer-links">
+                    <h4 class="footer-title">الأسواق</h4>
+                    <a href="#">دولار أمريكي</a>
+                    <a href="#">ريال يمني</a>
+                    <a href="#">ريال سعودي</a>
+                    <a href="#">ذهب عيار 21</a>
+                </div>
+                <div class="footer-links">
+                    <h4 class="footer-title">المعلومات</h4>
+                    <a href="#">عن المنصة</a>
+                    <a href="#">سياسة الخصوصية</a>
+                    <a href="#">شروط الاستخدام</a>
+                    <a href="#">اتصل بنا</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 ريال ودولار. جميع الحقوق محفوظة.</p>
+                <p class="footer-disclaimer">
+                    الأسعار المعروضة هي لأغراض إعلامية فقط وقد تختلف عن الأسعار الفعلية في السوق. أسعار الذهب والفضة عالمية.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Install Prompt (PWA) -->
+    <div id="install-prompt" class="install-prompt">
+        <div class="install-content">
+            <div class="install-icon">🪙</div>
+            <div class="install-text">
+                <strong>تثبيت ريال ودولار</strong>
+                <span>أضف التطبيق إلى شاشتك الرئيسية</span>
+            </div>
+            <button class="install-btn" id="install-btn">تثبيت</button>
+            <button class="install-close" id="install-close">✕</button>
+        </div>
+    </div>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="back-to-top" aria-label="العودة للأعلى">
+        <span>↑</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="js/app.js" defer></script>
+</body>
+</html>
