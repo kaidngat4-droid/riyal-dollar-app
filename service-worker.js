@@ -3,6 +3,7 @@ const CACHE_NAME = 'riyal-dollar-v3';
 const BASE = '/riyal-dollar-app';
 
 const ASSETS = [
+    BASE + '/offline.html',
     BASE + '/',
     BASE + '/index.html',
     BASE + '/css/styles.css',
