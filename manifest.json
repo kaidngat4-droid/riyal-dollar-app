@@ -6,6 +6,7 @@
   "start_url": "/riyal-dollar-app/",
   "scope": "/riyal-dollar-app/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#0f172a",
   "theme_color": "#f59e0b",
@@ -20,5 +21,21 @@
     {"src": "images/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any"},
     {"src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
     {"src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
-  ]
+  ],
+  "shortcuts": [
+    {"name": "محول العملات", "short_name": "محول", "url": "/riyal-dollar-app/?shortcut=converter", "icons": [{"src": "images/icon-96.png", "sizes": "96x96"}]},
+    {"name": "أسعار الذهب", "short_name": "ذهب", "url": "/riyal-dollar-app/?shortcut=gold", "icons": [{"src": "images/icon-96.png", "sizes": "96x96"}]},
+    {"name": "أسعار الصرف", "short_name": "صرف", "url": "/riyal-dollar-app/?shortcut=rates", "icons": [{"src": "images/icon-96.png", "sizes": "96x96"}]}
+  ],
+  "file_handlers": [{"action": "/riyal-dollar-app/?file=open", "accept": {"text/csv": [".csv"], "application/json": [".json"]}, "launch_type": "single-client"}],
+  "launch_handler": {"client_mode": ["navigate-existing", "auto"]},
+  "protocol_handlers": [{"protocol": "web+riyaldollar", "url": "/riyal-dollar-app/?protocol=%s"}],
+  "share_target": {"action": "/riyal-dollar-app/?share=true", "method": "POST", "enctype": "multipart/form-data", "params": {"title": "name", "text": "description", "url": "link"}},
+  "note_taking": {"new_note_url": "/riyal-dollar-app/?note=new"},
+  "screenshots": [
+    {"src": "images/screenshot-1.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "محول العملات"},
+    {"src": "images/screenshot-2.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "أسعار الذهب"}
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
