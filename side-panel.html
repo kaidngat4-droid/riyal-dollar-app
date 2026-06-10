@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>ريال ودولار - لوحة جانبية</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 16px; min-height: 100vh; }
+    .header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #334155; }
+    .header-icon { font-size: 24px; }
+    .header-title { font-size: 16px; font-weight: bold; color: #f59e0b; }
+    .rate-list { display: flex; flex-direction: column; gap: 8px; }
+    .rate-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155; }
+    .rate-name { font-size: 13px; color: #94a3b8; }
+    .rate-value { font-size: 16px; font-weight: bold; color: #f59e0b; }
+    .rate-change { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-top: 4px; }
+    .rate-change.up { background: #166534; color: #4ade80; }
+    .rate-change.down { background: #7f1d1d; color: #f87171; }
+    .refresh-btn { background: #f59e0b; color: #0f172a; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 12px; }
+    .update-time { text-align: center; margin-top: 16px; font-size: 11px; color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="header-icon">🪙</span>
+    <span class="header-title">أسعار سريعة</span>
+  </div>
+  <div id="rates-container"><div style="text-align:center;color:#64748b">جاري التحميل...</div></div>
+  <button class="refresh-btn" onclick="loadRates()">🔄 تحديث</button>
+  <div class="update-time" id="update-time"></div>
+  <script>
+    const defaultRates = [
+      { name: 'الدولار الأمريكي', pair: 'USD/YER', value: '1,250.00', change: '+0.5', up: true },
+      { name: 'الريال السعودي', pair: 'SAR/YER', value: '333.33', change: '+0.2', up: true },
+      { name: 'اليورو', pair: 'EUR/YER', value: '1,350.00', change: '-0.3', up: false },
+      { name: 'ذهب عيار 21', pair: 'XAU', value: '85,000', change: '+1.2', up: true },
+      { name: 'الفضة', pair: 'XAG', value: '1,200', change: '-0.5', up: false }
+    ];
+    async function loadRates() {
+      const c = document.getElementById('rates-container');
+      c.innerHTML = defaultRates.map(r => `
+        <div class="rate-item">
+          <div>
+            <div class="rate-name">${r.name}</div>
+            <span class="rate-change ${r.up?'up':'down'}">${r.up?'▲':'▼'} ${r.change}%</span>
+          </div>
+          <span class="rate-value">${r.value}</span>
+        </div>`).join('');
+      document.getElementById('update-time').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA');
+    }
+    loadRates();
+    setInterval(loadRates, 60000);
+  </script>
+</body>
+</html>
