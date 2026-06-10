@@ -773,3 +773,38 @@ input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; marg
     body { background: white; color: black; }
 }
 
+
+/* ============================================
+   PWA ADVANCED: Window Controls Overlay
+   ============================================ */
+@media (display-mode: window-controls-overlay) {
+  .header {
+    padding-top: env(titlebar-area-height, 0);
+    -webkit-app-region: drag;
+  }
+  .header-actions, .btn-icon, .btn-menu {
+    -webkit-app-region: no-drag;
+  }
+}
+
+/* Note Modal */
+.note-modal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+}
+.note-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.7);
+}
+.note-content {
+  position: relative; background: var(--bg-card, #1e293b);
+  border-radius: 1.5rem; padding: 2rem;
+  width: 90%; max-width: 500px; z-index: 1;
+}
+.note-content h3 { color: var(--primary, #f59e0b); margin-bottom: 1rem; }
+.note-content textarea {
+  width: 100%; min-height: 150px; padding: 1rem;
+  background: var(--bg-tertiary, #334155); border: 1px solid var(--border);
+  border-radius: 1rem; color: var(--text-primary); font-family: inherit;
+  resize: vertical;
+}
+.note-actions { display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: flex-end; }

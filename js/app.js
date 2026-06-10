@@ -1551,3 +1551,54 @@ document.addEventListener('DOMContentLoaded', () => {
     registerBackgroundSync();
     setTimeout(requestNotificationPermission, 5000); // بعد 5 ثواني
 });
+
+// ============================================================
+// PWA ADVANCED FEATURES
+// ============================================================
+
+function handleLaunchParams() {
+  const params = new URLSearchParams(window.location.search);
+  const shortcut = params.get('shortcut');
+  if (shortcut) navigateToSection(shortcut);
+}
+
+function navigateToSection(section) {
+  const map = {
+    'converter': '#converter',
+    'gold': '#gold-silver',
+    'rates': '#rates',
+    'trends': '#trends',
+    'calculator': '#calculator'
+  };
+  const target = map[section];
+  if (target) {
+    document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function openNoteEditor() {
+  const modal = document.createElement('div');
+  modal.className = 'note-modal';
+  modal.innerHTML = '<div class="note-overlay" onclick="this.parentElement.remove()"></div><div class="note-content"><h3>📝 ملاحظة جديدة</h3><textarea placeholder="اكتب ملاحظتك هنا..."></textarea><div class="note-actions"><button class="btn-primary" onclick="saveNote(this)">حفظ</button><button class="btn-secondary" onclick="this.closest(\'.note-modal\').remove()">إلغاء</button></div></div>';
+  document.body.appendChild(modal);
+}
+
+function saveNote(btn) {
+  const textarea = btn.closest('.note-content').querySelector('textarea');
+  const notes = JSON.parse(localStorage.getItem('riyal-notes') || '[]');
+  notes.push({ text: textarea.value, date: new Date().toISOString() });
+  localStorage.setItem('riyal-notes', JSON.stringify(notes));
+  btn.closest('.note-modal').remove();
+  showToast('✅ تم حفظ الملاحظة');
+}
+
+// File Handling
+if ('launchQueue' in window) {
+  launchQueue.setConsumer(async (launchParams) => {
+    for (const file of launchParams.files) {
+      showToast('📁 تم فتح: ' + file.name);
+    }
+  });
+}
+
+window.addEventListener('load', handleLaunchParams);
