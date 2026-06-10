@@ -3,8 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.kaidngat4.riyaldollar",
-    "sha256_cert_fingerprints": [
-      "YOUR_SHA256_HERE"
-    ]
+    "sha256_cert_fingerprints": ["38:1B:E2:12:44:E0:76:92:ED:31:B6:6C:A0:01:1A:26:60:7B:79:1A:EF:6E:9E:CB:03:D0:32:B5:76:BE:CD:A9"]
   }
 }]
