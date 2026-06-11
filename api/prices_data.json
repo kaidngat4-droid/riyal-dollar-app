@@ -1,0 +1,165 @@
+{
+  "metadata": {
+    "app_name": "ريال ودولار",
+    "version": "1.0.0",
+    "last_updated": "2026-06-12T00:00:00Z",
+    "base_currency": "YER",
+    "data_source": "live_market"
+  },
+  "currencies": [
+    {
+      "code": "USD",
+      "name_ar": "دولار أمريكي",
+      "name_en": "US Dollar",
+      "flag": "🇺🇸",
+      "price_yer": 238.67,
+      "rate": 1.0000,
+      "change_24h": 0.15,
+      "change_percent": 0.02,
+      "trend": "up"
+    },
+    {
+      "code": "EUR",
+      "name_ar": "يورو",
+      "name_en": "Euro",
+      "flag": "🇪🇺",
+      "price_yer": 219.57,
+      "rate": 0.9200,
+      "change_24h": -0.08,
+      "change_percent": -0.09,
+      "trend": "down"
+    },
+    {
+      "code": "GBP",
+      "name_ar": "جنيه إسترليني",
+      "name_en": "British Pound",
+      "flag": "🇬🇧",
+      "price_yer": 188.55,
+      "rate": 0.7900,
+      "change_24h": 0.05,
+      "change_percent": 0.06,
+      "trend": "up"
+    },
+    {
+      "code": "SAR",
+      "name_ar": "ريال سعودي",
+      "name_en": "Saudi Riyal",
+      "flag": "🇸🇦",
+      "price_yer": 895.00,
+      "rate": 3.7500,
+      "change_24h": 0.00,
+      "change_percent": 0.00,
+      "trend": "stable"
+    },
+    {
+      "code": "AED",
+      "name_ar": "درهم إماراتي",
+      "name_en": "UAE Dirham",
+      "flag": "🇦🇪",
+      "price_yer": 875.91,
+      "rate": 3.6700,
+      "change_24h": 0.00,
+      "change_percent": 0.00,
+      "trend": "stable"
+    },
+    {
+      "code": "KWD",
+      "name_ar": "دينار كويتي",
+      "name_en": "Kuwaiti Dinar",
+      "flag": "🇰🇼",
+      "price_yer": 73.99,
+      "rate": 0.3100,
+      "change_24h": 0.01,
+      "change_percent": 0.03,
+      "trend": "up"
+    }
+  ],
+  "metals": [
+    {
+      "code": "XPD",
+      "name_ar": "البلاديوم",
+      "name_en": "Palladium",
+      "icon": "🪶",
+      "price_usd": 951.46,
+      "unit": "oz",
+      "change_24h": null,
+      "change_percent": null,
+      "trend": "stable"
+    },
+    {
+      "code": "XPT",
+      "name_ar": "البلاتين",
+      "name_en": "Platinum",
+      "icon": "🪨",
+      "price_usd": 1026.00,
+      "unit": "oz",
+      "change_24h": null,
+      "change_percent": null,
+      "trend": "stable"
+    },
+    {
+      "code": "AL",
+      "name_ar": "الألومنيوم",
+      "name_en": "Aluminum",
+      "icon": "🔩",
+      "price_usd": 2.34,
+      "unit": "kg",
+      "change_24h": null,
+      "change_percent": null,
+      "trend": "stable"
+    },
+    {
+      "code": "HG",
+      "name_ar": "النحاس",
+      "name_en": "Copper",
+      "icon": "🔶",
+      "price_usd": 4.30,
+      "unit": "kg",
+      "change_24h": null,
+      "change_percent": null,
+      "trend": "stable"
+    }
+  ],
+  "gold": {
+    "ounce": {
+      "price_usd": 2344.34,
+      "change_24h": 0.00,
+      "change_percent": 0.00,
+      "trend": "stable"
+    },
+    "grams": [
+      {
+        "karat": 24,
+        "price_usd": 75.37,
+        "price_yer": null
+      },
+      {
+        "karat": 22,
+        "price_usd": 69.04,
+        "price_yer": null
+      },
+      {
+        "karat": 21,
+        "price_usd": 65.95,
+        "price_yer": 32975.38
+      },
+      {
+        "karat": 18,
+        "price_usd": 56.53,
+        "price_yer": null
+      }
+    ]
+  },
+  "silver": {
+    "code": "XAG",
+    "name_ar": "الفضة",
+    "name_en": "Silver",
+    "icon": "🥈",
+    "price_usd": 28.80,
+    "unit": "oz",
+    "status": "live",
+    "change_24h": null,
+    "change_percent": null,
+    "trend": "stable"
+  }
+}
