@@ -5,182 +5,681 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم | ريال ودولار</title>
     <style>
-        :root { --primary: #f59e0b; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; --border: #334155; }
+        :root { 
+            --primary: #f59e0b; 
+            --primary-dark: #d97706;
+            --bg: #0f172a; 
+            --card: #1e293b; 
+            --text: #f8fafc; 
+            --muted: #94a3b8; 
+            --border: #334155; 
+            --success: #10b981;
+            --error: #ef4444;
+            --info: #3b82f6;
+        }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Cairo',sans-serif; background:var(--bg); color:var(--text); padding:20px; }
-        .container { max-width:750px; margin:0 auto; }
-        h1 { text-align:center; color:var(--primary); margin:20px 0; }
-        h2 { color:var(--primary); margin:15px 0 10px; font-size:1.1rem; }
+        body { font-family:'Cairo','Segoe UI',sans-serif; background:var(--bg); color:var(--text); padding:20px; min-height:100vh; }
+        .container { max-width:900px; margin:0 auto; }
+
+        h1 { text-align:center; color:var(--primary); margin:10px 0 5px; font-size:1.6rem; }
+        .subtitle { text-align:center; color:var(--muted); font-size:0.85rem; margin-bottom:20px; }
+
+        h2 { color:var(--primary); margin:15px 0 10px; font-size:1.1rem; display:flex; align-items:center; gap:8px; }
+
         .card { background:var(--card); border-radius:16px; padding:20px; margin:15px 0; border:1px solid var(--border); }
-        .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-        .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-        .field { margin-bottom:5px; }
-        .field label { display:block; color:var(--muted); font-size:0.7rem; }
-        .field input { width:100%; padding:10px; background:#0f172a; border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:0.85rem; }
-        .field input:focus { border-color:var(--primary); outline:none; }
-        button { width:100%; padding:14px; background:var(--primary); color:#0f172a; border:none; border-radius:12px; font-weight:700; font-size:1.1rem; cursor:pointer; margin:10px 0; }
-        button:hover { opacity:0.9; }
-        .btn-copy { background:#334155; color:#fff; }
-        textarea { width:100%; height:200px; margin:10px 0; padding:15px; background:#000; border:2px solid var(--primary); border-radius:12px; color:#0f0; font-family:monospace; font-size:0.75rem; }
-        .msg { text-align:center; padding:15px; border-radius:10px; margin:10px 0; }
-        .success { background:#065f46; color:#34d399; }
+        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+        .card-badge { background:var(--primary); color:#0f172a; padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:700; }
+
+        .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+        .grid4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; }
+
+        .field { margin-bottom:8px; }
+        .field label { display:block; color:var(--muted); font-size:0.75rem; margin-bottom:4px; font-weight:600; }
+        .field input, .field select { 
+            width:100%; padding:10px 12px; background:#0f172a; 
+            border:1px solid var(--border); border-radius:10px; 
+            color:var(--text); font-size:0.9rem; transition:all 0.2s;
+        }
+        .field input:focus, .field select:focus { border-color:var(--primary); outline:none; box-shadow:0 0 0 3px rgba(245,158,11,0.15); }
+        .field input[type="number"] { font-family:'Courier New',monospace; }
+
+        .btn { 
+            width:100%; padding:14px; border:none; border-radius:12px; 
+            font-weight:700; font-size:1rem; cursor:pointer; 
+            transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .btn-primary { background:var(--primary); color:#0f172a; }
+        .btn-primary:hover { background:var(--primary-dark); transform:translateY(-2px); }
+        .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+        .btn-secondary { background:#334155; color:#fff; }
+        .btn-secondary:hover { background:#475569; }
+        .btn-success { background:var(--success); color:#fff; }
+        .btn-danger { background:var(--error); color:#fff; }
+        .btn-info { background:var(--info); color:#fff; }
+
+        .btn-row { display:flex; gap:10px; margin:15px 0; }
+        .btn-row .btn { flex:1; }
+
+        textarea { 
+            width:100%; height:180px; margin:10px 0; padding:15px; 
+            background:#000; border:2px solid var(--primary); border-radius:12px; 
+            color:#0f0; font-family:'Courier New',monospace; font-size:0.75rem; 
+            resize:vertical; direction:ltr; text-align:left;
+        }
+
+        .msg { 
+            text-align:center; padding:15px; border-radius:12px; margin:10px 0; 
+            font-weight:600; animation:slideDown 0.3s ease;
+        }
+        .msg-success { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); }
+        .msg-error { background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3); }
+        .msg-info { background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); }
+        .msg-warning { background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.3); }
+
+        @keyframes slideDown {
+            from { opacity:0; transform:translateY(-10px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+
+        .spinner {
+            width:18px; height:18px; border:2px solid rgba(0,0,0,0.2); 
+            border-top-color:#0f172a; border-radius:50%; 
+            animation:spin 0.8s linear infinite; display:inline-block;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        .stats-row { display:flex; gap:15px; margin:15px 0; flex-wrap:wrap; }
+        .stat-box { 
+            flex:1; min-width:120px; background:var(--card); 
+            padding:15px; border-radius:12px; text-align:center; border:1px solid var(--border);
+        }
+        .stat-value { font-size:1.4rem; font-weight:800; color:var(--primary); }
+        .stat-label { font-size:0.75rem; color:var(--muted); margin-top:4px; }
+
+        .last-updated { 
+            text-align:center; color:var(--muted); font-size:0.8rem; 
+            margin:10px 0; padding:10px; background:rgba(245,158,11,0.05); 
+            border-radius:8px; border:1px dashed var(--border);
+        }
+
+        .github-token-input { 
+            margin:15px 0; padding:15px; background:rgba(59,130,246,0.05); 
+            border-radius:12px; border:1px solid rgba(59,130,246,0.2);
+        }
+        .github-token-input label { color:#60a5fa; }
+        .github-token-input input { border-color:rgba(59,130,246,0.3); }
+        .github-token-input input:focus { border-color:#3b82f6; }
+
+        .hidden { display:none !important; }
+
+        /* Toast */
+        .toast-container { position:fixed; top:20px; left:20px; z-index:1000; display:flex; flex-direction:column; gap:10px; }
+        .toast { 
+            padding:12px 20px; border-radius:10px; color:#fff; font-weight:600; 
+            animation:toastIn 0.3s ease; max-width:300px; font-size:0.9rem;
+        }
+        .toast-success { background:var(--success); }
+        .toast-error { background:var(--error); }
+        .toast-info { background:var(--info); }
+        @keyframes toastIn { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+
+        @media (max-width:600px) {
+            .grid, .grid3, .grid4 { grid-template-columns:1fr 1fr; }
+            h1 { font-size:1.3rem; }
+            .btn-row { flex-direction:column; }
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="container">
     <h1>🪙 لوحة تحكم ريال ودولار</h1>
+    <p class="subtitle">حدث الأسعار وارفعها مباشرة إلى GitHub</p>
 
-    <div class="card"><h2>📍 صنعاء - العملات</h2><div class="grid">
-        <div class="field"><label>💵 دولار شراء</label><input type="number" id="s1" step="0.01"></div>
-        <div class="field"><label>💵 دولار بيع</label><input type="number" id="s2" step="0.01"></div>
-        <div class="field"><label>🇸🇦 سعودي شراء</label><input type="number" id="s3" step="0.01"></div>
-        <div class="field"><label>🇸🇦 سعودي بيع</label><input type="number" id="s4" step="0.01"></div>
-        <div class="field"><label>💶 يورو شراء</label><input type="number" id="s5" step="0.01"></div>
-        <div class="field"><label>💶 يورو بيع</label><input type="number" id="s6" step="0.01"></div>
-        <div class="field"><label>🇬🇧 جنيه شراء</label><input type="number" id="s7" step="0.01"></div>
-        <div class="field"><label>🇬🇧 جنيه بيع</label><input type="number" id="s8" step="0.01"></div>
-        <div class="field"><label>🇦🇪 درهم شراء</label><input type="number" id="s9" step="0.01"></div>
-        <div class="field"><label>🇦🇪 درهم بيع</label><input type="number" id="s10" step="0.01"></div>
-        <div class="field"><label>🇰🇼 دينار شراء</label><input type="number" id="s11" step="0.01"></div>
-        <div class="field"><label>🇰🇼 دينار بيع</label><input type="number" id="s12" step="0.01"></div>
-    </div></div>
+    <!-- GitHub Token -->
+    <div class="github-token-input">
+        <div class="field">
+            <label>🔑 GitHub Personal Access Token (للرفع المباشر)</label>
+            <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+        </div>
+        <p style="color:var(--muted);font-size:0.75rem;margin-top:8px;">
+            احصل على Token من: Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token → اختر "repo"
+        </p>
+    </div>
 
-    <div class="card"><h2>📍 عدن - العملات</h2><div class="grid">
-        <div class="field"><label>💵 دولار شراء</label><input type="number" id="a1" step="0.01"></div>
-        <div class="field"><label>💵 دولار بيع</label><input type="number" id="a2" step="0.01"></div>
-        <div class="field"><label>🇸🇦 سعودي شراء</label><input type="number" id="a3" step="0.01"></div>
-        <div class="field"><label>🇸🇦 سعودي بيع</label><input type="number" id="a4" step="0.01"></div>
-        <div class="field"><label>💶 يورو شراء</label><input type="number" id="a5" step="0.01"></div>
-        <div class="field"><label>💶 يورو بيع</label><input type="number" id="a6" step="0.01"></div>
-        <div class="field"><label>🇬🇧 جنيه شراء</label><input type="number" id="a7" step="0.01"></div>
-        <div class="field"><label>🇬🇧 جنيه بيع</label><input type="number" id="a8" step="0.01"></div>
-        <div class="field"><label>🇦🇪 درهم شراء</label><input type="number" id="a9" step="0.01"></div>
-        <div class="field"><label>🇦🇪 درهم بيع</label><input type="number" id="a10" step="0.01"></div>
-        <div class="field"><label>🇰🇼 دينار شراء</label><input type="number" id="a11" step="0.01"></div>
-        <div class="field"><label>🇰🇼 دينار بيع</label><input type="number" id="a12" step="0.01"></div>
-    </div></div>
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="stat-value" id="stat-gold">--</div>
+            <div class="stat-label">ذهب/أونصة</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-silver">--</div>
+            <div class="stat-label">فضة/أونصة</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-usd-sanaa">--</div>
+            <div class="stat-label">دولار صنعاء</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value" id="stat-usd-aden">--</div>
+            <div class="stat-label">دولار عدن</div>
+        </div>
+    </div>
 
-    <div class="card"><h2>🥇 ذهب وفضة - صنعاء</h2><div class="grid">
-        <div class="field"><label>ذهب 21k شراء</label><input type="number" id="g1" step="0.01"></div>
-        <div class="field"><label>ذهب 21k بيع</label><input type="number" id="g2" step="0.01"></div>
-        <div class="field"><label>ذهب 22k شراء</label><input type="number" id="g3" step="0.01"></div>
-        <div class="field"><label>ذهب 22k بيع</label><input type="number" id="g4" step="0.01"></div>
-        <div class="field"><label>ذهب 24k شراء</label><input type="number" id="g5" step="0.01"></div>
-        <div class="field"><label>ذهب 24k بيع</label><input type="number" id="g6" step="0.01"></div>
-        <div class="field"><label>🥈 فضة شراء</label><input type="number" id="g7" step="0.01"></div>
-        <div class="field"><label>🥈 فضة بيع</label><input type="number" id="g8" step="0.01"></div>
-    </div></div>
+    <div class="last-updated" id="last-updated">جاري تحميل آخر تحديث...</div>
 
-    <div class="card"><h2>🥇 ذهب وفضة - عدن</h2><div class="grid">
-        <div class="field"><label>ذهب 21k شراء</label><input type="number" id="h1" step="0.01"></div>
-        <div class="field"><label>ذهب 21k بيع</label><input type="number" id="h2" step="0.01"></div>
-        <div class="field"><label>ذهب 22k شراء</label><input type="number" id="h3" step="0.01"></div>
-        <div class="field"><label>ذهب 22k بيع</label><input type="number" id="h4" step="0.01"></div>
-        <div class="field"><label>ذهب 24k شراء</label><input type="number" id="h5" step="0.01"></div>
-        <div class="field"><label>ذهب 24k بيع</label><input type="number" id="h6" step="0.01"></div>
-        <div class="field"><label>🥈 فضة شراء</label><input type="number" id="h7" step="0.01"></div>
-        <div class="field"><label>🥈 فضة بيع</label><input type="number" id="h8" step="0.01"></div>
-    </div></div>
+    <!-- صنعاء - العملات -->
+    <div class="card">
+        <div class="card-header">
+            <h2>📍 صنعاء - العملات</h2>
+            <span class="card-badge">منطقة الشمال</span>
+        </div>
+        <div class="grid">
+            <div class="field"><label>💵 دولار شراء</label><input type="number" id="s1" step="0.01" placeholder="1500"></div>
+            <div class="field"><label>💵 دولار بيع</label><input type="number" id="s2" step="0.01" placeholder="1510"></div>
+            <div class="field"><label>🇸🇦 سعودي شراء</label><input type="number" id="s3" step="0.01" placeholder="399"></div>
+            <div class="field"><label>🇸🇦 سعودي بيع</label><input type="number" id="s4" step="0.01" placeholder="401"></div>
+            <div class="field"><label>💶 يورو شراء</label><input type="number" id="s5" step="0.01" placeholder="1620"></div>
+            <div class="field"><label>💶 يورو بيع</label><input type="number" id="s6" step="0.01" placeholder="1640"></div>
+            <div class="field"><label>🇬🇧 جنيه شراء</label><input type="number" id="s7" step="0.01" placeholder="1890"></div>
+            <div class="field"><label>🇬🇧 جنيه بيع</label><input type="number" id="s8" step="0.01" placeholder="1910"></div>
+            <div class="field"><label>🇦🇪 درهم شراء</label><input type="number" id="s9" step="0.01" placeholder="408"></div>
+            <div class="field"><label>🇦🇪 درهم بيع</label><input type="number" id="s10" step="0.01" placeholder="410"></div>
+            <div class="field"><label>🇰🇼 دينار شراء</label><input type="number" id="s11" step="0.01" placeholder="4890"></div>
+            <div class="field"><label>🇰🇼 دينار بيع</label><input type="number" id="s12" step="0.01" placeholder="4920"></div>
+        </div>
+    </div>
 
-    <div class="card"><h2>🔩 معادن أخرى (USD)</h2><div class="grid3">
-        <div class="field"><label>🪨 بلاتين</label><input type="number" id="m1" step="0.01"></div>
-        <div class="field"><label>🪶 بلاديوم</label><input type="number" id="m2" step="0.01"></div>
-        <div class="field"><label>🔩 ألومنيوم</label><input type="number" id="m3" step="0.01"></div>
-        <div class="field"><label>🔶 نحاس</label><input type="number" id="m4" step="0.01"></div>
-        <div class="field"><label>🥇 ذهب/أونصة</label><input type="number" id="m5" step="0.01"></div>
-        <div class="field"><label>🥈 فضة/أونصة</label><input type="number" id="m6" step="0.01"></div>
-    </div></div>
+    <!-- عدن - العملات -->
+    <div class="card">
+        <div class="card-header">
+            <h2>📍 عدن - العملات</h2>
+            <span class="card-badge">منطقة الجنوب</span>
+        </div>
+        <div class="grid">
+            <div class="field"><label>💵 دولار شراء</label><input type="number" id="a1" step="0.01" placeholder="533"></div>
+            <div class="field"><label>💵 دولار بيع</label><input type="number" id="a2" step="0.01" placeholder="535"></div>
+            <div class="field"><label>🇸🇦 سعودي شراء</label><input type="number" id="a3" step="0.01" placeholder="139.7"></div>
+            <div class="field"><label>🇸🇦 سعودي بيع</label><input type="number" id="a4" step="0.01" placeholder="140.1"></div>
+            <div class="field"><label>💶 يورو شراء</label><input type="number" id="a5" step="0.01" placeholder="575"></div>
+            <div class="field"><label>💶 يورو بيع</label><input type="number" id="a6" step="0.01" placeholder="580"></div>
+            <div class="field"><label>🇬🇧 جنيه شراء</label><input type="number" id="a7" step="0.01" placeholder="670"></div>
+            <div class="field"><label>🇬🇧 جنيه بيع</label><input type="number" id="a8" step="0.01" placeholder="675"></div>
+            <div class="field"><label>🇦🇪 درهم شراء</label><input type="number" id="a9" step="0.01" placeholder="145"></div>
+            <div class="field"><label>🇦🇪 درهم بيع</label><input type="number" id="a10" step="0.01" placeholder="146"></div>
+            <div class="field"><label>🇰🇼 دينار شراء</label><input type="number" id="a11" step="0.01" placeholder="1730"></div>
+            <div class="field"><label>🇰🇼 دينار بيع</label><input type="number" id="a12" step="0.01" placeholder="1740"></div>
+        </div>
+    </div>
 
-    <button onclick="gen()">📋 إنشاء JSON كامل</button>
-    <textarea id="out" placeholder="JSON..."></textarea>
-    <button class="btn-copy" onclick="copy()">📋 نسخ للكليبورد</button>
+    <!-- صنعاء - ذهب وفضة -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🥇 ذهب وفضة - صنعاء</h2>
+            <span class="card-badge">جرام</span>
+        </div>
+        <div class="grid">
+            <div class="field"><label>ذهب 21k شراء</label><input type="number" id="g1" step="0.01" placeholder="54174.12"></div>
+            <div class="field"><label>ذهب 21k بيع</label><input type="number" id="g2" step="0.01" placeholder="55463.45"></div>
+            <div class="field"><label>ذهب 22k شراء</label><input type="number" id="g3" step="0.01" placeholder="72232.16"></div>
+            <div class="field"><label>ذهب 22k بيع</label><input type="number" id="g4" step="0.01" placeholder="73953.05"></div>
+            <div class="field"><label>ذهب 24k شراء</label><input type="number" id="g5" step="0.01" placeholder="505641.11"></div>
+            <div class="field"><label>ذهب 24k بيع</label><input type="number" id="g6" step="0.01" placeholder="517687.40"></div>
+            <div class="field"><label>🥈 فضة شراء (USD/oz)</label><input type="number" id="g7" step="0.01" placeholder="28.5"></div>
+            <div class="field"><label>🥈 فضة بيع (USD/oz)</label><input type="number" id="g8" step="0.01" placeholder="29.0"></div>
+        </div>
+    </div>
+
+    <!-- عدن - ذهب وفضة -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🥇 ذهب وفضة - عدن</h2>
+            <span class="card-badge">جرام</span>
+        </div>
+        <div class="grid">
+            <div class="field"><label>ذهب 21k شراء</label><input type="number" id="h1" step="0.01" placeholder="19200"></div>
+            <div class="field"><label>ذهب 21k بيع</label><input type="number" id="h2" step="0.01" placeholder="19500"></div>
+            <div class="field"><label>ذهب 22k شراء</label><input type="number" id="h3" step="0.01" placeholder="25600"></div>
+            <div class="field"><label>ذهب 22k بيع</label><input type="number" id="h4" step="0.01" placeholder="26000"></div>
+            <div class="field"><label>ذهب 24k شراء</label><input type="number" id="h5" step="0.01" placeholder="179000"></div>
+            <div class="field"><label>ذهب 24k بيع</label><input type="number" id="h6" step="0.01" placeholder="183000"></div>
+            <div class="field"><label>🥈 فضة شراء (USD/oz)</label><input type="number" id="h7" step="0.01" placeholder="9.5"></div>
+            <div class="field"><label>🥈 فضة بيع (USD/oz)</label><input type="number" id="h8" step="0.01" placeholder="9.8"></div>
+        </div>
+    </div>
+
+    <!-- معادن أخرى -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🔩 معادن أخرى (USD)</h2>
+            <span class="card-badge">عالمي</span>
+        </div>
+        <div class="grid3">
+            <div class="field"><label>🪨 بلاتين / أونصة</label><input type="number" id="m1" step="0.01" placeholder="1031.51"></div>
+            <div class="field"><label>🪶 بلاديوم / أونصة</label><input type="number" id="m2" step="0.01" placeholder="961.18"></div>
+            <div class="field"><label>🔩 ألومنيوم / كغ</label><input type="number" id="m3" step="0.01" placeholder="2.34"></div>
+            <div class="field"><label>🔶 نحاس / كغ</label><input type="number" id="m4" step="0.01" placeholder="4.30"></div>
+            <div class="field"><label>🥇 ذهب / أونصة (عالمي)</label><input type="number" id="m5" step="0.01" placeholder="2344.34"></div>
+            <div class="field"><label>🥈 فضة / أونصة (عالمي)</label><input type="number" id="m6" step="0.01" placeholder="28.8"></div>
+        </div>
+    </div>
+
+    <!-- أزرار التحكم -->
+    <div class="btn-row">
+        <button class="btn btn-primary" id="btn-gen" onclick="generateAndPreview()">
+            <span>📋</span> معاينة JSON
+        </button>
+        <button class="btn btn-success" id="btn-push" onclick="pushToGitHub()">
+            <span>🚀</span> رفع إلى GitHub
+        </button>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyJSON()">
+            <span>📋</span> نسخ JSON
+        </button>
+        <button class="btn btn-info" onclick="downloadJSON()">
+            <span>💾</span> تحميل ملف
+        </button>
+        <button class="btn btn-danger" onclick="resetForm()">
+            <span>🔄</span> إعادة تعيين
+        </button>
+    </div>
+
     <div id="msg"></div>
+
+    <textarea id="out" placeholder="سيظهر هنا JSON..." readonly></textarea>
 </div>
 
+<div class="toast-container" id="toast-container"></div>
+
 <script>
-const V=id=>parseFloat(document.getElementById(id).value)||0;
+// ─── الإعدادات ───
+const REPO_OWNER = 'kaidngat4-droid';
+const REPO_NAME = 'riyal-dollar-app';
+const FILE_PATH = 'api/prices_data.json';
+const BRANCH = 'main';
+const GH_PAGES_BRANCH = 'gh-pages';
 
-async function load(){
-  try{
-    const r=await fetch("https://kaidngat4-droid.github.io/riyal-dollar-app/api/prices_data.json");
-    const d=await r.json(), s=d.regions.sanaa, a=d.regions.aden;
-    const sc=s.currencies, ac=a.currencies;
-    // صنعاء عملات
-    set('s1',sc.USD.buy);set('s2',sc.USD.sell);set('s3',sc.SAR.buy);set('s4',sc.SAR.sell);
-    set('s5',sc.EUR.buy);set('s6',sc.EUR.sell);set('s7',sc.GBP.buy);set('s8',sc.GBP.sell);
-    set('s9',sc.AED.buy);set('s10',sc.AED.sell);set('s11',sc.KWD.buy);set('s12',sc.KWD.sell);
-    // عدن عملات
-    set('a1',ac.USD.buy);set('a2',ac.USD.sell);set('a3',ac.SAR.buy);set('a4',ac.SAR.sell);
-    set('a5',ac.EUR.buy);set('a6',ac.EUR.sell);set('a7',ac.GBP.buy);set('a8',ac.GBP.sell);
-    set('a9',ac.AED.buy);set('a10',ac.AED.sell);set('a11',ac.KWD.buy);set('a12',ac.KWD.sell);
-    // صنعاء ذهب
-    set('g1',s.gold['21k'].buy);set('g2',s.gold['21k'].sell);set('g3',s.gold['22k'].buy);set('g4',s.gold['22k'].sell);
-    set('g5',s.gold['24k'].buy);set('g6',s.gold['24k'].sell);set('g7',s.silver.buy);set('g8',s.silver.sell);
-    // عدن ذهب
-    set('h1',a.gold['21k'].buy);set('h2',a.gold['21k'].sell);set('h3',a.gold['22k'].buy);set('h4',a.gold['22k'].sell);
-    set('h5',a.gold['24k'].buy);set('h6',a.gold['24k'].sell);set('h7',a.silver.buy);set('h8',a.silver.sell);
-    // معادن
-    const mt=d.metals||[];
-    if(mt[0]){set('m1',mt[0].price_usd);} if(mt[1]){set('m2',mt[1].price_usd);}
-    if(mt[2]){set('m3',mt[2].price_usd);} if(mt[3]){set('m4',mt[3].price_usd);}
-    set('m5',d.gold?.ounce?.price_usd||2344); set('m6',d.silver?.price_usd||28.8);
-  }catch(e){}
+// ─── دوال مساعدة ───
+const V = id => parseFloat(document.getElementById(id).value) || 0;
+const set = (id, v) => { if(v != null) document.getElementById(id).value = v; };
+const showMsg = (html, type='info') => {
+    const el = document.getElementById('msg');
+    el.innerHTML = `<div class="msg msg-${type}">${html}</div>`;
+    setTimeout(() => el.innerHTML = '', 8000);
+};
+const toast = (text, type='info') => {
+    const container = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.textContent = text;
+    container.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+};
+const setLoading = (btnId, loading) => {
+    const btn = document.getElementById(btnId);
+    if(!btn) return;
+    btn.disabled = loading;
+    btn.innerHTML = loading ? '<span class="spinner"></span> جاري العمل...' : btn.dataset.originalHtml || btn.innerHTML;
+};
+
+// ─── تحميل البيانات الحالية ───
+async function loadCurrentData() {
+    try {
+        toast('جاري تحميل البيانات الحالية...', 'info');
+        const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${FILE_PATH}?t=${Date.now()}`;
+        const r = await fetch(url);
+        if(!r.ok) throw new Error('HTTP ' + r.status);
+        const d = await r.json();
+
+        // ملء الحقول
+        const s = d.regions?.sanaa, a = d.regions?.aden;
+        if(s) {
+            const sc = s.currencies || {};
+            set('s1', sc.USD?.buy); set('s2', sc.USD?.sell);
+            set('s3', sc.SAR?.buy); set('s4', sc.SAR?.sell);
+            set('s5', sc.EUR?.buy); set('s6', sc.EUR?.sell);
+            set('s7', sc.GBP?.buy); set('s8', sc.GBP?.sell);
+            set('s9', sc.AED?.buy); set('s10', sc.AED?.sell);
+            set('s11', sc.KWD?.buy); set('s12', sc.KWD?.sell);
+
+            if(s.gold) {
+                set('g1', s.gold['21k']?.buy); set('g2', s.gold['21k']?.sell);
+                set('g3', s.gold['22k']?.buy); set('g4', s.gold['22k']?.sell);
+                set('g5', s.gold['24k']?.buy); set('g6', s.gold['24k']?.sell);
+            }
+            if(s.silver) { set('g7', s.silver.buy); set('g8', s.silver.sell); }
+        }
+        if(a) {
+            const ac = a.currencies || {};
+            set('a1', ac.USD?.buy); set('a2', ac.USD?.sell);
+            set('a3', ac.SAR?.buy); set('a4', ac.SAR?.sell);
+            set('a5', ac.EUR?.buy); set('a6', ac.EUR?.sell);
+            set('a7', ac.GBP?.buy); set('a8', ac.GBP?.sell);
+            set('a9', ac.AED?.buy); set('a10', ac.AED?.sell);
+            set('a11', ac.KWD?.buy); set('a12', ac.KWD?.sell);
+
+            if(a.gold) {
+                set('h1', a.gold['21k']?.buy); set('h2', a.gold['21k']?.sell);
+                set('h3', a.gold['22k']?.buy); set('h4', a.gold['22k']?.sell);
+                set('h5', a.gold['24k']?.buy); set('h6', a.gold['24k']?.sell);
+            }
+            if(a.silver) { set('h7', a.silver.buy); set('h8', a.silver.sell); }
+        }
+
+        // المعادن
+        const mt = d.metals || [];
+        if(mt[0]) set('m1', mt[0].price_usd);
+        if(mt[1]) set('m2', mt[1].price_usd);
+        if(mt[2]) set('m3', mt[2].price_usd);
+        if(mt[3]) set('m4', mt[3].price_usd);
+        set('m5', d.gold?.ounce?.price_usd);
+        set('m6', d.silver?.price_usd);
+
+        // الإحصائيات
+        document.getElementById('stat-gold').textContent = '$' + (d.gold?.ounce?.price_usd || '--');
+        document.getElementById('stat-silver').textContent = '$' + (d.silver?.price_usd || '--');
+        document.getElementById('stat-usd-sanaa').textContent = sc?.USD?.sell || '--';
+        document.getElementById('stat-usd-aden').textContent = ac?.USD?.sell || '--';
+
+        // آخر تحديث
+        const lu = d.metadata?.last_updated;
+        document.getElementById('last-updated').textContent = lu 
+            ? 'آخر تحديث: ' + new Date(lu).toLocaleString('ar-YE') 
+            : 'لا يوجد تاريخ تحديث';
+
+        toast('✅ تم تحميل البيانات الحالية', 'success');
+    } catch(e) {
+        toast('⚠️ تعذر تحميل البيانات الحالية، استخدام القيم الافتراضية', 'error');
+        console.error(e);
+    }
 }
-function set(id,v){if(v!=null)document.getElementById(id).value=v;}
 
-function gen(){
-  const ts=new Date().toISOString();
-  const su=V('s1'),suS=V('s2'),au=V('a1'),auS=V('a2');
-  const sarB=V('s3'),sarS=V('s4'),aSarB=V('a3'),aSarS=V('a4');
-  const json={
-    metadata:{app_name:"ريال ودولار",version:"1.0.0",last_updated:ts,base_currency:"YER",data_source:"manual_update"},
-    regions:{
-      sanaa:{
-        name:"صنعاء",
-        currencies:{
-          USD:{buy:su,sell:suS},SAR:{buy:sarB,sell:sarS},
-          EUR:{buy:V('s5'),sell:V('s6')},GBP:{buy:V('s7'),sell:V('s8')},
-          AED:{buy:V('s9'),sell:V('s10')},KWD:{buy:V('s11'),sell:V('s12')}
+// ─── بناء JSON ───
+function buildJSON() {
+    const ts = new Date().toISOString();
+    const su = V('s1'), suS = V('s2'), au = V('a1'), auS = V('a2');
+    const sarB = V('s3'), sarS = V('s4'), aSarB = V('a3'), aSarS = V('a4');
+
+    // حساب أسعار الذهب بالدولار للجرام
+    const goldOz = V('m5') || 2344.34;
+    const silverOz = V('m6') || 28.8;
+    const ounceToGram = 31.1035;
+
+    const calcGram = (karatPurity, usdRate) => {
+        const gramUsd = (goldOz / ounceToGram) * karatPurity;
+        return {
+            buy_yer: Math.round(gramUsd * usdRate * 0.98 * 100) / 100,
+            sell_yer: Math.round(gramUsd * usdRate * 1.02 * 100) / 100,
+            buy_usd: Math.round(gramUsd * 0.98 * 100) / 100,
+            sell_usd: Math.round(gramUsd * 1.02 * 100) / 100,
+            unit: "YER/gram"
+        };
+    };
+
+    const sanaaUsdRate = (su + suS) / 2;
+    const adenUsdRate = (au + auS) / 2;
+
+    return {
+        metadata: {
+            app_name: "ريال ودولار",
+            version: "1.1.0",
+            last_updated: ts,
+            base_currency: "YER",
+            data_source: "manual_update",
+            updated_by: "admin_panel"
         },
-        gold:{"21k":{buy:V('g1'),sell:V('g2'),unit:"YER/gram"},"22k":{buy:V('g3'),sell:V('g4'),unit:"YER/gram"},"24k":{buy:V('g5'),sell:V('g6'),unit:"YER/gram"}},
-        silver:{buy:V('g7'),sell:V('g8'),unit:"USD/oz"}
-      },
-      aden:{
-        name:"عدن",
-        currencies:{
-          USD:{buy:au,sell:auS},SAR:{buy:aSarB,sell:aSarS},
-          EUR:{buy:V('a5'),sell:V('a6')},GBP:{buy:V('a7'),sell:V('a8')},
-          AED:{buy:V('a9'),sell:V('a10')},KWD:{buy:V('a11'),sell:V('a12')}
+        regions: {
+            sanaa: {
+                name: "صنعاء",
+                currencies: {
+                    USD: { buy: su, sell: suS },
+                    SAR: { buy: sarB, sell: sarS },
+                    EUR: { buy: V('s5'), sell: V('s6') },
+                    GBP: { buy: V('s7'), sell: V('s8') },
+                    AED: { buy: V('s9'), sell: V('s10') },
+                    KWD: { buy: V('s11'), sell: V('s12') }
+                },
+                gold: {
+                    "21k": { buy: V('g1'), sell: V('g2'), unit: "YER/gram" },
+                    "22k": { buy: V('g3'), sell: V('g4'), unit: "YER/gram" },
+                    "24k": { buy: V('g5'), sell: V('g6'), unit: "YER/gram" }
+                },
+                silver: { buy: V('g7'), sell: V('g8'), unit: "USD/oz" }
+            },
+            aden: {
+                name: "عدن",
+                currencies: {
+                    USD: { buy: au, sell: auS },
+                    SAR: { buy: aSarB, sell: aSarS },
+                    EUR: { buy: V('a5'), sell: V('a6') },
+                    GBP: { buy: V('a7'), sell: V('a8') },
+                    AED: { buy: V('a9'), sell: V('a10') },
+                    KWD: { buy: V('a11'), sell: V('a12') }
+                },
+                gold: {
+                    "21k": { buy: V('h1'), sell: V('h2'), unit: "YER/gram" },
+                    "22k": { buy: V('h3'), sell: V('h4'), unit: "YER/gram" },
+                    "24k": { buy: V('h5'), sell: V('h6'), unit: "YER/gram" }
+                },
+                silver: { buy: V('h7'), sell: V('h8'), unit: "USD/oz" }
+            }
         },
-        gold:{"21k":{buy:V('h1'),sell:V('h2'),unit:"YER/gram"},"22k":{buy:V('h3'),sell:V('h4'),unit:"YER/gram"},"24k":{buy:V('h5'),sell:V('h6'),unit:"YER/gram"}},
-        silver:{buy:V('h7'),sell:V('h8'),unit:"USD/oz"}
-      }
-    },
-    currencies:[
-      {code:"USD",name_ar:"دولار أمريكي",flag:"🇺🇸",price_yer:(su+au)/2,buy:(su+au)/2,sell:(suS+auS)/2,sanaa_buy:su,sanaa_sell:suS,aden_buy:au,aden_sell:auS,change_24h:0,change_percent:0,trend:"stable"},
-      {code:"SAR",name_ar:"ريال سعودي",flag:"🇸🇦",price_yer:(sarB+aSarB)/2,buy:(sarB+aSarB)/2,sell:(sarS+aSarS)/2,sanaa_buy:sarB,sanaa_sell:sarS,aden_buy:aSarB,aden_sell:aSarS,change_24h:0,change_percent:0,trend:"stable"}
-    ],
-    gold:{ounce:{price_usd:V('m5'),change_24h:0,change_percent:0,trend:"stable"}},
-    silver:{code:"XAG",name_ar:"الفضة",icon:"🥈",price_usd:V('m6'),unit:"oz",status:"live"},
-    metals:[
-      {code:"XPT",name_ar:"البلاتين",icon:"🪨",price_usd:V('m1'),unit:"oz",trend:"stable"},
-      {code:"XPD",name_ar:"البلاديوم",icon:"🪶",price_usd:V('m2'),unit:"oz",trend:"stable"},
-      {code:"AL",name_ar:"الألومنيوم",icon:"🔩",price_usd:V('m3'),unit:"kg",trend:"stable"},
-      {code:"HG",name_ar:"النحاس",icon:"🔶",price_usd:V('m4'),unit:"kg",trend:"stable"}
-    ]
-  };
-  document.getElementById('out').value=JSON.stringify(json,null,2);
-  document.getElementById('msg').innerHTML='<div class="msg success">✅ تم! اضغط نسخ ثم الصقه في api/prices_data.json</div>';
+        currencies: [
+            {
+                code: "USD", name_ar: "دولار أمريكي", name_en: "US Dollar", flag: "🇺🇸",
+                price_yer: Math.round((su + au) / 2 * 100) / 100,
+                buy: Math.round((su + au) / 2 * 100) / 100,
+                sell: Math.round((suS + auS) / 2 * 100) / 100,
+                sanaa_buy: su, sanaa_sell: suS,
+                aden_buy: au, aden_sell: auS,
+                change_24h: 0, change_percent: 0, trend: "stable"
+            },
+            {
+                code: "SAR", name_ar: "ريال سعودي", name_en: "Saudi Riyal", flag: "🇸🇦",
+                price_yer: Math.round((sarB + aSarB) / 2 * 100) / 100,
+                buy: Math.round((sarB + aSarB) / 2 * 100) / 100,
+                sell: Math.round((sarS + aSarS) / 2 * 100) / 100,
+                sanaa_buy: sarB, sanaa_sell: sarS,
+                aden_buy: aSarB, aden_sell: aSarS,
+                change_24h: 0, change_percent: 0, trend: "stable"
+            }
+        ],
+        gold: {
+            ounce: {
+                price_usd: goldOz,
+                change_24h: 0, change_percent: 0, trend: "stable"
+            },
+            regions: {
+                sanaa: {
+                    name: "صنعاء",
+                    grams: [
+                        { karat: 24, ...calcGram(0.999, sanaaUsdRate) },
+                        { karat: 22, ...calcGram(0.916, sanaaUsdRate) },
+                        { karat: 21, ...calcGram(0.875, sanaaUsdRate) },
+                        { karat: 18, ...calcGram(0.750, sanaaUsdRate) }
+                    ]
+                },
+                aden: {
+                    name: "عدن",
+                    grams: [
+                        { karat: 24, ...calcGram(0.999, adenUsdRate) },
+                        { karat: 22, ...calcGram(0.916, adenUsdRate) },
+                        { karat: 21, ...calcGram(0.875, adenUsdRate) },
+                        { karat: 18, ...calcGram(0.750, adenUsdRate) }
+                    ]
+                }
+            }
+        },
+        silver: {
+            code: "XAG", name_ar: "الفضة", name_en: "Silver", icon: "🥈",
+            price_usd: silverOz, unit: "oz", status: "live",
+            change_24h: 0, change_percent: 0, trend: "stable",
+            regions: {
+                sanaa: { name: "صنعاء", buy: V('g7'), sell: V('g8'), unit: "USD/oz" },
+                aden: { name: "عدن", buy: V('h7'), sell: V('h8'), unit: "USD/oz" }
+            }
+        },
+        metals: [
+            { code: "XPT", name_ar: "البلاتين", name_en: "Platinum", icon: "🪨", price_usd: V('m1') || 1031.51, unit: "oz", trend: "stable" },
+            { code: "XPD", name_ar: "البلاديوم", name_en: "Palladium", icon: "🪶", price_usd: V('m2') || 961.18, unit: "oz", trend: "stable" },
+            { code: "AL", name_ar: "الألومنيوم", name_en: "Aluminum", icon: "🔩", price_usd: V('m3') || 2.34, unit: "kg", trend: "stable" },
+            { code: "HG", name_ar: "النحاس", name_en: "Copper", icon: "🔶", price_usd: V('m4') || 4.30, unit: "kg", trend: "stable" }
+        ]
+    };
 }
 
-function copy(){
-  const t=document.getElementById('out').value;
-  if(!t)return;
-  navigator.clipboard.writeText(t).then(()=>{
-    document.getElementById('msg').innerHTML='<div class="msg success">✅ تم النسخ! اذهب لـ GitHub → api/prices_data.json → Edit → Paste → Commit</div>';
-  });
+// ─── معاينة JSON ───
+function generateAndPreview() {
+    const json = buildJSON();
+    document.getElementById('out').value = JSON.stringify(json, null, 2);
+    showMsg('✅ تم إنشاء JSON! يمكنك مراجعته ثم الضغط على "رفع إلى GitHub"', 'success');
+    toast('تم إنشاء JSON', 'success');
 }
-load();
+
+// ─── رفع إلى GitHub ───
+async function pushToGitHub() {
+    const token = document.getElementById('github-token').value.trim();
+    if(!token) {
+        showMsg('❌ يرجى إدخال GitHub Token أولاً! اذهب لـ GitHub → Settings → Developer settings → Personal access tokens', 'error');
+        document.getElementById('github-token').focus();
+        return;
+    }
+
+    const json = buildJSON();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(json, null, 2))));
+
+    setLoading('btn-push', true);
+    showMsg('⏳ جاري الرفع إلى GitHub...', 'info');
+
+    try {
+        // 1. الحصول على SHA الحالي
+        const shaResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}?ref=${BRANCH}`, {
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+
+        if(!shaResp.ok) {
+            const err = await shaResp.json();
+            throw new Error(err.message || 'فشل في الحصول على SHA');
+        }
+        const shaData = await shaResp.json();
+        const sha = shaData.sha;
+
+        // 2. رفع الملف الجديد
+        const commitMsg = `تحديث أسعار: ${new Date().toLocaleString('ar-YE')}`;
+        const updateResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: commitMsg,
+                content: content,
+                sha: sha,
+                branch: BRANCH
+            })
+        });
+
+        if(!updateResp.ok) {
+            const err = await updateResp.json();
+            throw new Error(err.message || 'فشل في الرفع');
+        }
+
+        // 3. تحديث gh-pages
+        showMsg('⏳ جاري تحديث gh-pages...', 'info');
+
+        // الحصول على SHA لـ gh-pages
+        const shaGhResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}?ref=${GH_PAGES_BRANCH}`, {
+            headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+
+        let shaGh = '';
+        if(shaGhResp.ok) {
+            const shaGhData = await shaGhResp.json();
+            shaGh = shaGhData.sha;
+        }
+
+        // رفع على gh-pages
+        const ghResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: commitMsg + ' [gh-pages]',
+                content: content,
+                sha: shaGh || undefined,
+                branch: GH_PAGES_BRANCH
+            })
+        });
+
+        if(!ghResp.ok && ghResp.status !== 201) {
+            console.warn('gh-pages warning:', await ghResp.text());
+        }
+
+        showMsg(`✅ تم الرفع بنجاح!<br>🕐 ${new Date().toLocaleString('ar-YE')}<br>🌐 <a href="https://${REPO_OWNER}.github.io/${REPO_NAME}/" target="_blank" style="color:#34d399;">فتح الموقع</a>`, 'success');
+        toast('🚀 تم الرفع بنجاح!', 'success');
+
+        // تحديث التاريخ المعروض
+        document.getElementById('last-updated').textContent = 'آخر تحديث: ' + new Date().toLocaleString('ar-YE');
+
+    } catch(e) {
+        showMsg(`❌ فشل الرفع: ${e.message}<br><br>تأكد من:<br>1. صحة الـ Token<br>2. أن المستودع عام<br>3. أن لديك صلاحيات الكتابة`, 'error');
+        toast('فشل الرفع: ' + e.message, 'error');
+        console.error(e);
+    } finally {
+        setLoading('btn-push', false);
+    }
+}
+
+// ─── نسخ JSON ───
+function copyJSON() {
+    const t = document.getElementById('out').value;
+    if(!t) { generateAndPreview(); }
+    navigator.clipboard.writeText(document.getElementById('out').value).then(() => {
+        toast('✅ تم النسخ!', 'success');
+    });
+}
+
+// ─── تحميل ملف ───
+function downloadJSON() {
+    const t = document.getElementById('out').value;
+    if(!t) { generateAndPreview(); }
+    const blob = new Blob([document.getElementById('out').value], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'prices_data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('💾 تم التحميل!', 'success');
+}
+
+// ─── إعادة تعيين ───
+function resetForm() {
+    if(!confirm('هل أنت متأكد من إعادة تعيين جميع الحقول؟')) return;
+    document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+    document.getElementById('out').value = '';
+    showMsg('🔄 تم إعادة التعيين', 'info');
+}
+
+// ─── تهيئة ───
+document.addEventListener('DOMContentLoaded', () => {
+    // حفظ HTML الأصلي للأزرار
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.dataset.originalHtml = btn.innerHTML;
+    });
+
+    // تحميل البيانات
+    loadCurrentData();
+});
 </script>
 </body>
 </html>
