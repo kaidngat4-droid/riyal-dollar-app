@@ -1676,3 +1676,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // تحديث كل 5 دقائق
 setInterval(updatePricesFromJSON, 300000);
+
+// ============ تصحيح حاسبة الذهب ============
+function fixGoldCalculator() {
+    const TROY_OUNCE = 31.1035; // 1 أونصة = 31.1035 جرام
+    
+    // احصل على سعر الذهب العالمي وسعر الصرف
+    const goldOuncePrice = state.metals?.gold || 2345;
+    const yerRate = CONFIG.LOCAL_RATES.sanaa.USD.buy || 533;
+    
+    // احفظ الدوال الأصلية
+    const origCalc = window.updateMetalCalculator;
+    
+    // استبدل دالة الحساب
+    window.updateMetalCalculator = function() {
+        const type = document.getElementById('metal-type')?.value || 'gold-21';
+        const weight = parseFloat(document.getElementById('metal-weight')?.value) || 0;
+        const currency = document.getElementById('metal-currency')?.value || 'YER';
+        
+        // سعر الجرام 24k بالدولار
+        const gram24USD = goldOuncePrice / TROY_OUNCE;
+        
+        let pricePerGram;
+        switch(type) {
+            case 'gold-24': pricePerGram = gram24USD; break;
+            case 'gold-22': pricePerGram = gram24USD * 0.9167; break;
+            case 'gold-21': pricePerGram = gram24USD * 0.875; break;
+            case 'gold-18': pricePerGram = gram24USD * 0.750; break;
+            case 'silver': pricePerGram = state.metals?.silver / TROY_OUNCE || 0.9; break;
+            default: pricePerGram = gram24USD * 0.875;
+        }
+        
+        let total = pricePerGram * weight;
+        
+        // تحويل العملة
+        if (currency === 'YER') total *= yerRate;
+        else if (currency === 'SAR') total *= (CONFIG.LOCAL_RATES.sanaa.SAR?.buy || 140);
+        
+        const resultEl = document.getElementById('metal-calc-result');
+        if (resultEl) {
+            resultEl.textContent = Math.round(total).toLocaleString() + ' ' + currency;
+        }
+    };
+    
+    // شغل الحاسبة
+    if (typeof window.updateMetalCalculator === 'function') {
+        window.updateMetalCalculator();
+    }
+}
+
+// شغل التصحيح بعد التحميل
+setTimeout(fixGoldCalculator, 1000);
