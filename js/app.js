@@ -1602,3 +1602,28 @@ if ('launchQueue' in window) {
 }
 
 window.addEventListener('load', handleLaunchParams);
+
+// تحميل الأسعار المحلية من JSON
+async function loadLocalPrices() {
+    try {
+        const r = await fetch('./api/prices_data.json');
+        if (r.ok) {
+            const d = await r.json();
+            if (d.regions) {
+                CONFIG.LOCAL_RATES = {
+                    sanaa: {
+                        USD: { buy: d.regions.sanaa.currencies.USD.buy, sell: d.regions.sanaa.currencies.USD.sell },
+                        SAR: { buy: d.regions.sanaa.currencies.SAR.buy, sell: d.regions.sanaa.currencies.SAR.sell }
+                    },
+                    aden: {
+                        USD: { buy: d.regions.aden.currencies.USD.buy, sell: d.regions.aden.currencies.USD.sell },
+                        SAR: { buy: d.regions.aden.currencies.SAR.buy, sell: d.regions.aden.currencies.SAR.sell }
+                    }
+                };
+                console.log('✅ تم تحميل الأسعار المحلية');
+            }
+        }
+    } catch(e) {}
+}
+
+document.addEventListener('DOMContentLoaded', loadLocalPrices);
