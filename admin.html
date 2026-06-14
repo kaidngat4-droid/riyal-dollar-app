@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | ريال ودولار</title>
+    <style>
+        :root { --primary: #f59e0b; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary); margin: 20px 0; }
+        .card { background: var(--card); border-radius: 16px; padding: 20px; margin: 15px 0; border: 1px solid #334155; }
+        .card h3 { color: var(--primary); margin-bottom: 15px; }
+        .row { display: flex; gap: 10px; margin: 10px 0; align-items: center; }
+        .row label { width: 80px; color: var(--muted); }
+        input, select { flex: 1; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: var(--text); font-family: inherit; font-size: 1rem; }
+        button { width: 100%; padding: 14px; background: var(--primary); color: #0f172a; border: none; border-radius: 12px; font-family: inherit; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin: 10px 0; }
+        button:hover { opacity: 0.9; }
+        .msg { text-align: center; padding: 10px; border-radius: 10px; margin: 10px 0; }
+        .success { background: #065f46; color: #34d399; }
+        .error { background: #7f1d1d; color: #f87171; }
+        .current { font-size: 0.85rem; color: var(--muted); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🪙 لوحة تحكم ريال ودولار</h1>
+        
+        <div class="card">
+            <h3>📍 صنعاء</h3>
+            <div class="row"><label>💵 دولار:</label><input type="number" id="s-usd-b" placeholder="شراء" step="0.01"><input type="number" id="s-usd-s" placeholder="بيع" step="0.01"></div>
+            <div class="row"><label>🇸🇦 سعودي:</label><input type="number" id="s-sar-b" placeholder="شراء" step="0.01"><input type="number" id="s-sar-s" placeholder="بيع" step="0.01"></div>
+            <div class="row"><label>🥇 ذهب 21:</label><input type="number" id="s-gold-b" placeholder="شراء" step="0.01"><input type="number" id="s-gold-s" placeholder="بيع" step="0.01"></div>
+        </div>
+        
+        <div class="card">
+            <h3>📍 عدن</h3>
+            <div class="row"><label>💵 دولار:</label><input type="number" id="a-usd-b" placeholder="شراء" step="0.01"><input type="number" id="a-usd-s" placeholder="بيع" step="0.01"></div>
+            <div class="row"><label>🇸🇦 سعودي:</label><input type="number" id="a-sar-b" placeholder="شراء" step="0.01"><input type="number" id="a-sar-s" placeholder="بيع" step="0.01"></div>
+            <div class="row"><label>🥇 ذهب 21:</label><input type="number" id="a-gold-b" placeholder="شراء" step="0.01"><input type="number" id="a-gold-s" placeholder="بيع" step="0.01"></div>
+        </div>
+        
+        <button onclick="updatePrices()">💾 حفظ التغييرات</button>
+        <div id="msg"></div>
+    </div>
+
+    <script>
+        const API = "https://kaidngat4-droid.github.io/riyal-dollar-app/api/prices_data.json";
+        
+        async function loadCurrent() {
+            try {
+                const r = await fetch(API);
+                const d = await r.json();
+                const s = d.regions.sanaa, a = d.regions.aden;
+                document.getElementById('s-usd-b').value = s.currencies.USD.buy;
+                document.getElementById('s-usd-s').value = s.currencies.USD.sell;
+                document.getElementById('s-sar-b').value = s.currencies.SAR.buy;
+                document.getElementById('s-sar-s').value = s.currencies.SAR.sell;
+                document.getElementById('s-gold-b').value = s.gold['21k'].buy;
+                document.getElementById('s-gold-s').value = s.gold['21k'].sell;
+                document.getElementById('a-usd-b').value = a.currencies.USD.buy;
+                document.getElementById('a-usd-s').value = a.currencies.USD.sell;
+                document.getElementById('a-sar-b').value = a.currencies.SAR.buy;
+                document.getElementById('a-sar-s').value = a.currencies.SAR.sell;
+                document.getElementById('a-gold-b').value = a.gold['21k'].buy;
+                document.getElementById('a-gold-s').value = a.gold['21k'].sell;
+            } catch(e) {}
+        }
+        
+        function updatePrices() {
+            const data = {
+                sanaa: {
+                    USD: {buy: +document.getElementById('s-usd-b').value, sell: +document.getElementById('s-usd-s').value},
+                    SAR: {buy: +document.getElementById('s-sar-b').value, sell: +document.getElementById('s-sar-s').value},
+                    gold21: {buy: +document.getElementById('s-gold-b').value, sell: +document.getElementById('s-gold-s').value}
+                },
+                aden: {
+                    USD: {buy: +document.getElementById('a-usd-b').value, sell: +document.getElementById('a-usd-s').value},
+                    SAR: {buy: +document.getElementById('a-sar-b').value, sell: +document.getElementById('a-sar-s').value},
+                    gold21: {buy: +document.getElementById('a-gold-b').value, sell: +document.getElementById('a-gold-s').value}
+                }
+            };
+            
+            // حفظ في LocalStorage + عرض النتيجة
+            localStorage.setItem('prices', JSON.stringify(data));
+            
+            // نسخ للكليبورد
+            const json = JSON.stringify(data, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                document.getElementById('msg').innerHTML = '<div class="msg success">✅ تم نسخ البيانات! الصقها في api/prices_data.json</div>';
+            });
+        }
+        
+        loadCurrent();
+    </script>
+</body>
+</html>
