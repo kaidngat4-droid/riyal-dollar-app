@@ -1627,3 +1627,52 @@ async function loadLocalPrices() {
 }
 
 document.addEventListener('DOMContentLoaded', loadLocalPrices);
+
+// ============ تحديث الأسعار من prices_data.json ============
+async function updatePricesFromJSON() {
+    try {
+        const r = await fetch('./api/prices_data.json?t=' + Date.now());
+        if (!r.ok) return;
+        const d = await r.json();
+        
+        if (d.regions) {
+            // تحديث كل المناطق
+            for (const [key, region] of Object.entries(d.regions)) {
+                if (CONFIG.LOCAL_RATES[key] && region.currencies) {
+                    CONFIG.LOCAL_RATES[key] = {
+                        USD: {
+                            buy: region.currencies.USD.buy,
+                            sell: region.currencies.USD.sell
+                        },
+                        SAR: {
+                            buy: region.currencies.SAR.buy,
+                            sell: region.currencies.SAR.sell
+                        }
+                    };
+                }
+            }
+            
+            // تحديث العناصر في الصفحة
+            if (typeof updateLocalConverter === 'function') {
+                updateLocalConverter();
+            }
+            if (typeof performGlobalConversion === 'function') {
+                performGlobalConversion();
+            }
+            
+            console.log('✅ الأسعار محدثة من prices_data.json');
+            console.log('📍 صنعاء USD:', CONFIG.LOCAL_RATES.sanaa.USD.buy);
+            console.log('📍 عدن USD:', CONFIG.LOCAL_RATES.aden.USD.buy);
+        }
+    } catch(e) {
+        console.log('⚠️ استخدام الأسعار الافتراضية');
+    }
+}
+
+// استدعاء عند التحميل
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(updatePricesFromJSON, 500);
+});
+
+// تحديث كل 5 دقائق
+setInterval(updatePricesFromJSON, 300000);
