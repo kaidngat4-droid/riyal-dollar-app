@@ -20,13 +20,13 @@ const CONFIG = {
   DEFAULT_TO: 'YER',
   YER_RATE: 500, // Approximate YER rate (will be updated from API)
   LOCAL_RATES: {
-    sanaa: { USD: { buy: 585, sell: 590 }, SAR: { buy: 155, sell: 157 } },
-    aden: { USD: { buy: 1380, sell: 1390 }, SAR: { buy: 365, sell: 370 } },
-    taiz: { USD: { buy: 580, sell: 585 }, SAR: { buy: 154, sell: 156 } },
-    hodeidah: { USD: { buy: 582, sell: 587 }, SAR: { buy: 154, sell: 156 } },
-    ibb: { USD: { buy: 583, sell: 588 }, SAR: { buy: 154, sell: 156 } },
-    marib: { USD: { buy: 590, sell: 595 }, SAR: { buy: 156, sell: 158 } },
-    hadramout: { USD: { buy: 1385, sell: 1395 }, SAR: { buy: 366, sell: 372 } }
+    sanaa: { USD: { buy: 533, sell: 535 }, SAR: { buy: 140, sell: 141 } },
+    aden: { USD: { buy: 1550, sell: 1558 }, SAR: { buy: 409, sell: 410 } },
+    taiz: { USD: { buy: 530, sell: 535 }, SAR: { buy: 140, sell: 141 } },
+    hodeidah: { USD: { buy: 530, sell: 535 }, SAR: { buy: 140, sell: 141 } },
+    ibb: { USD: { buy: 530, sell: 535 }, SAR: { buy: 140, sell: 141 } },
+    marib: { USD: { buy: 535, sell: 540 }, SAR: { buy: 142, sell: 143 } },
+    hadramout: { USD: { buy: 1555, sell: 1565 }, SAR: { buy: 410, sell: 412 } }
   }
 };
 
