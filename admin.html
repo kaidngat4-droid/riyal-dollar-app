@@ -3,110 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم | ريال ودولار</title>
+    <title>لوحة تحكم | ريال ودولار</title>
     <style>
-        :root { --primary: #f59e0b; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; }
+        :root { --primary: #f59e0b; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; --border: #334155; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 700px; margin: 0 auto; }
         h1 { text-align: center; color: var(--primary); margin: 20px 0; }
-        .card { background: var(--card); border-radius: 16px; padding: 20px; margin: 15px 0; }
-        h3 { color: var(--primary); margin-bottom: 15px; }
-        .row { display: flex; gap: 10px; margin: 10px 0; align-items: center; }
-        .row label { width: 100px; color: #94a3b8; font-size: 0.9rem; }
-        input { flex: 1; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: var(--text); font-size: 0.95rem; }
+        h2 { color: var(--primary); margin: 15px 0 10px; font-size: 1.2rem; }
+        .card { background: var(--card); border-radius: 16px; padding: 20px; margin: 15px 0; border: 1px solid var(--border); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .field { margin-bottom: 5px; }
+        .field label { display: block; color: var(--muted); font-size: 0.75rem; }
+        .field input { width: 100%; padding: 10px; background: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9rem; }
+        .field input:focus { border-color: var(--primary); outline: none; }
         button { width: 100%; padding: 14px; background: var(--primary); color: #0f172a; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin: 10px 0; }
-        textarea { width: 100%; height: 200px; margin: 10px 0; padding: 15px; background: #000; border: 2px solid var(--primary); border-radius: 12px; color: #fff; font-family: monospace; font-size: 0.85rem; }
+        button:hover { opacity: 0.9; }
+        .btn-copy { background: #334155; color: #fff; }
+        textarea { width: 100%; height: 250px; margin: 10px 0; padding: 15px; background: #000; border: 2px solid var(--primary); border-radius: 12px; color: #0f0; font-family: monospace; font-size: 0.8rem; }
         .msg { text-align: center; padding: 15px; border-radius: 10px; margin: 10px 0; }
         .success { background: #065f46; color: #34d399; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🪙 لوحة تحكم ريال ودولار</h1>
-        
+        <h1>🪙 تحديث أسعار ريال ودولار</h1>
+
         <div class="card">
-            <h3>📍 صنعاء</h3>
-            <div class="row"><label>💵 دولار شراء:</label><input type="number" id="s1" step="0.01"></div>
-            <div class="row"><label>💵 دولار بيع:</label><input type="number" id="s2" step="0.01"></div>
-            <div class="row"><label>🇸🇦 سعودي شراء:</label><input type="number" id="s3" step="0.01"></div>
-            <div class="row"><label>🇸🇦 سعودي بيع:</label><input type="number" id="s4" step="0.01"></div>
-            <div class="row"><label>🥇 ذهب 21 شراء:</label><input type="number" id="s5" step="0.01"></div>
-            <div class="row"><label>🥇 ذهب 21 بيع:</label><input type="number" id="s6" step="0.01"></div>
+            <h2>📍 صنعاء</h2>
+            <div class="grid">
+                <div class="field"><label>💵 دولار شراء</label><input type="number" id="s1" step="0.01"></div>
+                <div class="field"><label>💵 دولار بيع</label><input type="number" id="s2" step="0.01"></div>
+                <div class="field"><label>🇸🇦 سعودي شراء</label><input type="number" id="s3" step="0.01"></div>
+                <div class="field"><label>🇸🇦 سعودي بيع</label><input type="number" id="s4" step="0.01"></div>
+                <div class="field"><label>💶 يورو شراء</label><input type="number" id="s5" step="0.01"></div>
+                <div class="field"><label>💶 يورو بيع</label><input type="number" id="s6" step="0.01"></div>
+                <div class="field"><label>🇬🇧 جنيه شراء</label><input type="number" id="s7" step="0.01"></div>
+                <div class="field"><label>🇬🇧 جنيه بيع</label><input type="number" id="s8" step="0.01"></div>
+                <div class="field"><label>🇦🇪 درهم شراء</label><input type="number" id="s9" step="0.01"></div>
+                <div class="field"><label>🇦🇪 درهم بيع</label><input type="number" id="s10" step="0.01"></div>
+                <div class="field"><label>🇰🇼 دينار شراء</label><input type="number" id="s11" step="0.01"></div>
+                <div class="field"><label>🇰🇼 دينار بيع</label><input type="number" id="s12" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 21k شراء</label><input type="number" id="s13" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 21k بيع</label><input type="number" id="s14" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 22k شراء</label><input type="number" id="s15" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 22k بيع</label><input type="number" id="s16" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 24k شراء</label><input type="number" id="s17" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 24k بيع</label><input type="number" id="s18" step="0.01"></div>
+                <div class="field"><label>🥈 فضة شراء</label><input type="number" id="s19" step="0.01"></div>
+                <div class="field"><label>🥈 فضة بيع</label><input type="number" id="s20" step="0.01"></div>
+            </div>
         </div>
-        
+
         <div class="card">
-            <h3>📍 عدن</h3>
-            <div class="row"><label>💵 دولار شراء:</label><input type="number" id="a1" step="0.01"></div>
-            <div class="row"><label>💵 دولار بيع:</label><input type="number" id="a2" step="0.01"></div>
-            <div class="row"><label>🇸🇦 سعودي شراء:</label><input type="number" id="a3" step="0.01"></div>
-            <div class="row"><label>🇸🇦 سعودي بيع:</label><input type="number" id="a4" step="0.01"></div>
-            <div class="row"><label>🥇 ذهب 21 شراء:</label><input type="number" id="a5" step="0.01"></div>
-            <div class="row"><label>🥇 ذهب 21 بيع:</label><input type="number" id="a6" step="0.01"></div>
+            <h2>📍 عدن</h2>
+            <div class="grid">
+                <div class="field"><label>💵 دولار شراء</label><input type="number" id="a1" step="0.01"></div>
+                <div class="field"><label>💵 دولار بيع</label><input type="number" id="a2" step="0.01"></div>
+                <div class="field"><label>🇸🇦 سعودي شراء</label><input type="number" id="a3" step="0.01"></div>
+                <div class="field"><label>🇸🇦 سعودي بيع</label><input type="number" id="a4" step="0.01"></div>
+                <div class="field"><label>💶 يورو شراء</label><input type="number" id="a5" step="0.01"></div>
+                <div class="field"><label>💶 يورو بيع</label><input type="number" id="a6" step="0.01"></div>
+                <div class="field"><label>🇬🇧 جنيه شراء</label><input type="number" id="a7" step="0.01"></div>
+                <div class="field"><label>🇬🇧 جنيه بيع</label><input type="number" id="a8" step="0.01"></div>
+                <div class="field"><label>🇦🇪 درهم شراء</label><input type="number" id="a9" step="0.01"></div>
+                <div class="field"><label>🇦🇪 درهم بيع</label><input type="number" id="a10" step="0.01"></div>
+                <div class="field"><label>🇰🇼 دينار شراء</label><input type="number" id="a11" step="0.01"></div>
+                <div class="field"><label>🇰🇼 دينار بيع</label><input type="number" id="a12" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 21k شراء</label><input type="number" id="a13" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 21k بيع</label><input type="number" id="a14" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 22k شراء</label><input type="number" id="a15" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 22k بيع</label><input type="number" id="a16" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 24k شراء</label><input type="number" id="a17" step="0.01"></div>
+                <div class="field"><label>🥇 ذهب 24k بيع</label><input type="number" id="a18" step="0.01"></div>
+                <div class="field"><label>🥈 فضة شراء</label><input type="number" id="a19" step="0.01"></div>
+                <div class="field"><label>🥈 فضة بيع</label><input type="number" id="a20" step="0.01"></div>
+            </div>
         </div>
-        
-        <button onclick="generate()">📋 إنشاء JSON</button>
+
+        <button onclick="generateJSON()">📋 إنشاء JSON</button>
         <textarea id="output" placeholder="JSON سيظهر هنا..."></textarea>
-        <button onclick="copyText()">📋 نسخ للكليبورد</button>
+        <button class="btn-copy" onclick="copyText()">📋 نسخ للكليبورد</button>
         <div id="msg"></div>
     </div>
 
     <script>
+        const v = (id) => parseFloat(document.getElementById(id).value) || 0;
+
         async function load() {
             try {
                 const r = await fetch("https://kaidngat4-droid.github.io/riyal-dollar-app/api/prices_data.json");
                 const d = await r.json();
                 const s = d.regions.sanaa, a = d.regions.aden;
-                document.getElementById('s1').value = s.currencies.USD.buy;
-                document.getElementById('s2').value = s.currencies.USD.sell;
-                document.getElementById('s3').value = s.currencies.SAR.buy;
-                document.getElementById('s4').value = s.currencies.SAR.sell;
-                document.getElementById('s5').value = s.gold['21k'].buy;
-                document.getElementById('s6').value = s.gold['21k'].sell;
-                document.getElementById('a1').value = a.currencies.USD.buy;
-                document.getElementById('a2').value = a.currencies.USD.sell;
-                document.getElementById('a3').value = a.currencies.SAR.buy;
-                document.getElementById('a4').value = a.currencies.SAR.sell;
-                document.getElementById('a5').value = a.gold['21k'].buy;
-                document.getElementById('a6').value = a.gold['21k'].sell;
+                const sc = s.currencies, ac = a.currencies;
+                
+                // صنعاء
+                set('s1',sc.USD.buy); set('s2',sc.USD.sell); set('s3',sc.SAR.buy); set('s4',sc.SAR.sell);
+                set('s5',sc.EUR.buy); set('s6',sc.EUR.sell); set('s7',sc.GBP.buy); set('s8',sc.GBP.sell);
+                set('s9',sc.AED.buy); set('s10',sc.AED.sell); set('s11',sc.KWD.buy); set('s12',sc.KWD.sell);
+                set('s13',s.gold['21k'].buy); set('s14',s.gold['21k'].sell);
+                set('s15',s.gold['22k'].buy); set('s16',s.gold['22k'].sell);
+                set('s17',s.gold['24k'].buy); set('s18',s.gold['24k'].sell);
+                set('s19',s.silver.buy); set('s20',s.silver.sell);
+                
+                // عدن
+                set('a1',ac.USD.buy); set('a2',ac.USD.sell); set('a3',ac.SAR.buy); set('a4',ac.SAR.sell);
+                set('a5',ac.EUR.buy); set('a6',ac.EUR.sell); set('a7',ac.GBP.buy); set('a8',ac.GBP.sell);
+                set('a9',ac.AED.buy); set('a10',ac.AED.sell); set('a11',ac.KWD.buy); set('a12',ac.KWD.sell);
+                set('a13',a.gold['21k'].buy); set('a14',a.gold['21k'].sell);
+                set('a15',a.gold['22k'].buy); set('a16',a.gold['22k'].sell);
+                set('a17',a.gold['24k'].buy); set('a18',a.gold['24k'].sell);
+                set('a19',a.silver.buy); set('a20',a.silver.sell);
             } catch(e) {}
         }
-        
-        function generate() {
+
+        function set(id, val) { if (val !== undefined && val !== null) document.getElementById(id).value = val; }
+
+        function generateJSON() {
             const ts = new Date().toISOString();
+            const su = v('s1'), suS = v('s2'), au = v('a1'), auS = v('a2');
+            const sarB = v('s3'), sarS = v('s4'), aSarB = v('a3'), aSarS = v('a4');
+
             const json = {
                 metadata: { app_name: "ريال ودولار", version: "1.0.0", last_updated: ts, base_currency: "YER", data_source: "manual_update" },
                 regions: {
                     sanaa: {
                         name: "صنعاء",
                         currencies: {
-                            USD: { buy: +document.getElementById('s1').value, sell: +document.getElementById('s2').value },
-                            SAR: { buy: +document.getElementById('s3').value, sell: +document.getElementById('s4').value }
+                            USD: { buy: su, sell: suS },
+                            SAR: { buy: sarB, sell: sarS },
+                            EUR: { buy: v('s5'), sell: v('s6') },
+                            GBP: { buy: v('s7'), sell: v('s8') },
+                            AED: { buy: v('s9'), sell: v('s10') },
+                            KWD: { buy: v('s11'), sell: v('s12') }
                         },
-                        gold: { "21k": { buy: +document.getElementById('s5').value, sell: +document.getElementById('s6').value, unit: "YER/gram" } }
+                        gold: {
+                            "21k": { buy: v('s13'), sell: v('s14'), unit: "YER/gram" },
+                            "22k": { buy: v('s15'), sell: v('s16'), unit: "YER/gram" },
+                            "24k": { buy: v('s17'), sell: v('s18'), unit: "YER/gram" }
+                        },
+                        silver: { buy: v('s19'), sell: v('s20'), unit: "USD/oz" }
                     },
                     aden: {
                         name: "عدن",
                         currencies: {
-                            USD: { buy: +document.getElementById('a1').value, sell: +document.getElementById('a2').value },
-                            SAR: { buy: +document.getElementById('a3').value, sell: +document.getElementById('a4').value }
+                            USD: { buy: au, sell: auS },
+                            SAR: { buy: aSarB, sell: aSarS },
+                            EUR: { buy: v('a5'), sell: v('a6') },
+                            GBP: { buy: v('a7'), sell: v('a8') },
+                            AED: { buy: v('a9'), sell: v('a10') },
+                            KWD: { buy: v('a11'), sell: v('a12') }
                         },
-                        gold: { "21k": { buy: +document.getElementById('a5').value, sell: +document.getElementById('a6').value, unit: "YER/gram" } }
+                        gold: {
+                            "21k": { buy: v('a13'), sell: v('a14'), unit: "YER/gram" },
+                            "22k": { buy: v('a15'), sell: v('a16'), unit: "YER/gram" },
+                            "24k": { buy: v('a17'), sell: v('a18'), unit: "YER/gram" }
+                        },
+                        silver: { buy: v('a19'), sell: v('a20'), unit: "USD/oz" }
                     }
-                }
+                },
+                currencies: [
+                    { code: "USD", name_ar: "دولار أمريكي", flag: "🇺🇸", price_yer: (su+au)/2, buy: (su+au)/2, sell: (suS+auS)/2, sanaa_buy: su, sanaa_sell: suS, aden_buy: au, aden_sell: auS, change_24h: 0, change_percent: 0, trend: "stable" },
+                    { code: "SAR", name_ar: "ريال سعودي", flag: "🇸🇦", price_yer: (sarB+aSarB)/2, buy: (sarB+aSarB)/2, sell: (sarS+aSarS)/2, sanaa_buy: sarB, sanaa_sell: sarS, aden_buy: aSarB, aden_sell: aSarS, change_24h: 0, change_percent: 0, trend: "stable" }
+                ],
+                gold: { ounce: { price_usd: 2344.34, change_24h: 0, change_percent: 0, trend: "stable" } },
+                silver: { code: "XAG", name_ar: "الفضة", icon: "🥈", price_usd: 28.8, unit: "oz", status: "live" },
+                metals: []
             };
+
             document.getElementById('output').value = JSON.stringify(json, null, 2);
-            document.getElementById('msg').innerHTML = '<div class="msg success">✅ تم إنشاء JSON! اضغط نسخ ثم الصقه في GitHub</div>';
+            document.getElementById('msg').innerHTML = '<div class="msg success">✅ تم! اضغط نسخ ثم الصقه في api/prices_data.json</div>';
         }
-        
+
         function copyText() {
-            const text = document.getElementById('output').value;
-            if (!text) return;
-            navigator.clipboard.writeText(text).then(() => {
-                document.getElementById('msg').innerHTML = '<div class="msg success">✅ تم النسخ! اذهب لـ GitHub والصقه في api/prices_data.json</div>';
+            const t = document.getElementById('output').value;
+            if (!t) return;
+            navigator.clipboard.writeText(t).then(() => {
+                document.getElementById('msg').innerHTML = '<div class="msg success">✅ تم النسخ! اذهب لـ GitHub → api/prices_data.json → Edit → Paste → Commit</div>';
             });
         }
-        
+
         load();
     </script>
 </body>
