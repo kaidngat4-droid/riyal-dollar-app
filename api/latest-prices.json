@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-06-12T00:48:08.438806",
+  "source_yemen": "local",
+  "source_metals": "estimated",
+  "exchange_rate": {
+    "usd_to_yer": 1495,
+    "sanaa_buy": 1500,
+    "sanaa_sell": 1510,
+    "aden_buy": 1490,
+    "aden_sell": 1500
+  },
+  "gold": {
+    "ounce_usd": 2345.5,
+    "gram_24k_usd": 75.41,
+    "gram_22k_usd": 69.13,
+    "gram_21k_usd": 65.98,
+    "gram_18k_usd": 56.56,
+    "gram_21k_yer": 98645.0,
+    "gram_18k_yer": 84553.0
+  },
+  "silver": {
+    "ounce_usd": 28.75,
+    "gram_usd": 0.92,
+    "gram_yer": 1382.0
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-06-11T04:27:36.852134",
+  "source": "fallback",
+  "usd_to_yer": 1042,
+  "gold": {
+    "ounce_usd": 2345.5,
+    "gram_24k_usd": 75.41,
+    "gram_21k_usd": 65.98,
+    "gram_21k_yer": 68755.0,
+    "gram_18k_usd": 56.56,
+    "gram_18k_yer": 58933.0
+  },
+  "silver": {
+    "ounce_usd": 28.75,
+    "gram_usd": 0.92,
+    "gram_yer": 963.0
+  }
+}
