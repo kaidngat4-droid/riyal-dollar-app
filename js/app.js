@@ -333,7 +333,8 @@ async function fetchAllData() {
     showLoading(true);
     await Promise.all([
       fetchRates(),
-      fetchMetals()
+      fetchMetals(),
+      fetchLocalRatesFromJSON()  // FIXED: إضافة تحديث الأسعار المحلية من لوحة التحكم
     ]);
     state.lastUpdate = new Date();
     updateLastUpdateTime();
@@ -530,10 +531,16 @@ function updateLocalConverter() {
   if (dom.totalYer) dom.totalYer.textContent = formatNumber(buyTotal, '');
   
   // Trends (simulated)
-  if (dom.buyTrend) dom.buyTrend.textContent = Math.random() > 0.5 ? '▲' : '▼';
-  if (dom.sellTrend) dom.sellTrend.textContent = Math.random() > 0.5 ? '▲' : '▼';
-  if (dom.buyTrend) dom.buyTrend.style.color = dom.buyTrend.textContent === '▲' ? 'var(--success)' : 'var(--danger)';
-  if (dom.sellTrend) dom.sellTrend.style.color = dom.sellTrend.textContent === '▲' ? 'var(--success)' : 'var(--danger)';
+  if (dom.buyTrend) {
+    const isUp = Math.random() > 0.5;
+    dom.buyTrend.textContent = isUp ? '▲' : '▼';
+    dom.buyTrend.style.color = isUp ? 'var(--success)' : 'var(--danger)';
+  }
+  if (dom.sellTrend) {
+    const isUp = Math.random() > 0.5;
+    dom.sellTrend.textContent = isUp ? '▲' : '▼';
+    dom.sellTrend.style.color = isUp ? 'var(--success)' : 'var(--danger)';
+  }
 }
 
 function updateMetalsDisplay() {
@@ -1606,17 +1613,114 @@ window.addEventListener('load', handleLaunchParams);
 
 
 
-// ============ تحميل الأسعار من JSON مباشرة ============
-(async function(){
-    try {
-        const r = await fetch('./api/prices_data.json?t=' + Date.now());
-        const d = await r.json();
-        if(d.regions){
-            CONFIG.LOCAL_RATES.sanaa.USD = d.regions.sanaa.currencies.USD;
-            CONFIG.LOCAL_RATES.sanaa.SAR = d.regions.sanaa.currencies.SAR;
-            CONFIG.LOCAL_RATES.aden.USD = d.regions.aden.currencies.USD;
-            CONFIG.LOCAL_RATES.aden.SAR = d.regions.aden.currencies.SAR;
-            console.log('✅ أسعار محلية من JSON');
+/* ============================================
+   LOCAL RATES FROM JSON - FIXED FUNCTION
+   ============================================ */
+async function fetchLocalRatesFromJSON() {
+  try {
+    // FIXED: استخدام cache-busting لتجنب تخزين Service Worker للملف
+    const cacheBuster = Date.now();
+    const response = await fetch(`./api/prices_data.json?_=${cacheBuster}`, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
+
+    if (!response.ok) {
+      console.warn('[LocalRates] JSON fetch failed, status:', response.status);
+      return;
+    }
+
+    const data = await response.json();
+    console.log('[LocalRates] JSON data received:', data);
+
+    if (!data || !data.regions) {
+      console.warn('[LocalRates] Invalid JSON structure - missing regions');
+      return;
+    }
+
+    let updatedCount = 0;
+
+    // FIXED: تحديث كل المناطق المتاحة في JSON ديناميكياً
+    for (const regionKey in data.regions) {
+      const regionData = data.regions[regionKey];
+      if (!regionData || !regionData.currencies) {
+        console.warn(`[LocalRates] Region "${regionKey}" missing currencies data`);
+        continue;
+      }
+
+      // التأكد من وجود المنطقة في CONFIG
+      if (!CONFIG.LOCAL_RATES[regionKey]) {
+        CONFIG.LOCAL_RATES[regionKey] = {};
+        console.log(`[LocalRates] Created new region: ${regionKey}`);
+      }
+
+      // تحديث كل عملة في المنطقة
+      for (const currencyKey in regionData.currencies) {
+        const currencyData = regionData.currencies[currencyKey];
+
+        // FIXED: التحقق من صحة البيانات (يجب أن تكون {buy, sell})
+        if (currencyData && typeof currencyData === 'object') {
+          if ('buy' in currencyData && 'sell' in currencyData) {
+            const buyVal = parseFloat(currencyData.buy);
+            const sellVal = parseFloat(currencyData.sell);
+
+            if (!isNaN(buyVal) && !isNaN(sellVal) && buyVal > 0 && sellVal > 0) {
+              CONFIG.LOCAL_RATES[regionKey][currencyKey] = {
+                buy: buyVal,
+                sell: sellVal
+              };
+              updatedCount++;
+              console.log(`[LocalRates] ✓ Updated ${regionKey}.${currencyKey}: buy=${buyVal}, sell=${sellVal}`);
+            } else {
+              console.warn(`[LocalRates] Invalid numeric values for ${regionKey}.${currencyKey}:`, currencyData);
+            }
+          } else {
+            console.warn(`[LocalRates] Missing buy/sell keys for ${regionKey}.${currencyKey}:`, currencyData);
+          }
+        } else {
+          console.warn(`[LocalRates] Invalid data type for ${regionKey}.${currencyKey}:`, typeof currencyData);
         }
-    } catch(e){}
+      }
+    }
+
+    if (updatedCount > 0) {
+      console.log(`[LocalRates] ✅ Successfully updated ${updatedCount} rate entries from control panel`);
+      // FIXED: تحديث العرض مباشرة بعد تحديث البيانات
+      updateLocalConverter();
+      // FIXED: تحديث آخر وقت تحديث
+      if (dom.resultTime) {
+        const time = new Date().toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
+        dom.resultTime.textContent = `آخر تحديث: ${time} (من لوحة التحكم)`;
+      }
+      showToast(`تم تحديث ${updatedCount} سعر من لوحة التحكم`, 'success');
+    } else {
+      console.warn('[LocalRates] No valid rates found in JSON - keeping defaults');
+    }
+
+  } catch (err) {
+    console.error('[LocalRates] Error fetching local rates:', err.message);
+    // لا نعرض toast هنا لتجنب الإزعاج - الأسعار الافتراضية تعمل
+  }
+}
+
+/* ============================================
+   LOCAL RATES AUTO-REFRESH FROM CONTROL PANEL
+   ============================================ */
+async function refreshLocalRatesFromControlPanel() {
+  console.log('[ControlPanel] Refreshing local rates from control panel...');
+  await fetchLocalRatesFromJSON();
+}
+
+// FIXED: استدعاء فوري عند التحميل + كل 30 ثانية للأسعار المحلية
+(async function initLocalRates() {
+  // التحميل الأولي
+  await fetchLocalRatesFromJSON();
+
+  // تحديث دوري كل 30 ثانية للأسعار المحلية (أسرع من الأسعار العالمية)
+  setInterval(fetchLocalRatesFromJSON, 30000);
+
+  console.log('[LocalRates] Auto-refresh initialized (every 30s)');
 })();
