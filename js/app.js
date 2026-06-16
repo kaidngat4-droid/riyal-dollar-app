@@ -1792,3 +1792,32 @@ async function fixGoldDisplay() {
 setTimeout(fixGoldDisplay, 500);
 setInterval(fixGoldDisplay, 30000);
 document.getElementById('local-region')?.addEventListener('change', fixGoldDisplay);
+
+// ============ تحديث فوري للذهب المحلي عند التحميل ============
+(async function updateGoldNow() {
+    try {
+        const r = await fetch('./api/prices_data.json?t=' + Date.now());
+        if (!r.ok) return;
+        const d = await r.json();
+        
+        if (d.regions && d.regions.sanaa && d.regions.sanaa.gold) {
+            const g = d.regions.sanaa.gold;
+            
+            // تحديث عرض الذهب في الصفحة
+            const el21 = document.getElementById('gold-gram-21-yer');
+            const el22 = document.getElementById('gold-gram-22');
+            const el24 = document.getElementById('gold-gram-24');
+            const el18 = document.getElementById('gold-gram-18');
+            
+            if (el21 && g['21k']) el21.textContent = Number(g['21k'].buy).toLocaleString() + ' ر.ي';
+            if (el22 && g['22k']) el22.textContent = '$' + (Number(g['22k'].buy) / (d.regions.sanaa.currencies.USD.buy || 533)).toFixed(2);
+            if (el24 && g['24k']) el24.textContent = '$' + (Number(g['24k'].buy) / (d.regions.sanaa.currencies.USD.buy || 533)).toFixed(2);
+            if (el18 && g['18k']) {
+                const usd = Number(g['18k']?.buy || g['21k'].buy * 0.857) / (d.regions.sanaa.currencies.USD.buy || 533);
+                if (el18) el18.textContent = '$' + usd.toFixed(2);
+            }
+            
+            console.log('✅ ذهب صنعاء محدث: 21k=' + g['21k'].buy + ' ر.ي');
+        }
+    } catch(e) {}
+})();
