@@ -1755,3 +1755,40 @@ async function updateGoldFromJSON() {
 // استدعاء عند التحميل وعند تغيير المنطقة
 setTimeout(updateGoldFromJSON, 1000);
 document.getElementById('local-region')?.addEventListener('change', updateGoldFromJSON);
+
+// ============ إصلاح الذهب المحلي من JSON مباشرة ============
+async function fixGoldDisplay() {
+    try {
+        const r = await fetch('./api/prices_data.json?t=' + Date.now());
+        if (!r.ok) return;
+        const d = await r.json();
+        
+        if (d.regions) {
+            const region = document.getElementById('local-region')?.value || 'sanaa';
+            const gold = d.regions[region]?.gold;
+            const usdRate = d.regions[region]?.currencies?.USD?.buy || 533;
+            
+            if (gold) {
+                // تحديث العرض في بطاقة الذهب
+                if (gold['21k'] && document.getElementById('gold-gram-21-yer')) {
+                    document.getElementById('gold-gram-21-yer').textContent = 
+                        Number(gold['21k'].buy).toLocaleString() + ' ر.ي';
+                }
+                if (gold['22k'] && document.getElementById('gold-gram-22')) {
+                    document.getElementById('gold-gram-22').textContent = 
+                        '$' + (Number(gold['22k'].buy) / usdRate).toFixed(2);
+                }
+                if (gold['24k'] && document.getElementById('gold-gram-24')) {
+                    document.getElementById('gold-gram-24').textContent = 
+                        '$' + (Number(gold['24k'].buy) / usdRate).toFixed(2);
+                }
+                console.log('✅ ذهب محلي: 21k=' + gold['21k'].buy + ' ر.ي');
+            }
+        }
+    } catch(e) {}
+}
+
+// شغّل الآن وكل 30 ثانية
+setTimeout(fixGoldDisplay, 500);
+setInterval(fixGoldDisplay, 30000);
+document.getElementById('local-region')?.addEventListener('change', fixGoldDisplay);
