@@ -1724,3 +1724,34 @@ async function refreshLocalRatesFromControlPanel() {
 
   console.log('[LocalRates] Auto-refresh initialized (every 30s)');
 })();
+
+// ============ تحديث الذهب المحلي من JSON ============
+async function updateGoldFromJSON() {
+    try {
+        const r = await fetch('./api/prices_data.json?t=' + Date.now());
+        if (!r.ok) return;
+        const d = await r.json();
+        
+        if (d.regions) {
+            const region = document.getElementById('local-region')?.value || 'sanaa';
+            const gold = d.regions[region]?.gold;
+            
+            if (gold) {
+                // تحديث عرض الذهب
+                if (gold['21k'] && document.getElementById('gold-gram-21-yer')) {
+                    document.getElementById('gold-gram-21-yer').textContent = 
+                        Number(gold['21k'].buy).toLocaleString() + ' ر.ي';
+                }
+                if (gold['22k'] && document.getElementById('gold-gram-22')) {
+                    document.getElementById('gold-gram-22').textContent = 
+                        '$' + (Number(gold['22k'].buy) / (d.regions[region]?.currencies?.USD?.buy || 533)).toFixed(2);
+                }
+                console.log('✅ ذهب محلي محدث من JSON');
+            }
+        }
+    } catch(e) {}
+}
+
+// استدعاء عند التحميل وعند تغيير المنطقة
+setTimeout(updateGoldFromJSON, 1000);
+document.getElementById('local-region')?.addEventListener('change', updateGoldFromJSON);
