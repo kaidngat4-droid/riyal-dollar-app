@@ -1605,3 +1605,18 @@ window.addEventListener('load', handleLaunchParams);
 
 
 
+
+// ============ تحميل الأسعار من JSON مباشرة ============
+(async function(){
+    try {
+        const r = await fetch('./api/prices_data.json?t=' + Date.now());
+        const d = await r.json();
+        if(d.regions){
+            CONFIG.LOCAL_RATES.sanaa.USD = d.regions.sanaa.currencies.USD;
+            CONFIG.LOCAL_RATES.sanaa.SAR = d.regions.sanaa.currencies.SAR;
+            CONFIG.LOCAL_RATES.aden.USD = d.regions.aden.currencies.USD;
+            CONFIG.LOCAL_RATES.aden.SAR = d.regions.aden.currencies.SAR;
+            console.log('✅ أسعار محلية من JSON');
+        }
+    } catch(e){}
+})();
