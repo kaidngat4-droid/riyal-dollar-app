@@ -2,7 +2,7 @@
   "metadata": {
     "app_name": "ريال ودولار",
     "version": "1.1.0",
-    "last_updated": "2026-06-16T13:30:00Z",
+    "last_updated": "2026-06-17T01:46:00Z",
     "base_currency": "YER",
     "data_source": "manual_update",
     "updated_by": "admin_panel"
@@ -12,11 +12,11 @@
       "name": "صنعاء",
       "currencies": {
         "USD": {"buy": 533, "sell": 535},
-        "SAR": {"buy": 139.7, "sell": 140.1},
-        "EUR": {"buy": 550, "sell": 580},
-        "GBP": {"buy": 658, "sell": 675},
+        "SAR": {"buy": 140, "sell": 141},
+        "EUR": {"buy": 620, "sell": 625},
+        "GBP": {"buy": 730, "sell": 738},
         "AED": {"buy": 142.5, "sell": 145},
-        "KWD": {"buy": 399, "sell": 401}
+        "KWD": {"buy": 1720, "sell": 1735}
       },
       "gold": {
         "21k": {"buy": 63203, "sell": 64708, "unit": "YER/gram"},
@@ -30,22 +30,22 @@
       "currencies": {
         "USD": {"buy": 1550, "sell": 1558},
         "SAR": {"buy": 409, "sell": 410},
-        "EUR": {"buy": 1469, "sell": 1478},
-        "GBP": {"buy": 1615, "sell": 1624},
-        "AED": {"buy": 339, "sell": 341},
-        "KWD": {"buy": 912, "sell": 917}
+        "EUR": {"buy": 1790, "sell": 1805},
+        "GBP": {"buy": 2110, "sell": 2130},
+        "AED": {"buy": 420, "sell": 423},
+        "KWD": {"buy": 5050, "sell": 5080}
       },
       "gold": {
         "21k": {"buy": 183799, "sell": 188440, "unit": "YER/gram"},
-        "22k": {"buy": 208055, "sell": 213362, "unit": "YER/gram"},
-        "24k": {"buy": 210056, "sell": 215362, "unit": "YER/gram"}
+        "22k": {"buy": 192000, "sell": 197000, "unit": "YER/gram"},
+        "24k": {"buy": 209000, "sell": 214000, "unit": "YER/gram"}
       },
       "silver": {"buy": 9.5, "sell": 9.8, "unit": "USD/oz"}
     }
   },
   "currencies": [
     {"code": "USD", "name_ar": "دولار أمريكي", "flag": "🇺🇸", "price_yer": 1041, "sanaa_buy": 533, "sanaa_sell": 535, "aden_buy": 1550, "aden_sell": 1558, "trend": "stable"},
-    {"code": "SAR", "name_ar": "ريال سعودي", "flag": "🇸🇦", "price_yer": 274, "sanaa_buy": 140, "sanaa_sell": 140, "aden_buy": 409, "aden_sell": 410, "trend": "stable"}
+    {"code": "SAR", "name_ar": "ريال سعودي", "flag": "🇸🇦", "price_yer": 274, "sanaa_buy": 140, "sanaa_sell": 141, "aden_buy": 409, "aden_sell": 410, "trend": "stable"}
   ],
   "gold": {"ounce": {"price_usd": 2344, "trend": "stable"}},
   "silver": {"code": "XAG", "name_ar": "الفضة", "icon": "🥈", "price_usd": 28.8, "unit": "oz", "status": "live"},
