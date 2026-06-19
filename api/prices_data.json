@@ -2,7 +2,7 @@
   "metadata": {
     "app_name": "ريال ودولار",
     "version": "1.1.0",
-    "last_updated": "2026-06-19T16:57:08.382Z",
+    "last_updated": "2026-06-19T23:02:02.434Z",
     "base_currency": "YER",
     "data_source": "manual_update",
     "updated_by": "admin_panel"
@@ -89,8 +89,8 @@
       },
       "gold": {
         "21k": {
-          "buy": 183799,
-          "sell": 188440,
+          "buy": 184799,
+          "sell": 189440,
           "unit": "YER/gram"
         },
         "22k": {
