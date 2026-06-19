@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الأسعار المحلية - ريال ودولار</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: #0f172a; 
+            color: #e2e8f0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { color: #f59e0b; text-align: center; margin-bottom: 30px; }
+        h2 { color: #3b82f6; margin: 25px 0 15px; border-bottom: 2px solid #1e293b; padding-bottom: 10px; }
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+        .row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .col { flex: 1; min-width: 200px; }
+        label { display: block; color: #94a3b8; margin-bottom: 5px; font-size: 14px; }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+        .price-display {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .price-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f59e0b;
+        }
+        .price-label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .status.success { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; }
+        .status.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; }
+        .status.warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #f59e0b; }
+        .btn {
+            background: #f59e0b;
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn:hover { background: #fbbf24; }
+        .gold-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
+        .gold-card {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #475569;
+        }
+        .gold-karat { color: #fbbf24; font-size: 18px; font-weight: bold; }
+        .gold-price { color: #10b981; font-size: 20px; margin-top: 8px; }
+        .console-output {
+            background: #020617;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #94a3b8;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+        .log-entry { margin: 2px 0; }
+        .log-success { color: #10b981; }
+        .log-error { color: #ef4444; }
+        .log-info { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 اختبار الأسعار المحلية</h1>
+
+        <!-- Test 1: JSON Fetch -->
+        <div class="card">
+            <h2>📡 اختبار الاتصال بـ prices_data.json</h2>
+            <button class="btn" onclick="testFetch()">🔍 اختبار الاتصال</button>
+            <div id="fetch-status" class="status" style="display:none;"></div>
+            <div id="fetch-data" class="console-output" style="display:none;"></div>
+        </div>
+
+        <!-- Test 2: Currency Converter -->
+        <div class="card">
+            <h2>💱 محول العملات المحلية</h2>
+            <div class="row">
+                <div class="col">
+                    <label>المنطقة</label>
+                    <select id="test-region" onchange="updateTestPrices()">
+                        <option value="sanaa">صنعاء</option>
+                        <option value="aden">عدن</option>
+                        <option value="taiz">تعز</option>
+                        <option value="hodeidah">الحديدة</option>
+                        <option value="ibb">إب</option>
+                        <option value="marib">مأرب</option>
+                        <option value="hadramout">حضرموت</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>العملة</label>
+                    <select id="test-currency" onchange="updateTestPrices()">
+                        <option value="USD">دولار أمريكي 🇺🇸</option>
+                        <option value="SAR">ريال سعودي 🇸🇦</option>
+                        <option value="EUR">يورو 🇪🇺</option>
+                        <option value="GBP">جنيه إسترليني 🇬🇧</option>
+                        <option value="AED">درهم إماراتي 🇦🇪</option>
+                        <option value="KWD">دينار كويتي 🇰🇼</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>المبلغ</label>
+                    <input type="number" id="test-amount" value="100" oninput="updateTestPrices()">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="price-display">
+                        <div class="price-label">سعر الشراء</div>
+                        <div class="price-value" id="test-buy-price">--</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="price-display">
+                        <div class="price-label">سعر البيع</div>
+                        <div class="price-value" id="test-sell-price">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 3: Gold Prices -->
+        <div class="card">
+            <h2>🥇 أسعار الذهب المحلية</h2>
+            <div class="row">
+                <div class="col">
+                    <label>المنطقة</label>
+                    <select id="test-gold-region" onchange="updateTestGold()">
+                        <option value="sanaa">صنعاء</option>
+                        <option value="aden">عدن</option>
+                    </select>
+                </div>
+            </div>
+            <div class="gold-grid">
+                <div class="gold-card">
+                    <div class="gold-karat">عيار 24</div>
+                    <div class="gold-price" id="test-gold-24">--</div>
+                </div>
+                <div class="gold-card">
+                    <div class="gold-karat">عيار 22</div>
+                    <div class="gold-price" id="test-gold-22">--</div>
+                </div>
+                <div class="gold-card">
+                    <div class="gold-karat">عيار 21</div>
+                    <div class="gold-price" id="test-gold-21">--</div>
+                </div>
+                <div class="gold-card">
+                    <div class="gold-karat">عيار 18</div>
+                    <div class="gold-price" id="test-gold-18">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 4: Silver -->
+        <div class="card">
+            <h2>🥈 أسعار الفضة المحلية</h2>
+            <div class="row">
+                <div class="col">
+                    <div class="price-display">
+                        <div class="price-label">سعر الشراء</div>
+                        <div class="price-value" id="test-silver-buy">--</div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="price-display">
+                        <div class="price-label">سعر البيع</div>
+                        <div class="price-value" id="test-silver-sell">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Console Log -->
+        <div class="card">
+            <h2>🖥️ سجل العمليات</h2>
+            <button class="btn" onclick="clearLog()">🗑️ مسح السجل</button>
+            <div id="console-log" class="console-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // Logger
+        function log(message, type = 'info') {
+            const consoleEl = document.getElementById('console-log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString('ar-YE')}] ${message}`;
+            consoleEl.appendChild(entry);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('console-log').innerHTML = '';
+        }
+
+        // Store fetched data
+        let fetchedData = null;
+        let configData = {
+            LOCAL_RATES: {}
+        };
+
+        // Test fetch
+        async function testFetch() {
+            log('بدء اختبار الاتصال...', 'info');
+            const statusEl = document.getElementById('fetch-status');
+            const dataEl = document.getElementById('fetch-data');
+
+            const paths = [
+                './api/prices_data.json',
+                '/api/prices_data.json',
+                'api/prices_data.json',
+                window.location.origin + '/api/prices_data.json'
+            ];
+
+            for (const path of paths) {
+                try {
+                    log(`محاولة: ${path}`, 'info');
+                    const response = await fetch(path + '?_=' + Date.now(), {
+                        headers: { 'Cache-Control': 'no-cache' }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        fetchedData = data;
+
+                        // Update config
+                        if (data.regions) {
+                            for (const [regionKey, regionData] of Object.entries(data.regions)) {
+                                configData.LOCAL_RATES[regionKey] = {};
+
+                                if (regionData.currencies) {
+                                    for (const [curr, rates] of Object.entries(regionData.currencies)) {
+                                        configData.LOCAL_RATES[regionKey][curr] = {
+                                            buy: parseFloat(rates.buy),
+                                            sell: parseFloat(rates.sell)
+                                        };
+                                    }
+                                }
+
+                                if (regionData.gold) {
+                                    configData.LOCAL_RATES[regionKey].gold = regionData.gold;
+                                }
+                                if (regionData.silver) {
+                                    configData.LOCAL_RATES[regionKey].silver = regionData.silver;
+                                }
+                            }
+                        }
+
+                        statusEl.className = 'status success';
+                        statusEl.textContent = `✅ تم الاتصال بنجاح! (${path})`;
+                        statusEl.style.display = 'block';
+
+                        dataEl.textContent = JSON.stringify(data, null, 2);
+                        dataEl.style.display = 'block';
+
+                        log(`✅ نجح الاتصال بـ ${path}`, 'success');
+                        log(`تم تحميل ${Object.keys(data.regions || {}).length} منطقة`, 'success');
+
+                        // Auto-update displays
+                        updateTestPrices();
+                        updateTestGold();
+                        updateTestSilver();
+
+                        return;
+                    } else {
+                        log(`❌ فشل: ${path} (HTTP ${response.status})`, 'error');
+                    }
+                } catch (err) {
+                    log(`❌ خطأ: ${path} - ${err.message}`, 'error');
+                }
+            }
+
+            statusEl.className = 'status error';
+            statusEl.textContent = '❌ فشل الاتصال بجميع المسارات!';
+            statusEl.style.display = 'block';
+        }
+
+        // Update test prices
+        function updateTestPrices() {
+            const region = document.getElementById('test-region').value;
+            const currency = document.getElementById('test-currency').value;
+            const amount = parseFloat(document.getElementById('test-amount').value) || 0;
+
+            log(`تحديث: ${region} / ${currency} / ${amount}`, 'info');
+
+            const rates = configData.LOCAL_RATES[region]?.[currency];
+
+            if (rates) {
+                document.getElementById('test-buy-price').textContent = 
+                    (amount * rates.buy).toLocaleString('ar-YE') + ' ر.ي';
+                document.getElementById('test-sell-price').textContent = 
+                    (amount * rates.sell).toLocaleString('ar-YE') + ' ر.ي';
+                log(`✅ تم تحديث الأسعار: شراء=${rates.buy}, بيع=${rates.sell}`, 'success');
+            } else {
+                document.getElementById('test-buy-price').textContent = '--';
+                document.getElementById('test-sell-price').textContent = '--';
+                log(`⚠️ لا توجد أسعار لـ ${currency} في ${region}`, 'error');
+
+                // Show available
+                const available = configData.LOCAL_RATES[region] ? 
+                    Object.keys(configData.LOCAL_RATES[region]).filter(k => k !== 'gold' && k !== 'silver') : [];
+                log(`العملات المتاحة: ${available.join(', ') || 'لا شيء'}`, 'info');
+            }
+        }
+
+        // Update test gold
+        function updateTestGold() {
+            const region = document.getElementById('test-gold-region').value;
+            const gold = configData.LOCAL_RATES[region]?.gold;
+
+            log(`تحديث الذهب: ${region}`, 'info');
+
+            if (gold) {
+                for (const [karat, data] of Object.entries(gold)) {
+                    const el = document.getElementById(`test-gold-${karat.replace('k', '')}`);
+                    if (el && data.buy) {
+                        el.textContent = Number(data.buy).toLocaleString('ar-YE') + ' ر.ي';
+                    }
+                }
+                log(`✅ تم تحديث أسعار الذهب`, 'success');
+            } else {
+                ['24', '22', '21', '18'].forEach(k => {
+                    document.getElementById(`test-gold-${k}`).textContent = '--';
+                });
+                log(`⚠️ لا توجد بيانات ذهب لـ ${region}`, 'error');
+            }
+        }
+
+        // Update test silver
+        function updateTestSilver() {
+            const region = document.getElementById('test-gold-region').value;
+            const silver = configData.LOCAL_RATES[region]?.silver;
+
+            if (silver) {
+                document.getElementById('test-silver-buy').textContent = 
+                    Number(silver.buy).toLocaleString('ar-YE') + ' $';
+                document.getElementById('test-silver-sell').textContent = 
+                    Number(silver.sell).toLocaleString('ar-YE') + ' $';
+                log(`✅ تم تحديث أسعار الفضة`, 'success');
+            } else {
+                document.getElementById('test-silver-buy').textContent = '--';
+                document.getElementById('test-silver-sell').textContent = '--';
+            }
+        }
+
+        // Auto-fetch on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🚀 صفحة الاختبار جاهزة', 'info');
+            log('اضغط على "اختبار الاتصال" لبدء الاختبار', 'info');
+        });
+    </script>
+</body>
+</html>
