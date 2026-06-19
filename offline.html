@@ -2,28 +2,621 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0f172a">
     <title>غير متصل - ريال ودولار</title>
     <style>
+        :root {
+            --primary: #f59e0b;
+            --primary-light: #fbbf24;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.9);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(148, 163, 184, 0.12);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 20px; }
-        .offline-container { max-width: 400px; }
-        .offline-icon { font-size: 80px; margin-bottom: 20px; }
-        .offline-title { font-size: 24px; margin-bottom: 10px; color: #f59e0b; }
-        .offline-text { font-size: 16px; color: #94a3b8; margin-bottom: 30px; line-height: 1.6; }
-        .retry-btn { background: #f59e0b; color: #0f172a; border: none; padding: 12px 30px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .retry-btn:hover { opacity: 0.9; }
-        .cached-info { margin-top: 20px; padding: 15px; background: rgba(245,158,11,0.1); border-radius: 8px; font-size: 14px; color: #fbbf24; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, 'Cairo', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .offline-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .offline-header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.95); }
+        }
+
+        .offline-title {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .offline-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: var(--bg-primary);
+            border: none;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Cached Data Section */
+        .cached-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .cached-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .cached-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .last-update {
+            font-size: 13px;
+            color: var(--text-muted);
+            background: rgba(245, 158, 11, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* Currency Cards */
+        .currency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .currency-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .currency-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .currency-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .currency-flag {
+            font-size: 24px;
+        }
+
+        .currency-name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .currency-code {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .currency-prices {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .price-label {
+            color: var(--text-muted);
+        }
+
+        .price-value {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .price-buy { color: var(--success); }
+        .price-sell { color: var(--danger); }
+
+        /* Gold Section */
+        .gold-section {
+            margin-top: 20px;
+        }
+
+        .gold-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .gold-grid { grid-template-columns: 1fr; }
+        }
+
+        .gold-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .gold-karat {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin-bottom: 8px;
+        }
+
+        .gold-price {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Footer */
+        .offline-footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .offline-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Loading */
+        .loading-shimmer {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(148,163,184,0.1) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+            height: 20px;
+            margin: 8px 0;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
     </style>
 </head>
 <body>
     <div class="offline-container">
-        <div class="offline-icon">📡</div>
-        <h1 class="offline-title">أنت غير متصل بالإنترنت</h1>
-        <p class="offline-text">لا يمكن تحميل الصفحة حالياً. بعض البيانات المحفوظة قد تكون متاحة للعرض.</p>
-        <button class="retry-btn" onclick="location.reload()">إعادة المحاولة</button>
-        <div class="cached-info">💡 تلميح: يمكنك عرض البيانات المحفوظة سابقاً</div>
+        <!-- Header -->
+        <div class="offline-header">
+            <div class="offline-icon">📡</div>
+            <h1 class="offline-title">أنت غير متصل بالإنترنت</h1>
+            <p class="offline-text">
+                لا يمكن تحديث البيانات حالياً. يتم عرض آخر الأسعار المتاحة من ذاكرة التخزين المحلية.
+            </p>
+            <button class="retry-btn" onclick="location.reload()">
+                <span>🔄</span>
+                <span>إعادة المحاولة</span>
+            </button>
+        </div>
+
+        <!-- Status -->
+        <div class="status-bar">
+            <span class="status-dot"></span>
+            <span>📦 عرض البيانات المحفوظة محلياً</span>
+        </div>
+
+        <!-- Cached Currencies -->
+        <div class="cached-section">
+            <div class="cached-header">
+                <h2 class="cached-title">
+                    <span>💱</span>
+                    <span>أسعار العملات المحفوظة</span>
+                </h2>
+                <span class="last-update" id="last-update">جاري التحميل...</span>
+            </div>
+            <div class="currency-grid" id="currency-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>لا توجد بيانات محفوظة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cached Gold -->
+        <div class="cached-section">
+            <div class="cached-header">
+                <h2 class="cached-title">
+                    <span>🥇</span>
+                    <span>أسعار الذهب المحفوظة</span>
+                </h2>
+            </div>
+            <div class="gold-grid" id="gold-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>لا توجد بيانات محفوظة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="offline-footer">
+            <p>💡 تلميح: البيانات تُحفظ تلقائياً عند التصفح المتصل</p>
+            <p style="margin-top: 8px;">
+                <a href="index.html">← العودة للصفحة الرئيسية</a>
+            </p>
+        </div>
     </div>
+
+    <script>
+        // ============================================
+        // OFFLINE PAGE - Load data from IndexedDB
+        // ============================================
+
+        class OfflineDataLoader {
+            constructor() {
+                this.dbName = 'RiyalDollarDB';
+                this.dbVersion = 1;
+                this.db = null;
+                this.init();
+            }
+
+            async init() {
+                try {
+                    await this.initDB();
+                    await this.loadCachedData();
+                } catch (err) {
+                    console.error('[Offline] Error loading data:', err);
+                    this.showFallbackData();
+                }
+            }
+
+            async initDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(this.dbName, this.dbVersion);
+
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => {
+                        this.db = request.result;
+                        resolve(this.db);
+                    };
+
+                    // If DB doesn't exist yet, show fallback
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('priceHistory')) {
+                            db.createObjectStore('priceHistory', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+                });
+            }
+
+            async loadCachedData() {
+                // Get last snapshot for each currency/region
+                const currencies = ['USD', 'SAR', 'EUR', 'AED', 'GBP', 'KWD'];
+                const regions = ['sanaa', 'aden', 'taiz', 'hodeidah', 'ibb', 'marib', 'hadramout'];
+
+                const latestData = {};
+                let lastUpdateTime = null;
+
+                for (const currency of currencies) {
+                    for (const region of regions) {
+                        const records = await this.getLatestRecords(currency, region, 1);
+                        if (records.length > 0) {
+                            if (!latestData[currency]) latestData[currency] = {};
+                            latestData[currency][region] = records[0];
+
+                            if (!lastUpdateTime || records[0].timestamp > lastUpdateTime) {
+                                lastUpdateTime = records[0].timestamp;
+                            }
+                        }
+                    }
+                }
+
+                // Update UI
+                if (lastUpdateTime) {
+                    const date = new Date(lastUpdateTime);
+                    document.getElementById('last-update').textContent = 
+                        'آخر تحديث: ' + date.toLocaleString('ar-YE');
+                }
+
+                this.renderCurrencies(latestData);
+                this.renderGold(latestData);
+            }
+
+            async getLatestRecords(currency, region, limit = 1) {
+                return new Promise((resolve, reject) => {
+                    if (!this.db) {
+                        resolve([]);
+                        return;
+                    }
+
+                    const transaction = this.db.transaction(['priceHistory'], 'readonly');
+                    const store = transaction.objectStore('priceHistory');
+                    const request = store.openCursor(null, 'prev');
+
+                    const results = [];
+                    request.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        if (cursor && results.length < limit) {
+                            const record = cursor.value;
+                            if (record.currency === currency && record.region === region) {
+                                results.push(record);
+                            }
+                            cursor.continue();
+                        } else {
+                            resolve(results);
+                        }
+                    };
+                    request.onerror = () => reject(request.error);
+                });
+            }
+
+            renderCurrencies(data) {
+                const grid = document.getElementById('currency-grid');
+
+                // Aggregate by currency (show best prices across regions)
+                const currencyCards = [];
+
+                for (const [currency, regions] of Object.entries(data)) {
+                    let bestBuy = Infinity;
+                    let bestSell = 0;
+                    let bestRegion = '';
+
+                    for (const [region, record] of Object.entries(regions)) {
+                        if (record.buyPrice < bestBuy) {
+                            bestBuy = record.buyPrice;
+                            bestSell = record.sellPrice;
+                            bestRegion = region;
+                        }
+                    }
+
+                    if (bestBuy !== Infinity) {
+                        currencyCards.push({ currency, bestBuy, bestSell, bestRegion });
+                    }
+                }
+
+                if (currencyCards.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-icon">📭</div>
+                            <p>لا توجد بيانات محفوظة</p>
+                            <p style="font-size: 13px; margin-top: 8px;">تصفح التطبيق أولاً أثناء الاتصال بالإنترنت</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const flags = {
+                    USD: '🇺🇸', SAR: '🇸🇦', EUR: '🇪🇺', AED: '🇦🇪',
+                    GBP: '🇬🇧', KWD: '🇰🇼', QAR: '🇶🇦', OMR: '🇴🇲'
+                };
+
+                const names = {
+                    USD: 'دولار أمريكي', SAR: 'ريال سعودي', EUR: 'يورو',
+                    AED: 'درهم إماراتي', GBP: 'جنيه إسترليني', KWD: 'دينار كويتي'
+                };
+
+                const regionNames = {
+                    sanaa: 'صنعاء', aden: 'عدن', taiz: 'تعز', hodeidah: 'الحديدة',
+                    ibb: 'إب', marib: 'مأرب', hadramout: 'حضرموت'
+                };
+
+                grid.innerHTML = currencyCards.map(c => `
+                    <div class="currency-card">
+                        <div class="currency-header">
+                            <span class="currency-flag">${flags[c.currency] || '💱'}</span>
+                            <div>
+                                <div class="currency-name">${names[c.currency] || c.currency}</div>
+                                <div class="currency-code">${c.currency} · ${regionNames[c.bestRegion] || c.bestRegion}</div>
+                            </div>
+                        </div>
+                        <div class="currency-prices">
+                            <div class="price-row">
+                                <span class="price-label">شراء</span>
+                                <span class="price-value price-buy">${c.bestBuy.toLocaleString('ar-YE')} ر.ي</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="price-label">بيع</span>
+                                <span class="price-value price-sell">${c.bestSell.toLocaleString('ar-YE')} ر.ي</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderGold(data) {
+                const grid = document.getElementById('gold-grid');
+
+                // Check if we have gold data
+                const goldData = data['GOLD21'] || data['GOLD24'];
+                if (!goldData) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-icon">📭</div>
+                            <p>لا توجد بيانات ذهب محفوظة</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Get gold prices from sanaa as reference
+                const sanaaGold = goldData['sanaa'];
+                if (!sanaaGold) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-icon">📭</div>
+                            <p>لا توجد بيانات متاحة</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Calculate gram prices from ounce price
+                const ouncePrice = sanaaGold.buyPrice || sanaaGold.midPrice || 72000;
+                const gram24 = ouncePrice / 31.1035;
+
+                grid.innerHTML = `
+                    <div class="gold-card">
+                        <div class="gold-karat">🥇 عيار 24</div>
+                        <div class="gold-price">${Math.round(gram24).toLocaleString('ar-YE')} ر.ي</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">للجرام</div>
+                    </div>
+                    <div class="gold-card">
+                        <div class="gold-karat">🥇 عيار 21</div>
+                        <div class="gold-price">${Math.round(gram24 * 0.875).toLocaleString('ar-YE')} ر.ي</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">للجرام</div>
+                    </div>
+                    <div class="gold-card">
+                        <div class="gold-karat">🥇 عيار 18</div>
+                        <div class="gold-price">${Math.round(gram24 * 0.750).toLocaleString('ar-YE')} ر.ي</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">للجرام</div>
+                    </div>
+                `;
+            }
+
+            showFallbackData() {
+                // If IndexedDB fails, try localStorage
+                const cached = localStorage.getItem('lastRatesSnapshot');
+                if (cached) {
+                    try {
+                        const data = JSON.parse(cached);
+                        // Render from localStorage
+                        this.renderFromLocalStorage(data);
+                    } catch (e) {
+                        console.warn('[Offline] No fallback data available');
+                    }
+                }
+            }
+
+            renderFromLocalStorage(data) {
+                // Simple rendering from localStorage backup
+                const grid = document.getElementById('currency-grid');
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">💾</div>
+                        <p>تم العثور على بيانات احتياطية</p>
+                        <p style="font-size: 13px; margin-top: 8px;">جاري التحميل...</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        const offlineLoader = new OfflineDataLoader();
+
+        // Listen for online event
+        window.addEventListener('online', () => {
+            window.location.href = 'index.html';
+        });
+    </script>
 </body>
 </html>
