@@ -11,48 +11,176 @@
     "sanaa": {
       "name": "صنعاء",
       "currencies": {
-        "USD": {"buy": 533, "sell": 535},
-        "SAR": {"buy": 140, "sell": 141},
-        "EUR": {"buy": 620, "sell": 625},
-        "GBP": {"buy": 730, "sell": 738},
-        "AED": {"buy": 142.5, "sell": 145},
-        "KWD": {"buy": 1720, "sell": 1735}
+        "USD": {
+          "buy": 533,
+          "sell": 535
+        },
+        "SAR": {
+          "buy": 140,
+          "sell": 141
+        },
+        "EUR": {
+          "buy": 620,
+          "sell": 625
+        },
+        "GBP": {
+          "buy": 730,
+          "sell": 738
+        },
+        "AED": {
+          "buy": 142.5,
+          "sell": 145
+        },
+        "KWD": {
+          "buy": 1720,
+          "sell": 1735
+        }
       },
       "gold": {
-        "21k": {"buy": 63203, "sell": 64708, "unit": "YER/gram"},
-        "22k": {"buy": 66000, "sell": 67500, "unit": "YER/gram"},
-        "24k": {"buy": 72000, "sell": 73500, "unit": "YER/gram"}
+        "21k": {
+          "buy": 63203,
+          "sell": 64708,
+          "unit": "YER/gram"
+        },
+        "22k": {
+          "buy": 66000,
+          "sell": 67500,
+          "unit": "YER/gram"
+        },
+        "24k": {
+          "buy": 72000,
+          "sell": 73500,
+          "unit": "YER/gram"
+        }
       },
-      "silver": {"buy": 28.5, "sell": 29, "unit": "USD/oz"}
+      "silver": {
+        "buy": 28.5,
+        "sell": 29,
+        "unit": "USD/oz"
+      }
     },
     "aden": {
       "name": "عدن",
       "currencies": {
-        "USD": {"buy": 1550, "sell": 1558},
-        "SAR": {"buy": 409, "sell": 410},
-        "EUR": {"buy": 1790, "sell": 1805},
-        "GBP": {"buy": 2110, "sell": 2130},
-        "AED": {"buy": 420, "sell": 423},
-        "KWD": {"buy": 5050, "sell": 5080}
+        "USD": {
+          "buy": 1550,
+          "sell": 1558
+        },
+        "SAR": {
+          "buy": 409,
+          "sell": 410
+        },
+        "EUR": {
+          "buy": 1790,
+          "sell": 1805
+        },
+        "GBP": {
+          "buy": 2110,
+          "sell": 2130
+        },
+        "AED": {
+          "buy": 420,
+          "sell": 423
+        },
+        "KWD": {
+          "buy": 5050,
+          "sell": 5080
+        }
       },
       "gold": {
-        "21k": {"buy": 183799, "sell": 188440, "unit": "YER/gram"},
-        "22k": {"buy": 192000, "sell": 197000, "unit": "YER/gram"},
-        "24k": {"buy": 209000, "sell": 214000, "unit": "YER/gram"}
+        "21k": {
+          "buy": 183799,
+          "sell": 188440,
+          "unit": "YER/gram"
+        },
+        "22k": {
+          "buy": 192000,
+          "sell": 197000,
+          "unit": "YER/gram"
+        },
+        "24k": {
+          "buy": 209000,
+          "sell": 214000,
+          "unit": "YER/gram"
+        }
       },
-      "silver": {"buy": 9.5, "sell": 9.8, "unit": "USD/oz"}
+      "silver": {
+        "buy": 9.5,
+        "sell": 9.8,
+        "unit": "USD/oz"
+      }
     }
   },
   "currencies": [
-    {"code": "USD", "name_ar": "دولار أمريكي", "flag": "🇺🇸", "price_yer": 1041, "sanaa_buy": 533, "sanaa_sell": 535, "aden_buy": 1550, "aden_sell": 1558, "trend": "stable"},
-    {"code": "SAR", "name_ar": "ريال سعودي", "flag": "🇸🇦", "price_yer": 274, "sanaa_buy": 140, "sanaa_sell": 141, "aden_buy": 409, "aden_sell": 410, "trend": "stable"}
+    {
+      "code": "USD",
+      "name_ar": "دولار أمريكي",
+      "flag": "🇺🇸",
+      "price_yer": 1041,
+      "sanaa_buy": 533,
+      "sanaa_sell": 535,
+      "aden_buy": 1550,
+      "aden_sell": 1558,
+      "trend": "stable"
+    },
+    {
+      "code": "SAR",
+      "name_ar": "ريال سعودي",
+      "flag": "🇸🇦",
+      "price_yer": 274,
+      "sanaa_buy": 140,
+      "sanaa_sell": 141,
+      "aden_buy": 409,
+      "aden_sell": 410,
+      "trend": "stable"
+    }
   ],
-  "gold": {"ounce": {"price_usd": 2344, "trend": "stable"}},
-  "silver": {"code": "XAG", "name_ar": "الفضة", "icon": "🥈", "price_usd": 28.8, "unit": "oz", "status": "live"},
+  "gold": {
+    "ounce": {
+      "price_usd": 2344,
+      "trend": "stable"
+    }
+  },
+  "silver": {
+    "code": "XAG",
+    "name_ar": "الفضة",
+    "icon": "🥈",
+    "price_usd": 28.8,
+    "unit": "oz",
+    "status": "live"
+  },
   "metals": [
-    {"code": "XPT", "name_ar": "البلاتين", "icon": "🪨", "price_usd": 1031, "unit": "oz", "trend": "stable"},
-    {"code": "XPD", "name_ar": "البلاديوم", "icon": "🪶", "price_usd": 961, "unit": "oz", "trend": "stable"},
-    {"code": "AL", "name_ar": "الألومنيوم", "icon": "🔩", "price_usd": 2.34, "unit": "kg", "trend": "stable"},
-    {"code": "HG", "name_ar": "النحاس", "icon": "🔶", "price_usd": 4.3, "unit": "kg", "trend": "stable"}
+    {
+      "code": "XPT",
+      "name_ar": "البلاتين",
+      "icon": "🪨",
+      "price_usd": 1031,
+      "unit": "oz",
+      "trend": "stable"
+    },
+    {
+      "code": "XPD",
+      "name_ar": "البلاديوم",
+      "icon": "🪶",
+      "price_usd": 961,
+      "unit": "oz",
+      "trend": "stable"
+    },
+    {
+      "code": "AL",
+      "name_ar": "الألومنيوم",
+      "icon": "🔩",
+      "price_usd": 2.34,
+      "unit": "kg",
+      "trend": "stable"
+    },
+    {
+      "code": "HG",
+      "name_ar": "النحاس",
+      "icon": "🔶",
+      "price_usd": 4.3,
+      "unit": "kg",
+      "trend": "stable"
+    }
   ]
 }
