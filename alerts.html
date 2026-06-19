@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التنبيهات - ريال ودولار</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Alerts System Styles */
+        .alerts-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .alerts-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .alerts-header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .alerts-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Create Alert Card */
+        .create-alert-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .create-alert-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .alert-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .alert-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .alert-input-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .alert-input-group select,
+        .alert-input-group input {
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xl);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all var(--transition-fast);
+        }
+
+        .alert-input-group select:focus,
+        .alert-input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+            outline: none;
+        }
+
+        .alert-condition-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: end;
+            margin-bottom: 1.5rem;
+        }
+
+        .condition-operator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xl);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            height: fit-content;
+        }
+
+        .condition-operator:hover {
+            border-color: var(--primary);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .condition-operator.less-than { color: var(--danger); }
+        .condition-operator.greater-than { color: var(--success); }
+
+        .btn-create-alert {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--gold));
+            color: var(--text-inverse);
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: var(--radius-xl);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-create-alert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-create-alert:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Active Alerts List */
+        .alerts-list-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .alerts-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .alerts-list-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .alerts-count {
+            background: var(--primary);
+            color: var(--text-inverse);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            margin-bottom: 0.75rem;
+            transition: all var(--transition-fast);
+        }
+
+        .alert-item:hover {
+            border-color: var(--primary);
+            transform: translateX(-4px);
+        }
+
+        .alert-item.triggered {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .alert-item.triggered .alert-status {
+            background: var(--success);
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+        }
+
+        .alert-details {
+            flex: 1;
+        }
+
+        .alert-pair {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-condition {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .alert-condition .target {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .alert-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .alert-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .alert-status.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--info);
+        }
+
+        .alert-status.triggered {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .alert-delete {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            color: var(--danger);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .alert-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .alerts-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .alerts-empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Notification Permission Banner */
+        .notif-permission-banner {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--radius-xl);
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notif-permission-banner .banner-icon {
+            font-size: 1.5rem;
+        }
+
+        .notif-permission-banner .banner-text {
+            flex: 1;
+        }
+
+        .notif-permission-banner .banner-text strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .notif-permission-banner .banner-text span {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .btn-enable-notif {
+            padding: 0.5rem 1rem;
+            background: var(--info);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-enable-notif:hover {
+            background: var(--secondary);
+        }
+
+        /* Alert History */
+        .alert-history-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            min-width: 80px;
+        }
+
+        .history-detail {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+
+        .history-price {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        /* Toast for alert trigger */
+        .alert-trigger-toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            min-width: 300px;
+            justify-content: center;
+        }
+
+        .alert-trigger-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .alert-trigger-toast .toast-icon {
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="alerts-container">
+        <div class="alerts-header">
+            <h1>🔔 نظام التنبيهات</h1>
+            <p>احصل على إشعارات فورية عند وصول الأسعار إلى مستوياتك المستهدفة</p>
+        </div>
+
+        <!-- Notification Permission Banner -->
+        <div class="notif-permission-banner" id="notif-banner">
+            <span class="banner-icon">🔔</span>
+            <div class="banner-text">
+                <strong>تفعيل الإشعارات</strong>
+                <span>لاستلام تنبيهات فورية عند تغير الأسعار</span>
+            </div>
+            <button class="btn-enable-notif" id="enable-notif-btn">تفعيل</button>
+        </div>
+
+        <!-- Create Alert -->
+        <div class="create-alert-card">
+            <h2 class="create-alert-title">➕ إنشاء تنبيه جديد</h2>
+            <div class="alert-form-grid">
+                <div class="alert-input-group">
+                    <label for="alert-currency">العملة</label>
+                    <select id="alert-currency">
+                        <option value="USD">🇺🇸 دولار أمريكي (USD)</option>
+                        <option value="SAR">🇸🇦 ريال سعودي (SAR)</option>
+                        <option value="EUR">🇪🇺 يورو (EUR)</option>
+                        <option value="AED">🇦🇪 درهم إماراتي (AED)</option>
+                        <option value="GBP">🇬🇧 جنيه إسترليني (GBP)</option>
+                        <option value="KWD">🇰🇼 دينار كويتي (KWD)</option>
+                        <option value="TRY">🇹🇷 ليرة تركية (TRY)</option>
+                        <option value="CNY">🇨🇳 رنمينبي صيني (CNY)</option>
+                    </select>
+                </div>
+                <div class="alert-input-group">
+                    <label for="alert-region">المنطقة</label>
+                    <select id="alert-region">
+                        <option value="sanaa">📍 صنعاء</option>
+                        <option value="aden">📍 عدن</option>
+                        <option value="taiz">📍 تعز</option>
+                        <option value="hodeidah">📍 الحديدة</option>
+                        <option value="ibb">📍 إب</option>
+                        <option value="marib">📍 مأرب</option>
+                        <option value="hadramout">📍 حضرموت</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="alert-condition-row">
+                <div class="alert-input-group">
+                    <label for="alert-current">السعر الحالي</label>
+                    <input type="text" id="alert-current" value="533.00" readonly style="opacity: 0.7;">
+                </div>
+                <button class="condition-operator" id="condition-operator" title="انقر للتبديل">
+                    <span id="operator-text">أقل من</span>
+                </button>
+                <div class="alert-input-group">
+                    <label for="alert-target">السعر المستهدف</label>
+                    <input type="number" id="alert-target" placeholder="530" min="0" step="0.01" inputmode="decimal">
+                </div>
+            </div>
+
+            <button class="btn-create-alert" id="btn-create-alert">
+                <span>🔔</span>
+                <span>إنشاء التنبيه</span>
+            </button>
+        </div>
+
+        <!-- Active Alerts -->
+        <div class="alerts-list-card">
+            <div class="alerts-list-header">
+                <h2 class="alerts-list-title">📋 التنبيهات النشطة</h2>
+                <span class="alerts-count" id="alerts-count">0</span>
+            </div>
+            <div id="alerts-list">
+                <div class="alerts-empty">
+                    <div class="alerts-empty-icon">🔔</div>
+                    <p>لا توجد تنبيهات نشطة</p>
+                    <p style="font-size: 0.875rem; margin-top: 0.5rem;">أنشئ تنبيهاً أولاً لتتبع الأسعار المستهدفة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert History -->
+        <div class="alert-history-card">
+            <h2 class="alerts-list-title">📜 سجل التنبيهات</h2>
+            <div id="alerts-history">
+                <div class="alerts-empty">
+                    <div class="alerts-empty-icon">📜</div>
+                    <p>لا يوجد سجل بعد</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Trigger Toast -->
+    <div class="alert-trigger-toast" id="alert-trigger-toast">
+        <span class="toast-icon">🎯</span>
+        <span id="alert-trigger-text">تم الوصول إلى السعر المستهدف!</span>
+    </div>
+
+    <script>
+        // ============================================
+        // PRICE ALERTS SYSTEM - v2.0
+        // ============================================
+
+        class PriceAlertSystem {
+            constructor() {
+                this.alerts = JSON.parse(localStorage.getItem('priceAlerts') || '[]');
+                this.history = JSON.parse(localStorage.getItem('alertHistory') || '[]');
+                this.currentOperator = 'less'; // 'less' or 'greater'
+                this.init();
+            }
+
+            init() {
+                this.cacheDOM();
+                this.bindEvents();
+                this.renderAlerts();
+                this.renderHistory();
+                this.checkNotificationPermission();
+                this.startMonitoring();
+            }
+
+            cacheDOM() {
+                this.dom = {
+                    currency: document.getElementById('alert-currency'),
+                    region: document.getElementById('alert-region'),
+                    current: document.getElementById('alert-current'),
+                    target: document.getElementById('alert-target'),
+                    operator: document.getElementById('condition-operator'),
+                    operatorText: document.getElementById('operator-text'),
+                    createBtn: document.getElementById('btn-create-alert'),
+                    alertsList: document.getElementById('alerts-list'),
+                    alertsCount: document.getElementById('alerts-count'),
+                    historyList: document.getElementById('alerts-history'),
+                    notifBanner: document.getElementById('notif-banner'),
+                    enableNotifBtn: document.getElementById('enable-notif-btn'),
+                    triggerToast: document.getElementById('alert-trigger-toast'),
+                    triggerText: document.getElementById('alert-trigger-text')
+                };
+            }
+
+            bindEvents() {
+                // Toggle operator
+                this.dom.operator.addEventListener('click', () => {
+                    this.currentOperator = this.currentOperator === 'less' ? 'greater' : 'less';
+                    this.updateOperatorUI();
+                });
+
+                // Create alert
+                this.dom.createBtn.addEventListener('click', () => this.createAlert());
+
+                // Enable notifications
+                this.dom.enableNotifBtn.addEventListener('click', () => this.requestNotificationPermission());
+
+                // Update current price when currency/region changes
+                this.dom.currency.addEventListener('change', () => this.updateCurrentPrice());
+                this.dom.region.addEventListener('change', () => this.updateCurrentPrice());
+            }
+
+            updateOperatorUI() {
+                const isLess = this.currentOperator === 'less';
+                this.dom.operatorText.textContent = isLess ? 'أقل من' : 'أكبر من';
+                this.dom.operator.className = `condition-operator ${isLess ? 'less-than' : 'greater-than'}`;
+            }
+
+            updateCurrentPrice() {
+                // In real app, fetch from CONFIG.LOCAL_RATES
+                const mockPrices = {
+                    sanaa: { USD: 533, SAR: 140, EUR: 620, AED: 142.5, GBP: 730, KWD: 1720, TRY: 18, CNY: 74 },
+                    aden: { USD: 1550, SAR: 409, EUR: 1790, AED: 420, GBP: 2110, KWD: 5050, TRY: 52, CNY: 215 },
+                    taiz: { USD: 530, SAR: 140, EUR: 618, AED: 142, GBP: 728, KWD: 1715, TRY: 17.8, CNY: 73.5 },
+                    hodeidah: { USD: 530, SAR: 140, EUR: 618, AED: 142, GBP: 728, KWD: 1715, TRY: 17.8, CNY: 73.5 },
+                    ibb: { USD: 530, SAR: 140, EUR: 618, AED: 142, GBP: 728, KWD: 1715, TRY: 17.8, CNY: 73.5 },
+                    marib: { USD: 535, SAR: 142, EUR: 623, AED: 143, GBP: 733, KWD: 1725, TRY: 18.2, CNY: 74.2 },
+                    hadramout: { USD: 1555, SAR: 410, EUR: 1795, AED: 422, GBP: 2115, KWD: 5055, TRY: 52.1, CNY: 215.5 }
+                };
+
+                const currency = this.dom.currency.value;
+                const region = this.dom.region.value;
+                const price = mockPrices[region]?.[currency] || 0;
+                this.dom.current.value = price.toFixed(2);
+            }
+
+            createAlert() {
+                const currency = this.dom.currency.value;
+                const region = this.dom.region.value;
+                const target = parseFloat(this.dom.target.value);
+                const current = parseFloat(this.dom.current.value);
+
+                if (!target || target <= 0) {
+                    this.showToast('❌ الرجاء إدخال سعر مستهدف صحيح', 'error');
+                    return;
+                }
+
+                // Validate: target should be different from current
+                if (Math.abs(target - current) < 0.01) {
+                    this.showToast('⚠️ السعر المستهدف يجب أن يختلف عن السعر الحالي', 'warning');
+                    return;
+                }
+
+                const alert = {
+                    id: Date.now(),
+                    currency,
+                    region,
+                    target,
+                    current,
+                    operator: this.currentOperator,
+                    createdAt: new Date().toISOString(),
+                    status: 'active', // active, triggered, cancelled
+                    triggeredAt: null
+                };
+
+                this.alerts.push(alert);
+                this.saveAlerts();
+                this.renderAlerts();
+
+                // Clear input
+                this.dom.target.value = '';
+
+                this.showToast('✅ تم إنشاء التنبيه بنجاح', 'success');
+
+                // Send test notification if permitted
+                if (this.hasNotificationPermission()) {
+                    this.sendNotification('تنبيه جديد', 
+                        `سيتم إشعارك عندما يصبح ${currency} في ${region} ${this.currentOperator === 'less' ? 'أقل' : 'أكبر'} من ${target}`);
+                }
+            }
+
+            deleteAlert(id) {
+                this.alerts = this.alerts.filter(a => a.id !== id);
+                this.saveAlerts();
+                this.renderAlerts();
+                this.showToast('🗑️ تم حذف التنبيه', 'info');
+            }
+
+            renderAlerts() {
+                const activeAlerts = this.alerts.filter(a => a.status === 'active');
+                this.dom.alertsCount.textContent = activeAlerts.length;
+
+                if (activeAlerts.length === 0) {
+                    this.dom.alertsList.innerHTML = `
+                        <div class="alerts-empty">
+                            <div class="alerts-empty-icon">🔔</div>
+                            <p>لا توجد تنبيهات نشطة</p>
+                            <p style="font-size: 0.875rem; margin-top: 0.5rem;">أنشئ تنبيهاً أولاً لتتبع الأسعار المستهدفة</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.dom.alertsList.innerHTML = activeAlerts.map(alert => {
+                    const regionNames = {
+                        sanaa: 'صنعاء', aden: 'عدن', taiz: 'تعز', hodeidah: 'الحديدة',
+                        ibb: 'إب', marib: 'مأرب', hadramout: 'حضرموت'
+                    };
+                    const currencyNames = {
+                        USD: 'دولار أمريكي', SAR: 'ريال سعودي', EUR: 'يورو', AED: 'درهم إماراتي',
+                        GBP: 'جنيه إسترليني', KWD: 'دينار كويتي', TRY: 'ليرة تركية', CNY: 'رنمينبي صيني'
+                    };
+
+                    const operatorText = alert.operator === 'less' ? 'أقل من' : 'أكبر من';
+                    const timeAgo = this.getTimeAgo(new Date(alert.createdAt));
+
+                    return `
+                        <div class="alert-item" data-id="${alert.id}">
+                            <div class="alert-icon">🔔</div>
+                            <div class="alert-details">
+                                <div class="alert-pair">${currencyNames[alert.currency]} — ${regionNames[alert.region]}</div>
+                                <div class="alert-condition">
+                                    ${operatorText} <span class="target">${alert.target.toFixed(2)}</span> ر.ي
+                                    (الحالي: ${alert.current.toFixed(2)})
+                                </div>
+                                <div class="alert-meta">
+                                    <span>🕐 ${timeAgo}</span>
+                                    <span>📍 ${regionNames[alert.region]}</span>
+                                </div>
+                            </div>
+                            <span class="alert-status active">نشط</span>
+                            <button class="alert-delete" onclick="alertSystem.deleteAlert(${alert.id})" title="حذف">🗑️</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderHistory() {
+                if (this.history.length === 0) {
+                    this.dom.historyList.innerHTML = `
+                        <div class="alerts-empty">
+                            <div class="alerts-empty-icon">📜</div>
+                            <p>لا يوجد سجل بعد</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.dom.historyList.innerHTML = this.history.slice(0, 10).map(item => {
+                    const date = new Date(item.triggeredAt);
+                    const timeStr = date.toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
+                    const dateStr = date.toLocaleDateString('ar-YE');
+
+                    return `
+                        <div class="history-item">
+                            <span class="history-time">${timeStr}<br><small>${dateStr}</small></span>
+                            <span class="history-detail">
+                                ${item.currency} في ${item.region} وصل إلى 
+                                <span class="history-price">${item.actualPrice.toFixed(2)}</span>
+                                (الهدف: ${item.target.toFixed(2)})
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Monitoring
+            startMonitoring() {
+                // Check every 30 seconds
+                setInterval(() => this.checkAlerts(), 30000);
+                // Also check on price updates
+            }
+
+            checkAlerts() {
+                const mockCurrentPrices = {
+                    sanaa: { USD: 533 + (Math.random() - 0.5) * 4, SAR: 140, EUR: 620, AED: 142.5, GBP: 730, KWD: 1720, TRY: 18, CNY: 74 },
+                    aden: { USD: 1550 + (Math.random() - 0.5) * 10, SAR: 409, EUR: 1790, AED: 420, GBP: 2110, KWD: 5050, TRY: 52, CNY: 215 },
+                    // ... other regions
+                };
+
+                this.alerts.forEach(alert => {
+                    if (alert.status !== 'active') return;
+
+                    const currentPrice = mockCurrentPrices[alert.region]?.[alert.currency] || alert.current;
+                    const isTriggered = alert.operator === 'less' 
+                        ? currentPrice <= alert.target 
+                        : currentPrice >= alert.target;
+
+                    if (isTriggered) {
+                        this.triggerAlert(alert, currentPrice);
+                    }
+                });
+            }
+
+            triggerAlert(alert, actualPrice) {
+                alert.status = 'triggered';
+                alert.triggeredAt = new Date().toISOString();
+                alert.actualPrice = actualPrice;
+
+                // Add to history
+                this.history.unshift({
+                    currency: alert.currency,
+                    region: alert.region,
+                    target: alert.target,
+                    actualPrice,
+                    triggeredAt: alert.triggeredAt
+                });
+
+                // Keep only last 50
+                if (this.history.length > 50) this.history = this.history.slice(0, 50);
+
+                this.saveAlerts();
+                this.saveHistory();
+                this.renderAlerts();
+                this.renderHistory();
+
+                // Show toast
+                this.showTriggerToast(alert, actualPrice);
+
+                // Send push notification
+                if (this.hasNotificationPermission()) {
+                    this.sendNotification(
+                        '🎯 تم الوصول إلى السعر المستهدف!',
+                        `${alert.currency} في ${alert.region}: ${actualPrice.toFixed(2)} (الهدف: ${alert.target.toFixed(2)})`
+                    );
+                }
+
+                // Play sound (optional)
+                this.playAlertSound();
+            }
+
+            showTriggerToast(alert, price) {
+                const regionNames = { sanaa: 'صنعاء', aden: 'عدن', taiz: 'تعز', hodeidah: 'الحديدة', ibb: 'إب', marib: 'مأرب', hadramout: 'حضرموت' };
+                this.dom.triggerText.textContent = `${alert.currency} في ${regionNames[alert.region]}: ${price.toFixed(2)} ر.ي`;
+                this.dom.triggerToast.classList.add('show');
+
+                setTimeout(() => {
+                    this.dom.triggerToast.classList.remove('show');
+                }, 5000);
+            }
+
+            // Notifications
+            async requestNotificationPermission() {
+                if (!('Notification' in window)) {
+                    this.showToast('❌ المتصفح لا يدعم الإشعارات', 'error');
+                    return;
+                }
+
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    this.dom.notifBanner.style.display = 'none';
+                    this.showToast('✅ تم تفعيل الإشعارات بنجاح', 'success');
+                    this.sendNotification('ريال ودولار', 'تم تفعيل التنبيهات بنجاح!');
+                } else {
+                    this.showToast('⚠️ تم رفض الإذن', 'warning');
+                }
+            }
+
+            checkNotificationPermission() {
+                if (!('Notification' in window)) {
+                    this.dom.notifBanner.style.display = 'none';
+                    return;
+                }
+
+                if (Notification.permission === 'granted') {
+                    this.dom.notifBanner.style.display = 'none';
+                } else if (Notification.permission === 'denied') {
+                    this.dom.notifBanner.style.display = 'none';
+                }
+            }
+
+            hasNotificationPermission() {
+                return 'Notification' in window && Notification.permission === 'granted';
+            }
+
+            sendNotification(title, body) {
+                if (this.hasNotificationPermission()) {
+                    new Notification(title, {
+                        body,
+                        icon: '/images/icon-192.png',
+                        badge: '/images/badge-72.png',
+                        tag: 'price-alert',
+                        requireInteraction: true,
+                        vibrate: [200, 100, 200]
+                    });
+                }
+            }
+
+            playAlertSound() {
+                // Create a simple beep using Web Audio API
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    gainNode.gain.value = 0.3;
+
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // Storage
+            saveAlerts() {
+                localStorage.setItem('priceAlerts', JSON.stringify(this.alerts));
+            }
+
+            saveHistory() {
+                localStorage.setItem('alertHistory', JSON.stringify(this.history));
+            }
+
+            // Utilities
+            getTimeAgo(date) {
+                const now = new Date();
+                const diff = Math.floor((now - date) / 1000);
+
+                if (diff < 60) return 'الآن';
+                if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
+                if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
+                return `منذ ${Math.floor(diff / 86400)} يوم`;
+            }
+
+            showToast(message, type = 'info') {
+                // Simple toast implementation
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+                    color: white;
+                    padding: 1rem 2rem;
+                    border-radius: 1rem;
+                    font-weight: 600;
+                    z-index: 10000;
+                    animation: fadeIn 0.3s ease;
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Initialize
+        const alertSystem = new PriceAlertSystem();
+    </script>
+</body>
+</html>
