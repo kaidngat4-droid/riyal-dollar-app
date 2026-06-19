@@ -119,8 +119,11 @@
                 <a href="#converter" class="nav-link active" data-section="converter">محول العملات</a>
                 <a href="#gold-silver" class="nav-link" data-section="gold-silver">الذهب والفضة</a>
                 <a href="#rates" class="nav-link" data-section="rates">أسعار الصرف</a>
+                <a href="alerts.html" class="nav-link">🔔 التنبيهات</a>
+                <a href="comparison.html" class="nav-link">📍 مقارنة</a>
                 <a href="#trends" class="nav-link" data-section="trends">التحليلات</a>
                 <a href="#calculator" class="nav-link" data-section="calculator">الحاسبة</a>
+                <a href="admin.html" class="nav-link" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#0f172a;padding:6px 14px;border-radius:20px;font-weight:700;">⚙️ تحكم</a>
             </nav>
             <div class="header-actions">
                 <button class="btn-icon" id="theme-toggle" title="تغيير الوضع" aria-label="تغيير الوضع">
@@ -163,6 +166,14 @@
                     <span class="mobile-link-icon">📊</span>
                     <span class="mobile-link-text">أسعار الصرف</span>
                 </a>
+                <a href="alerts.html" class="mobile-link">
+                    <span class="mobile-link-icon">🔔</span>
+                    <span class="mobile-link-text">التنبيهات</span>
+                </a>
+                <a href="comparison.html" class="mobile-link">
+                    <span class="mobile-link-icon">📍</span>
+                    <span class="mobile-link-text">مقارنة المحافظات</span>
+                </a>
                 <a href="#trends" class="mobile-link" data-section="trends">
                     <span class="mobile-link-icon">📈</span>
                     <span class="mobile-link-text">التحليلات</span>
@@ -173,7 +184,7 @@
                 </a>
             </div>
             <div class="mobile-menu-footer">
-                <div class="mobile-menu-version">الإصدار 1.0.0</div>
+                <div class="mobile-menu-version">الإصدار 2.0.0</div>
             </div>
         </div>
     </div>
@@ -857,7 +868,10 @@
     </button>
 
     <!-- Scripts -->
+    <script src="js/history-system.js"></script>
+    <script src="js/fetcher.js"></script>
+    <script src="js/app-v2-patch.js"></script>
     <script src="js/app.js" defer></script>
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/riyal-dollar-app/service-worker.js")}</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/service-worker.js")}</script>
 </body>
 </html>
