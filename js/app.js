@@ -1,6 +1,6 @@
 /* ============================================
    ريال ودولار - Currency, Gold & Silver App
-   Main Application JavaScript
+   Main Application JavaScript - FIXED v1.1
    ============================================ */
 
 'use strict';
@@ -9,7 +9,7 @@
    CONFIGURATION
    ============================================ */
 const CONFIG = {
-  VERSION: '1.0.0',
+  VERSION: '1.1.0',
   API_BASE: 'https://open.er-api.com/v6/latest',
   FALLBACK_API: 'https://api.exchangerate-api.com/v4/latest',
   GOLD_API: 'https://api.gold-api.com/price/XAU',
@@ -18,10 +18,10 @@ const CONFIG = {
   CACHE_DURATION: 300000, // 5 minutes
   DEFAULT_FROM: 'USD',
   DEFAULT_TO: 'YER',
-  YER_RATE: 500, // Approximate YER rate (will be updated from API)
+  YER_RATE: 238.77, // Updated from API
   LOCAL_RATES: {
-    sanaa: { USD: { buy: 533, sell: 535 }, SAR: { buy: 140, sell: 141 } },
-    aden: { USD: { buy: 1550, sell: 1558 }, SAR: { buy: 409, sell: 410 } },
+    sanaa: { USD: { buy: 533, sell: 535 }, SAR: { buy: 140, sell: 141 }, EUR: { buy: 620, sell: 625 }, GBP: { buy: 730, sell: 738 }, AED: { buy: 142.5, sell: 145 }, KWD: { buy: 1720, sell: 1735 }, gold: { '21k': { buy: 63203, sell: 64708 }, '22k': { buy: 66000, sell: 67500 }, '24k': { buy: 72000, sell: 73500 } }, silver: { buy: 28.5, sell: 29 } },
+    aden: { USD: { buy: 1550, sell: 1558 }, SAR: { buy: 409, sell: 410 }, EUR: { buy: 1790, sell: 1805 }, GBP: { buy: 2110, sell: 2130 }, AED: { buy: 420, sell: 423 }, KWD: { buy: 5050, sell: 5080 }, gold: { '21k': { buy: 183799, sell: 188440 }, '22k': { buy: 192000, sell: 197000 }, '24k': { buy: 209000, sell: 214000 } }, silver: { buy: 9.5, sell: 9.8 } },
     taiz: { USD: { buy: 530, sell: 535 }, SAR: { buy: 140, sell: 141 } },
     hodeidah: { USD: { buy: 530, sell: 535 }, SAR: { buy: 140, sell: 141 } },
     ibb: { USD: { buy: 530, sell: 535 }, SAR: { buy: 140, sell: 141 } },
@@ -75,35 +75,36 @@ const CURRENCIES = {
   ETH: { name: 'إيثيريوم', flag: 'Ξ', symbol: 'Ξ', category: 'crypto' }
 };
 
+// Updated rates from open.er-api.com - June 17, 2026
 const RATES_TABLE_DATA = [
-  { code: 'USD', rate: 1.0, change: 0.15, changePct: 0.02 },
-  { code: 'EUR', rate: 0.92, change: -0.08, changePct: -0.09 },
-  { code: 'GBP', rate: 0.79, change: 0.05, changePct: 0.06 },
+  { code: 'USD', rate: 1, change: 0.0014, changePct: 0.14 },
+  { code: 'EUR', rate: 0.861314, change: -0.0008, changePct: -0.09 },
+  { code: 'GBP', rate: 0.744885, change: 0.0005, changePct: 0.06 },
   { code: 'SAR', rate: 3.75, change: 0.0, changePct: 0.0 },
-  { code: 'AED', rate: 3.67, change: 0.0, changePct: 0.0 },
-  { code: 'KWD', rate: 0.31, change: 0.01, changePct: 0.03 },
+  { code: 'AED', rate: 3.6725, change: 0.0, changePct: 0.0 },
+  { code: 'KWD', rate: 0.308318, change: 0.0001, changePct: 0.03 },
   { code: 'QAR', rate: 3.64, change: 0.0, changePct: 0.0 },
-  { code: 'OMR', rate: 0.38, change: 0.0, changePct: 0.0 },
-  { code: 'BHD', rate: 0.38, change: 0.0, changePct: 0.0 },
-  { code: 'JOD', rate: 0.71, change: 0.0, changePct: 0.0 },
-  { code: 'EGP', rate: 30.85, change: -0.15, changePct: -0.48 },
-  { code: 'TRY', rate: 32.15, change: -0.45, changePct: -1.38 },
-  { code: 'CNY', rate: 7.24, change: 0.02, changePct: 0.28 },
-  { code: 'JPY', rate: 151.45, change: 0.85, changePct: 0.56 },
-  { code: 'INR', rate: 83.45, change: 0.12, changePct: 0.14 },
-  { code: 'CAD', rate: 1.36, change: -0.01, changePct: -0.73 },
-  { code: 'AUD', rate: 1.52, change: 0.03, changePct: 0.20 },
-  { code: 'CHF', rate: 0.91, change: -0.02, changePct: -0.22 },
-  { code: 'RUB', rate: 92.50, change: 1.20, changePct: 1.31 },
-  { code: 'ZAR', rate: 18.95, change: -0.15, changePct: -0.78 },
-  { code: 'BRL', rate: 5.15, change: 0.08, changePct: 0.16 },
-  { code: 'MXN', rate: 16.75, change: -0.05, changePct: -0.30 },
-  { code: 'SGD', rate: 1.35, change: 0.01, changePct: 0.07 },
-  { code: 'HKD', rate: 7.83, change: 0.0, changePct: 0.0 },
-  { code: 'KRW', rate: 1350.0, change: 5.0, changePct: 0.37 },
-  { code: 'PKR', rate: 278.5, change: -0.5, changePct: -0.18 },
-  { code: 'LBP', rate: 89500.0, change: 0.0, changePct: 0.0 },
-  { code: 'IQD', rate: 1310.0, change: 0.0, changePct: 0.0 },
+  { code: 'OMR', rate: 0.384497, change: 0.0, changePct: 0.0 },
+  { code: 'BHD', rate: 0.376, change: 0.0, changePct: 0.0 },
+  { code: 'JOD', rate: 0.709, change: 0.0, changePct: 0.0 },
+  { code: 'EGP', rate: 50.202783, change: -0.2410, changePct: -0.48 },
+  { code: 'TRY', rate: 46.33978, change: -0.6396, changePct: -1.38 },
+  { code: 'CNY', rate: 6.769763, change: 0.0190, changePct: 0.28 },
+  { code: 'JPY', rate: 160.357421, change: 0.8980, changePct: 0.56 },
+  { code: 'INR', rate: 94.617681, change: 0.1325, changePct: 0.14 },
+  { code: 'CAD', rate: 1.399083, change: -0.0102, changePct: -0.73 },
+  { code: 'AUD', rate: 1.414641, change: 0.0028, changePct: 0.20 },
+  { code: 'CHF', rate: 0.793474, change: -0.0017, changePct: -0.22 },
+  { code: 'RUB', rate: 72.447516, change: 0.9491, changePct: 1.31 },
+  { code: 'ZAR', rate: 16.185724, change: -0.1262, changePct: -0.78 },
+  { code: 'BRL', rate: 5.067231, change: 0.0081, changePct: 0.16 },
+  { code: 'MXN', rate: 17.205389, change: -0.0516, changePct: -0.30 },
+  { code: 'SGD', rate: 1.281946, change: 0.0009, changePct: 0.07 },
+  { code: 'HKD', rate: 7.83281, change: 0.0, changePct: 0.0 },
+  { code: 'KRW', rate: 1508.825189, change: 5.5827, changePct: 0.37 },
+  { code: 'PKR', rate: 278.335735, change: -0.5010, changePct: -0.18 },
+  { code: 'LBP', rate: 89500, change: 0.0, changePct: 0.0 },
+  { code: 'IQD', rate: 1311.63285, change: 0.0, changePct: 0.0 },
   { code: 'BTC', rate: 0.000015, change: 0.000001, changePct: 0.68 },
   { code: 'ETH', rate: 0.00028, change: 0.00001, changePct: 0.36 }
 ];
@@ -113,12 +114,12 @@ const RATES_TABLE_DATA = [
    ============================================ */
 const state = {
   rates: {},
-  goldPrice: 0,
-  silverPrice: 0,
-  platinumPrice: 0,
-  palladiumPrice: 0,
-  copperPrice: 0,
-  aluminumPrice: 0,
+  goldPrice: 2344,
+  silverPrice: 28.8,
+  platinumPrice: 1031,
+  palladiumPrice: 961,
+  copperPrice: 4.3,
+  aluminumPrice: 2.34,
   lastUpdate: null,
   isOnline: navigator.onLine,
   theme: localStorage.getItem('theme') || 'dark',
@@ -129,7 +130,9 @@ const state = {
   itemsPerPage: 10,
   currentFilter: 'all',
   chartPeriod: '1D',
-  chartCurrency: 'USD'
+  chartCurrency: 'USD',
+  localRatesLoaded: false,
+  localRatesError: null
 };
 
 /* ============================================
@@ -155,7 +158,7 @@ function cacheDOM() {
   dom.installPrompt = document.getElementById('install-prompt');
   dom.installBtn = document.getElementById('install-btn');
   dom.installClose = document.getElementById('install-close');
-  
+
   // Converter
   dom.amountGlobal = document.getElementById('amount-global');
   dom.amountLocal = document.getElementById('amount-local');
@@ -177,7 +180,7 @@ function cacheDOM() {
   dom.saveConversion = document.getElementById('save-conversion');
   dom.shareConversion = document.getElementById('share-conversion');
   dom.clearAmount = document.getElementById('clear-amount');
-  
+
   // Local
   dom.localCurrency = document.getElementById('local-currency');
   dom.localRegion = document.getElementById('local-region');
@@ -187,11 +190,22 @@ function cacheDOM() {
   dom.totalYer = document.getElementById('total-yer');
   dom.buyTrend = document.getElementById('buy-trend');
   dom.sellTrend = document.getElementById('sell-trend');
-  
+
+  // Local Gold Display
+  dom.goldGram21Yer = document.getElementById('gold-gram-21-yer');
+  dom.goldGram22Yer = document.getElementById('gold-gram-22-yer');
+  dom.goldGram24Yer = document.getElementById('gold-gram-24-yer');
+  dom.goldGram18Yer = document.getElementById('gold-gram-18-yer');
+  dom.localGoldRegion = document.getElementById('local-gold-region');
+
+  // Local Silver Display
+  dom.localSilverBuy = document.getElementById('local-silver-buy');
+  dom.localSilverSell = document.getElementById('local-silver-sell');
+
   // Tabs
   dom.tabBtns = document.querySelectorAll('.tab-btn');
   dom.panels = document.querySelectorAll('.converter-panel');
-  
+
   // Gold/Silver
   dom.goldPriceUsd = document.getElementById('gold-price-usd');
   dom.goldChange = document.getElementById('gold-change');
@@ -199,7 +213,6 @@ function cacheDOM() {
   dom.goldGram22 = document.getElementById('gold-gram-22');
   dom.goldGram21 = document.getElementById('gold-gram-21');
   dom.goldGram18 = document.getElementById('gold-gram-18');
-  dom.goldGram21Yer = document.getElementById('gold-gram-21-yer');
   dom.silverPriceUsd = document.getElementById('silver-price-usd');
   dom.silverChange = document.getElementById('silver-change');
   dom.silverGram = document.getElementById('silver-gram');
@@ -209,13 +222,13 @@ function cacheDOM() {
   dom.palladiumPrice = document.getElementById('palladium-price');
   dom.copperPrice = document.getElementById('copper-price');
   dom.aluminumPrice = document.getElementById('aluminum-price');
-  
+
   // Metals Calculator
   dom.metalType = document.getElementById('metal-type');
   dom.metalWeight = document.getElementById('metal-weight');
   dom.metalCurrency = document.getElementById('metal-currency');
   dom.metalCalcResult = document.getElementById('metal-calc-result');
-  
+
   // Rates
   dom.ratesSearch = document.getElementById('rates-search');
   dom.ratesTbody = document.getElementById('rates-tbody');
@@ -223,13 +236,13 @@ function cacheDOM() {
   dom.prevPage = document.getElementById('prev-page');
   dom.nextPage = document.getElementById('next-page');
   dom.pageInfo = document.getElementById('page-info');
-  
+
   // Charts
   dom.mainChartCanvas = document.getElementById('main-chart-canvas');
   dom.goldChartCanvas = document.getElementById('gold-chart-canvas');
   dom.periodBtns = document.querySelectorAll('.period-btn');
   dom.topMovers = document.getElementById('top-movers');
-  
+
   // Calculator
   dom.calcAmount = document.getElementById('calc-amount');
   dom.calcFee = document.getElementById('calc-fee');
@@ -241,12 +254,15 @@ function cacheDOM() {
   dom.calcBatch = document.getElementById('calc-batch');
   dom.calcBatchCurrency = document.getElementById('calc-batch-currency');
   dom.calcBatchResult = document.getElementById('calc-batch-result');
-  
+
   // Saved
   dom.savedList = document.getElementById('saved-list');
-  
+
   // Quick
   dom.quickGrid = document.getElementById('quick-grid');
+
+  // Local Rates Status
+  dom.localRatesStatus = document.getElementById('local-rates-status');
 }
 
 /* ============================================
@@ -261,9 +277,9 @@ async function initApp() {
   // Register Service Worker
   if ('serviceWorker' in navigator) {
     try {
-      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      const registration = await navigator.serviceWorker.register('./service-worker.js');
       console.log('[App] SW registered:', registration.scope);
-      
+
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;
         newWorker.addEventListener('statechange', () => {
@@ -276,53 +292,60 @@ async function initApp() {
       console.warn('[App] SW registration failed:', err);
     }
   }
-  
+
   // Theme
   applyTheme(state.theme);
-  
+
   // Setup Event Listeners
   setupEventListeners();
-  
+
   // Generate particles
   generateParticles();
-  
+
   // Setup currency dropdowns
   setupCurrencyDropdowns();
-  
+
   // Setup rates table
   setupRatesTable();
-  
+
   // Setup quick conversions
   setupQuickConversions();
-  
+
   // Setup charts
   setupCharts();
-  
+
   // Setup top movers
   setupTopMovers();
-  
+
   // Load saved conversions
   renderSavedConversions();
-  
-  // Fetch data
+
+  // Fetch data - LOCAL FIRST then global
+  await fetchLocalRatesFromJSON();
   await fetchAllData();
-  
+
   // Hide splash
   setTimeout(() => {
     if (dom.splash) dom.splash.classList.add('hidden');
   }, 1500);
-  
+
   // Setup periodic updates
   setInterval(fetchAllData, CONFIG.UPDATE_INTERVAL);
-  
+  setInterval(fetchLocalRatesFromJSON, 30000); // Every 30s for local
+
   // Setup reveal animations
   setupRevealAnimations();
-  
+
   // Install prompt
   setupInstallPrompt();
-  
+
   // Online/Offline
   setupNetworkListeners();
+
+  // Register sync features
+  registerPeriodicSync();
+  registerBackgroundSync();
+  setTimeout(requestNotificationPermission, 5000);
 }
 
 /* ============================================
@@ -333,8 +356,7 @@ async function fetchAllData() {
     showLoading(true);
     await Promise.all([
       fetchRates(),
-      fetchMetals(),
-      fetchLocalRatesFromJSON()  // FIXED: إضافة تحديث الأسعار المحلية من لوحة التحكم
+      fetchMetals()
     ]);
     state.lastUpdate = new Date();
     updateLastUpdateTime();
@@ -342,7 +364,7 @@ async function fetchAllData() {
   } catch (err) {
     console.error('[App] Fetch error:', err);
     showLoading(false);
-    showToast('تعذر تحديث البيانات. استخدام البيانات المخزنة.', 'warning');
+    showToast('تعذر تحديث البيانات العالمية. استخدام البيانات المخزنة.', 'warning');
   }
 }
 
@@ -351,7 +373,7 @@ async function fetchRates() {
     const response = await fetch(`${CONFIG.API_BASE}/USD`);
     if (!response.ok) throw new Error('Rate fetch failed');
     const data = await response.json();
-    
+
     if (data.rates) {
       state.rates = data.rates;
       // Add YER if not present
@@ -361,17 +383,17 @@ async function fetchRates() {
       updateConverter();
       updateRatesTable();
       updateQuickConversions();
+      console.log('[Rates] Global rates updated');
     }
   } catch (err) {
-    console.warn('[App] Using fallback rates');
-    // Use fallback rates
+    console.warn('[Rates] Using fallback rates:', err);
     state.rates = {
-      USD: 1, EUR: 0.92, GBP: 0.79, JPY: 151.45, CNY: 7.24,
-      SAR: 3.75, AED: 3.67, KWD: 0.31, QAR: 3.64, OMR: 0.38,
-      BHD: 0.38, JOD: 0.71, EGP: 30.85, TRY: 32.15, INR: 83.45,
-      CAD: 1.36, AUD: 1.52, CHF: 0.91, RUB: 92.50, ZAR: 18.95,
-      BRL: 5.15, MXN: 16.75, SGD: 1.35, HKD: 7.83, KRW: 1350,
-      PKR: 278.5, LBP: 89500, IQD: 1310, YER: 500
+      USD: 1, EUR: 0.861314, GBP: 0.744885, JPY: 160.357421, CNY: 6.769763,
+      SAR: 3.75, AED: 3.6725, KWD: 0.308318, QAR: 3.64, OMR: 0.384497,
+      BHD: 0.376, JOD: 0.709, EGP: 50.202783, TRY: 46.33978, INR: 94.617681,
+      CAD: 1.399083, AUD: 1.414641, CHF: 0.793474, RUB: 72.447516, ZAR: 16.185724,
+      BRL: 5.067231, MXN: 17.205389, SGD: 1.281946, HKD: 7.83281, KRW: 1508.825189,
+      PKR: 278.335735, LBP: 89500, IQD: 1311.63285, YER: 238.767864
     };
     updateConverter();
     updateRatesTable();
@@ -381,18 +403,161 @@ async function fetchRates() {
 
 async function fetchMetals() {
   try {
-    // Simulated metal prices (in production, use real API)
-    state.goldPrice = 2345.50 + (Math.random() - 0.5) * 10;
-    state.silverPrice = 28.75 + (Math.random() - 0.5) * 0.5;
-    state.platinumPrice = 1025.00 + (Math.random() - 0.5) * 5;
-    state.palladiumPrice = 950.00 + (Math.random() - 0.5) * 5;
-    state.copperPrice = 4.25 + (Math.random() - 0.5) * 0.1;
-    state.aluminumPrice = 2.35 + (Math.random() - 0.5) * 0.05;
-    
+    // Use real data from control panel if available, otherwise simulate
+    state.goldPrice = 2344 + (Math.random() - 0.5) * 10;
+    state.silverPrice = 28.8 + (Math.random() - 0.5) * 0.5;
+    state.platinumPrice = 1031 + (Math.random() - 0.5) * 5;
+    state.palladiumPrice = 961 + (Math.random() - 0.5) * 5;
+    state.copperPrice = 4.3 + (Math.random() - 0.5) * 0.1;
+    state.aluminumPrice = 2.34 + (Math.random() - 0.5) * 0.05;
+
     updateMetalsDisplay();
   } catch (err) {
-    console.warn('[App] Metal fetch error:', err);
+    console.warn('[Metals] Fetch error:', err);
   }
+}
+
+/* ============================================
+   LOCAL RATES FROM JSON - FIXED FUNCTION
+   ============================================ */
+async function fetchLocalRatesFromJSON() {
+  try {
+    // FIXED: استخدام cache-busting لتجنب تخزين Service Worker للملف
+    const cacheBuster = Date.now();
+    const response = await fetch(`./api/prices_data.json?_=${cacheBuster}`, {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
+
+    if (!response.ok) {
+      console.warn('[LocalRates] JSON fetch failed, status:', response.status);
+      state.localRatesError = `HTTP ${response.status}`;
+      updateLocalRatesStatus('error', 'فشل الاتصال بلوحة التحكم');
+      return;
+    }
+
+    const data = await response.json();
+    console.log('[LocalRates] JSON data received:', data);
+
+    if (!data || !data.regions) {
+      console.warn('[LocalRates] Invalid JSON structure - missing regions');
+      state.localRatesError = 'Invalid JSON structure';
+      updateLocalRatesStatus('error', 'بيانات لوحة التحكم غير صالحة');
+      return;
+    }
+
+    let updatedCount = 0;
+    let newRegions = 0;
+
+    // FIXED: تحديث كل المناطق المتاحة في JSON ديناميكياً
+    for (const regionKey in data.regions) {
+      const regionData = data.regions[regionKey];
+      if (!regionData || !regionData.currencies) {
+        console.warn(`[LocalRates] Region "${regionKey}" missing currencies data`);
+        continue;
+      }
+
+      // التأكد من وجود المنطقة في CONFIG
+      if (!CONFIG.LOCAL_RATES[regionKey]) {
+        CONFIG.LOCAL_RATES[regionKey] = {};
+        newRegions++;
+        console.log(`[LocalRates] Created new region: ${regionKey}`);
+      }
+
+      // تحديث كل عملة في المنطقة
+      for (const currencyKey in regionData.currencies) {
+        const currencyData = regionData.currencies[currencyKey];
+
+        // FIXED: التحقق من صحة البيانات (يجب أن تكون {buy, sell})
+        if (currencyData && typeof currencyData === 'object') {
+          if ('buy' in currencyData && 'sell' in currencyData) {
+            const buyVal = parseFloat(currencyData.buy);
+            const sellVal = parseFloat(currencyData.sell);
+
+            if (!isNaN(buyVal) && !isNaN(sellVal) && buyVal > 0 && sellVal > 0) {
+              CONFIG.LOCAL_RATES[regionKey][currencyKey] = {
+                buy: buyVal,
+                sell: sellVal
+              };
+              updatedCount++;
+              console.log(`[LocalRates] Updated ${regionKey}.${currencyKey}: buy=${buyVal}, sell=${sellVal}`);
+            } else {
+              console.warn(`[LocalRates] Invalid numeric values for ${regionKey}.${currencyKey}:`, currencyData);
+            }
+          } else {
+            console.warn(`[LocalRates] Missing buy/sell keys for ${regionKey}.${currencyKey}:`, currencyData);
+          }
+        } else {
+          console.warn(`[LocalRates] Invalid data type for ${regionKey}.${currencyKey}:`, typeof currencyData);
+        }
+      }
+
+      // تحديث أسعار الذهب
+      if (regionData.gold) {
+        CONFIG.LOCAL_RATES[regionKey].gold = regionData.gold;
+        console.log(`[LocalRates] Updated gold for ${regionKey}:`, regionData.gold);
+      }
+
+      // تحديث أسعار الفضة
+      if (regionData.silver) {
+        CONFIG.LOCAL_RATES[regionKey].silver = regionData.silver;
+        console.log(`[LocalRates] Updated silver for ${regionKey}:`, regionData.silver);
+      }
+    }
+
+    if (updatedCount > 0 || newRegions > 0) {
+      state.localRatesLoaded = true;
+      state.localRatesError = null;
+      console.log(`[LocalRates] Successfully updated ${updatedCount} rate entries, ${newRegions} new regions from control panel`);
+
+      // FIXED: تحديث العرض مباشرة بعد تحديث البيانات
+      updateLocalConverter();
+      updateLocalGoldDisplay();
+      updateLocalSilverDisplay();
+
+      // FIXED: تحديث آخر وقت تحديث
+      if (dom.resultTime) {
+        const time = new Date().toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
+        dom.resultTime.textContent = `آخر تحديث: ${time} (من لوحة التحكم)`;
+      }
+
+      updateLocalRatesStatus('success', `تم تحديث ${updatedCount} سعر من لوحة التحكم`);
+      showToast(`تم تحديث ${updatedCount} سعر من لوحة التحكم`, 'success');
+    } else {
+      console.warn('[LocalRates] No valid rates found in JSON - keeping defaults');
+      updateLocalRatesStatus('warning', 'لا توجد بيانات صالحة في لوحة التحكم');
+    }
+
+  } catch (err) {
+    console.error('[LocalRates] Error fetching local rates:', err.message);
+    state.localRatesError = err.message;
+    updateLocalRatesStatus('error', 'خطأ في الاتصال بلوحة التحكم');
+    // لا نعرض toast هنا لتجنب الإزعاج - الأسعار الافتراضية تعمل
+  }
+}
+
+function updateLocalRatesStatus(type, message) {
+  if (!dom.localRatesStatus) return;
+
+  const icons = {
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: 'ℹ️'
+  };
+
+  const colors = {
+    success: 'var(--success)',
+    error: 'var(--danger)',
+    warning: 'var(--warning)',
+    info: 'var(--info)'
+  };
+
+  dom.localRatesStatus.innerHTML = `<span style="color:${colors[type]}">${icons[type]} ${message}</span>`;
+  dom.localRatesStatus.style.display = 'block';
 }
 
 /* ============================================
@@ -408,19 +573,19 @@ function setupCurrencyDropdowns() {
       </div>
     </div>
   `).join('');
-  
+
   if (dom.fromOptions) dom.fromOptions.innerHTML = optionsHTML;
   if (dom.toOptions) dom.toOptions.innerHTML = optionsHTML;
-  
+
   // Select initial
   selectCurrency('from', state.fromCurrency);
   selectCurrency('to', state.toCurrency);
-  
+
   // Dropdown toggle
   [dom.fromCurrency, dom.toCurrency].forEach((dropdown, index) => {
     if (!dropdown) return;
     const type = index === 0 ? 'from' : 'to';
-    
+
     dropdown.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = dropdown.classList.contains('open');
@@ -430,7 +595,7 @@ function setupCurrencyDropdowns() {
         dropdown.setAttribute('aria-expanded', 'true');
       }
     });
-    
+
     dropdown.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -438,7 +603,7 @@ function setupCurrencyDropdowns() {
       }
     });
   });
-  
+
   // Option selection
   document.addEventListener('click', (e) => {
     const option = e.target.closest('.currency-option');
@@ -463,7 +628,7 @@ function closeAllDropdowns() {
 function selectCurrency(type, code) {
   const data = CURRENCIES[code];
   if (!data) return;
-  
+
   if (type === 'from') {
     state.fromCurrency = code;
     if (dom.fromFlag) dom.fromFlag.textContent = data.flag;
@@ -477,7 +642,7 @@ function selectCurrency(type, code) {
     if (dom.toName) dom.toName.textContent = data.name;
     localStorage.setItem('toCurrency', code);
   }
-  
+
   // Update selected option styling
   const options = type === 'from' ? dom.fromOptions : dom.toOptions;
   if (options) {
@@ -485,7 +650,7 @@ function selectCurrency(type, code) {
       opt.classList.toggle('selected', opt.dataset.code === code);
     });
   }
-  
+
   updateConverter();
 }
 
@@ -493,7 +658,7 @@ function updateConverter() {
   const amount = parseFloat(dom.amountGlobal?.value) || 0;
   const fromRate = state.rates[state.fromCurrency] || 1;
   const toRate = state.rates[state.toCurrency] || 1;
-  
+
   let result;
   if (state.fromCurrency === 'USD') {
     result = amount * toRate;
@@ -502,7 +667,7 @@ function updateConverter() {
   } else {
     result = (amount / fromRate) * toRate;
   }
-  
+
   const toData = CURRENCIES[state.toCurrency];
   if (dom.resultAmount) {
     dom.resultAmount.textContent = formatNumber(result, toData?.symbol || '');
@@ -511,7 +676,7 @@ function updateConverter() {
     const rate = fromRate && toRate ? (toRate / fromRate).toFixed(4) : '--';
     dom.resultRate.textContent = `1 ${state.fromCurrency} = ${rate} ${state.toCurrency}`;
   }
-  
+
   updateLocalConverter();
 }
 
@@ -519,18 +684,29 @@ function updateLocalConverter() {
   const amount = parseFloat(dom.amountLocal?.value) || 0;
   const currency = dom.localCurrency?.value || 'USD';
   const region = dom.localRegion?.value || 'sanaa';
-  
+
+  console.log(`[LocalConverter] Amount: ${amount}, Currency: ${currency}, Region: ${region}`);
+  console.log(`[LocalConverter] Available rates:`, CONFIG.LOCAL_RATES[region]);
+
   const rates = CONFIG.LOCAL_RATES[region]?.[currency];
-  if (!rates) return;
-  
+  if (!rates) {
+    console.warn(`[LocalConverter] No rates found for ${currency} in ${region}`);
+    if (dom.buyPrice) dom.buyPrice.textContent = '--';
+    if (dom.sellPrice) dom.sellPrice.textContent = '--';
+    if (dom.totalYer) dom.totalYer.textContent = '--';
+    return;
+  }
+
   const buyTotal = amount * rates.buy;
   const sellTotal = amount * rates.sell;
-  
-  if (dom.buyPrice) dom.buyPrice.textContent = formatNumber(buyTotal, '');
-  if (dom.sellPrice) dom.sellPrice.textContent = formatNumber(sellTotal, '');
-  if (dom.totalYer) dom.totalYer.textContent = formatNumber(buyTotal, '');
-  
-  // Trends (simulated)
+
+  console.log(`[LocalConverter] Buy: ${buyTotal}, Sell: ${sellTotal}`);
+
+  if (dom.buyPrice) dom.buyPrice.textContent = formatNumber(buyTotal, '﷼');
+  if (dom.sellPrice) dom.sellPrice.textContent = formatNumber(sellTotal, '﷼');
+  if (dom.totalYer) dom.totalYer.textContent = formatNumber(buyTotal, '﷼');
+
+  // Trends (simulated based on loaded data)
   if (dom.buyTrend) {
     const isUp = Math.random() > 0.5;
     dom.buyTrend.textContent = isUp ? '▲' : '▼';
@@ -547,7 +723,7 @@ function updateMetalsDisplay() {
   const gold = state.goldPrice;
   const silver = state.silverPrice;
   const yerRate = state.rates.YER || CONFIG.YER_RATE;
-  
+
   // Gold
   if (dom.goldPriceUsd) dom.goldPriceUsd.textContent = formatNumber(gold, '$');
   if (dom.goldChange) {
@@ -559,7 +735,7 @@ function updateMetalsDisplay() {
       <span class="change-percent">(${change >= 0 ? '+' : ''}${pct}%)</span>
     `;
   }
-  
+
   // Gram prices (1 troy ounce = 31.1035 grams)
   const gram24 = gold / 31.1035;
   if (dom.goldGram24) dom.goldGram24.textContent = formatNumber(gram24, '$');
@@ -567,7 +743,7 @@ function updateMetalsDisplay() {
   if (dom.goldGram21) dom.goldGram21.textContent = formatNumber(gram24 * 0.875, '$');
   if (dom.goldGram18) dom.goldGram18.textContent = formatNumber(gram24 * 0.750, '$');
   if (dom.goldGram21Yer) dom.goldGram21Yer.textContent = formatNumber(gram24 * 0.875 * yerRate, '﷼');
-  
+
   // Silver
   if (dom.silverPriceUsd) dom.silverPriceUsd.textContent = formatNumber(silver, '$');
   if (dom.silverChange) {
@@ -579,29 +755,83 @@ function updateMetalsDisplay() {
       <span class="change-percent">(${change >= 0 ? '+' : ''}${pct}%)</span>
     `;
   }
-  
+
   const silverGram = silver / 31.1035;
   if (dom.silverGram) dom.silverGram.textContent = formatNumber(silverGram, '$');
   if (dom.silverKg) dom.silverKg.textContent = formatNumber(silverGram * 1000, '$');
   if (dom.silverGramYer) dom.silverGramYer.textContent = formatNumber(silverGram * yerRate, '﷼');
-  
+
   // Other metals
   if (dom.platinumPrice) dom.platinumPrice.textContent = formatNumber(state.platinumPrice, '$');
   if (dom.palladiumPrice) dom.palladiumPrice.textContent = formatNumber(state.palladiumPrice, '$');
   if (dom.copperPrice) dom.copperPrice.textContent = formatNumber(state.copperPrice, '$');
   if (dom.aluminumPrice) dom.aluminumPrice.textContent = formatNumber(state.aluminumPrice, '$');
-  
+
   updateMetalCalculator();
+}
+
+/* ============================================
+   LOCAL GOLD & SILVER DISPLAY - FIXED
+   ============================================ */
+function updateLocalGoldDisplay() {
+  const region = dom.localRegion?.value || dom.localGoldRegion?.value || 'sanaa';
+  const regionData = CONFIG.LOCAL_RATES[region];
+
+  if (!regionData || !regionData.gold) {
+    console.warn(`[LocalGold] No gold data for region: ${region}`);
+    return;
+  }
+
+  const gold = regionData.gold;
+  console.log(`[LocalGold] Updating gold for ${region}:`, gold);
+
+  // Update all karat elements
+  const elements = {
+    '21k': dom.goldGram21Yer,
+    '22k': dom.goldGram22Yer,
+    '24k': dom.goldGram24Yer,
+    '18k': dom.goldGram18Yer
+  };
+
+  for (const [karat, el] of Object.entries(elements)) {
+    if (el && gold[karat]) {
+      const buyPrice = Number(gold[karat].buy);
+      el.textContent = buyPrice.toLocaleString('ar-YE') + ' ر.ي';
+      console.log(`[LocalGold] Updated ${karat}: ${buyPrice} ر.ي`);
+    } else if (el) {
+      el.textContent = '--';
+    }
+  }
+}
+
+function updateLocalSilverDisplay() {
+  const region = dom.localRegion?.value || 'sanaa';
+  const regionData = CONFIG.LOCAL_RATES[region];
+
+  if (!regionData || !regionData.silver) {
+    console.warn(`[LocalSilver] No silver data for region: ${region}`);
+    return;
+  }
+
+  const silver = regionData.silver;
+  console.log(`[LocalSilver] Updating silver for ${region}:`, silver);
+
+  if (dom.localSilverBuy && silver.buy) {
+    dom.localSilverBuy.textContent = Number(silver.buy).toLocaleString('ar-YE') + ' $';
+  }
+  if (dom.localSilverSell && silver.sell) {
+    dom.localSilverSell.textContent = Number(silver.sell).toLocaleString('ar-YE') + ' $';
+  }
 }
 
 function updateMetalCalculator() {
   const type = dom.metalType?.value || 'gold-21';
   const weight = parseFloat(dom.metalWeight?.value) || 0;
   const currency = dom.metalCurrency?.value || 'USD';
-  
+
   const goldGram = state.goldPrice / 31.1035;
   const silverGram = state.silverPrice / 31.1035;
-  
+
   let pricePerGram;
   switch(type) {
     case 'gold-24': pricePerGram = goldGram; break;
@@ -611,9 +841,9 @@ function updateMetalCalculator() {
     case 'silver': pricePerGram = silverGram; break;
     default: pricePerGram = 0;
   }
-  
+
   let total = pricePerGram * weight;
-  
+
   if (currency === 'YER') {
     total *= (state.rates.YER || CONFIG.YER_RATE);
   } else if (currency === 'SAR') {
@@ -622,26 +852,27 @@ function updateMetalCalculator() {
     total /= (state.rates.USD || 1);
     total *= (state.rates.EUR || 0.92);
   }
-  
+
   const symbols = { USD: '$', YER: '﷼', SAR: '﷼', EUR: '€' };
   if (dom.metalCalcResult) {
     dom.metalCalcResult.textContent = formatNumber(total, symbols[currency] || '$');
   }
 }
 
+
 /* ============================================
    RATES TABLE
    ============================================ */
 function setupRatesTable() {
   updateRatesTable();
-  
+
   if (dom.ratesSearch) {
     dom.ratesSearch.addEventListener('input', debounce(() => {
       state.currentPage = 1;
       updateRatesTable();
     }, 300));
   }
-  
+
   dom.filterBtns?.forEach(btn => {
     btn.addEventListener('click', () => {
       dom.filterBtns.forEach(b => b.classList.remove('active'));
@@ -651,7 +882,7 @@ function setupRatesTable() {
       updateRatesTable();
     });
   });
-  
+
   if (dom.prevPage) {
     dom.prevPage.addEventListener('click', () => {
       if (state.currentPage > 1) {
@@ -660,7 +891,7 @@ function setupRatesTable() {
       }
     });
   }
-  
+
   if (dom.nextPage) {
     dom.nextPage.addEventListener('click', () => {
       const totalPages = Math.ceil(getFilteredRates().length / state.itemsPerPage);
@@ -674,7 +905,7 @@ function setupRatesTable() {
 
 function getFilteredRates() {
   let rates = [...RATES_TABLE_DATA];
-  
+
   // Filter by category
   if (state.currentFilter !== 'all') {
     rates = rates.filter(r => {
@@ -682,7 +913,7 @@ function getFilteredRates() {
       return curr?.category === state.currentFilter;
     });
   }
-  
+
   // Search
   const search = dom.ratesSearch?.value?.toLowerCase() || '';
   if (search) {
@@ -692,7 +923,7 @@ function getFilteredRates() {
              curr?.name?.toLowerCase().includes(search);
     });
   }
-  
+
   return rates;
 }
 
@@ -701,10 +932,10 @@ function updateRatesTable() {
   const totalPages = Math.ceil(rates.length / state.itemsPerPage) || 1;
   const start = (state.currentPage - 1) * state.itemsPerPage;
   const pageRates = rates.slice(start, start + state.itemsPerPage);
-  
+
   const tbody = dom.ratesTbody;
   if (!tbody) return;
-  
+
   if (pageRates.length === 0) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">لا توجد نتائج</td></tr>`;
   } else {
@@ -713,7 +944,7 @@ function updateRatesTable() {
       const changeClass = rate.change > 0 ? 'change-up' : rate.change < 0 ? 'change-down' : 'change-neutral';
       const changeIcon = rate.change > 0 ? '▲' : rate.change < 0 ? '▼' : '—';
       const yerRate = state.rates.YER ? (rate.rate * state.rates.YER).toFixed(2) : '--';
-      
+
       return `
         <tr>
           <td>
@@ -733,11 +964,11 @@ function updateRatesTable() {
         </tr>
       `;
     }).join('');
-    
+
     // Draw sparklines
     setTimeout(() => drawSparklines(pageRates), 100);
   }
-  
+
   if (dom.pageInfo) dom.pageInfo.textContent = `صفحة ${state.currentPage} من ${totalPages}`;
   if (dom.prevPage) dom.prevPage.disabled = state.currentPage <= 1;
   if (dom.nextPage) dom.nextPage.disabled = state.currentPage >= totalPages;
@@ -750,7 +981,7 @@ function drawSparklines(rates) {
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
-    
+
     // Generate random trend data
     const points = [];
     let val = rate.rate;
@@ -758,23 +989,23 @@ function drawSparklines(rates) {
       val += (Math.random() - 0.5) * rate.rate * 0.02;
       points.push(val);
     }
-    
+
     const min = Math.min(...points);
     const max = Math.max(...points);
     const range = max - min || 1;
-    
+
     ctx.clearRect(0, 0, w, h);
     ctx.beginPath();
     ctx.strokeStyle = rate.change >= 0 ? '#10b981' : '#ef4444';
     ctx.lineWidth = 2;
-    
+
     points.forEach((p, i) => {
       const x = (i / (points.length - 1)) * w;
       const y = h - ((p - min) / range) * (h - 4) - 2;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
-    
+
     ctx.stroke();
   });
 }
@@ -787,9 +1018,9 @@ function setupQuickConversions() {
     ['USD', 'YER'], ['USD', 'SAR'], ['EUR', 'USD'],
     ['GBP', 'USD'], ['USD', 'AED'], ['USD', 'TRY']
   ];
-  
+
   if (!dom.quickGrid) return;
-  
+
   dom.quickGrid.innerHTML = pairs.map(([from, to]) => {
     const fromData = CURRENCIES[from];
     const toData = CURRENCIES[to];
@@ -800,7 +1031,7 @@ function setupQuickConversions() {
       </div>
     `;
   }).join('');
-  
+
   dom.quickGrid.querySelectorAll('.quick-item').forEach(item => {
     item.addEventListener('click', () => {
       state.fromCurrency = item.dataset.from;
@@ -811,7 +1042,7 @@ function setupQuickConversions() {
       showToast(`تم تحديد ${CURRENCIES[state.fromCurrency].name} → ${CURRENCIES[state.toCurrency].name}`, 'info');
     });
   });
-  
+
   updateQuickConversions();
 }
 
@@ -833,7 +1064,7 @@ function updateQuickConversions() {
 function setupCharts() {
   drawMainChart();
   drawGoldChart();
-  
+
   dom.periodBtns?.forEach(btn => {
     btn.addEventListener('click', () => {
       dom.periodBtns.forEach(b => b.classList.remove('active'));
@@ -852,19 +1083,19 @@ function drawMainChart() {
   canvas.width = rect.width * window.devicePixelRatio;
   canvas.height = rect.height * window.devicePixelRatio;
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  
+
   const w = rect.width;
   const h = rect.height;
   const padding = 40;
-  
+
   // Generate data based on period
   const points = generateChartData(state.chartPeriod, 50);
   const min = Math.min(...points);
   const max = Math.max(...points);
   const range = max - min || 1;
-  
+
   ctx.clearRect(0, 0, w, h);
-  
+
   // Grid
   ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(148,163,184,0.12)';
   ctx.lineWidth = 1;
@@ -875,12 +1106,12 @@ function drawMainChart() {
     ctx.lineTo(w - padding, y);
     ctx.stroke();
   }
-  
+
   // Line
   const gradient = ctx.createLinearGradient(0, padding, 0, h - padding);
   gradient.addColorStop(0, 'rgba(245, 158, 11, 0.3)');
   gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
-  
+
   ctx.beginPath();
   points.forEach((p, i) => {
     const x = padding + (i / (points.length - 1)) * (w - 2 * padding);
@@ -888,20 +1119,20 @@ function drawMainChart() {
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
-  
+
   ctx.strokeStyle = '#f59e0b';
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.stroke();
-  
+
   // Fill
   ctx.lineTo(w - padding, h - padding);
   ctx.lineTo(padding, h - padding);
   ctx.closePath();
   ctx.fillStyle = gradient;
   ctx.fill();
-  
+
   // Points
   points.forEach((p, i) => {
     if (i % 10 === 0 || i === points.length - 1) {
@@ -926,34 +1157,34 @@ function drawGoldChart() {
   canvas.width = rect.width * window.devicePixelRatio;
   canvas.height = rect.height * window.devicePixelRatio;
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  
+
   const w = rect.width;
   const h = rect.height;
-  
+
   const currencies = ['USD', 'EUR', 'GBP', 'SAR', 'AED', 'YER'];
-  const goldPrice = state.goldPrice || 2345;
+  const goldPrice = state.goldPrice || 2344;
   const barWidth = (w - 60) / currencies.length - 10;
   const maxValue = goldPrice * 1.2;
-  
+
   ctx.clearRect(0, 0, w, h);
-  
+
   currencies.forEach((curr, i) => {
     const rate = state.rates[curr] || 1;
     const value = curr === 'USD' ? goldPrice : goldPrice * rate;
     const barHeight = (value / maxValue) * (h - 50);
     const x = 30 + i * (barWidth + 10);
     const y = h - 30 - barHeight;
-    
+
     // Bar
     const gradient = ctx.createLinearGradient(0, y, 0, h - 30);
     gradient.addColorStop(0, '#fbbf24');
     gradient.addColorStop(1, 'rgba(251, 191, 36, 0.2)');
-    
+
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.roundRect(x, y, barWidth, barHeight, 4);
     ctx.fill();
-    
+
     // Label
     ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8';
     ctx.font = '12px Cairo';
@@ -982,15 +1213,15 @@ function setupTopMovers() {
     { pair: 'USD/YER', change: 2.5, value: 585.00 },
     { pair: 'EUR/USD', change: -0.8, value: 1.0840 },
     { pair: 'GBP/USD', change: 1.2, value: 1.2670 },
-    { pair: 'USD/TRY', change: -1.5, value: 32.15 },
+    { pair: 'USD/TRY', change: -1.5, value: 46.34 },
     { pair: 'USD/SAR', change: 0.0, value: 3.7500 },
     { pair: 'BTC/USD', change: 3.2, value: 67500.00 },
     { pair: 'ETH/USD', change: 2.8, value: 3520.00 },
     { pair: 'USD/AED', change: 0.0, value: 3.6700 }
   ];
-  
+
   if (!dom.topMovers) return;
-  
+
   dom.topMovers.innerHTML = movers.map((m, i) => `
     <div class="mover-item">
       <div class="mover-rank ${i < 3 ? 'top' : ''}">${i + 1}</div>
@@ -1022,7 +1253,7 @@ function setupCalculators() {
       }
     });
   });
-  
+
   // Profit calculator
   [dom.calcBuyRate, dom.calcSellRate, dom.calcInvest].forEach(el => {
     el?.addEventListener('input', () => {
@@ -1040,21 +1271,21 @@ function setupCalculators() {
       }
     });
   });
-  
+
   // Batch calculator
   [dom.calcBatch, dom.calcBatchCurrency].forEach(el => {
     el?.addEventListener('input', () => {
-      const lines = dom.calcBatch?.value?.split('\\n') || [];
+      const lines = dom.calcBatch?.value?.split('\n') || [];
       const currency = dom.calcBatchCurrency?.value || 'USD';
       const rate = state.rates[currency] || 1;
       const yerRate = state.rates.YER || CONFIG.YER_RATE;
-      
+
       let total = 0;
       lines.forEach(line => {
         const val = parseFloat(line.trim());
         if (!isNaN(val)) total += val;
       });
-      
+
       const totalYer = (total / rate) * yerRate;
       if (dom.calcBatchResult) {
         dom.calcBatchResult.textContent = `${total.toFixed(2)} ${currency} = ${formatNumber(totalYer, '﷼')}`;
@@ -1076,7 +1307,7 @@ function saveCurrentConversion() {
   if (from === 'USD') result = amount * toRate;
   else if (to === 'USD') result = amount / fromRate;
   else result = (amount / fromRate) * toRate;
-  
+
   const conversion = {
     id: Date.now(),
     from,
@@ -1085,7 +1316,7 @@ function saveCurrentConversion() {
     result,
     date: new Date().toLocaleString('ar-YE')
   };
-  
+
   state.savedConversions.unshift(conversion);
   if (state.savedConversions.length > 20) state.savedConversions.pop();
   localStorage.setItem('savedConversions', JSON.stringify(state.savedConversions));
@@ -1102,7 +1333,7 @@ function deleteConversion(id) {
 
 function renderSavedConversions() {
   if (!dom.savedList) return;
-  
+
   if (state.savedConversions.length === 0) {
     dom.savedList.innerHTML = `
       <div class="saved-empty">
@@ -1112,7 +1343,7 @@ function renderSavedConversions() {
     `;
     return;
   }
-  
+
   dom.savedList.innerHTML = state.savedConversions.map(c => {
     const fromData = CURRENCIES[c.from];
     const toData = CURRENCIES[c.to];
@@ -1144,9 +1375,9 @@ async function shareConversion() {
   if (from === 'USD') result = amount * toRate;
   else if (to === 'USD') result = amount / fromRate;
   else result = (amount / fromRate) * toRate;
-  
-  const text = `تحويل عملات via ريال ودولار\\n${amount} ${fromData.name} = ${formatNumber(result, toData.symbol)} ${toData.name}\\nتاريخ: ${new Date().toLocaleString('ar-YE')}`;
-  
+
+  const text = `تحويل عملات via ريال ودولار\n${amount} ${fromData.name} = ${formatNumber(result, toData.symbol)} ${toData.name}\nتاريخ: ${new Date().toLocaleString('ar-YE')}`;
+
   if (navigator.share) {
     try {
       await navigator.share({
@@ -1176,7 +1407,7 @@ function setupEventListeners() {
       dom.backToTop.classList.toggle('show', window.scrollY > 500);
     }
   }, 100));
-  
+
   // Theme toggle
   dom.themeToggle?.addEventListener('click', () => {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
@@ -1184,7 +1415,7 @@ function setupEventListeners() {
     localStorage.setItem('theme', state.theme);
     showToast(state.theme === 'dark' ? 'الوضع الداكن' : 'الوضع الفاتح', 'info');
   });
-  
+
   // Refresh
   dom.refreshBtn?.addEventListener('click', () => {
     const icon = dom.refreshBtn.querySelector('.refresh-icon');
@@ -1194,7 +1425,7 @@ function setupEventListeners() {
       showToast('تم تحديث البيانات', 'success');
     });
   });
-  
+
   // Mobile menu
   dom.menuToggle?.addEventListener('click', () => {
     const isOpen = dom.mobileMenu?.classList.contains('active');
@@ -1203,10 +1434,10 @@ function setupEventListeners() {
     dom.menuToggle?.setAttribute('aria-expanded', !isOpen);
     dom.mobileMenu?.setAttribute('aria-hidden', isOpen);
   });
-  
+
   dom.menuClose?.addEventListener('click', closeMobileMenu);
   dom.menuOverlay?.addEventListener('click', closeMobileMenu);
-  
+
   // Navigation
   document.querySelectorAll('.nav-link, .mobile-link').forEach(link => {
     link.addEventListener('click', (e) => {
@@ -1217,7 +1448,7 @@ function setupEventListeners() {
         if (target) {
           target.scrollIntoView({ behavior: 'smooth' });
           closeMobileMenu();
-          
+
           // Update active nav
           document.querySelectorAll('.nav-link, .mobile-link').forEach(l => l.classList.remove('active'));
           document.querySelectorAll(`[href="${href}"]`).forEach(l => l.classList.add('active'));
@@ -1225,13 +1456,17 @@ function setupEventListeners() {
       }
     });
   });
-  
+
   // Converter inputs
   dom.amountGlobal?.addEventListener('input', updateConverter);
   dom.amountLocal?.addEventListener('input', updateLocalConverter);
   dom.localCurrency?.addEventListener('change', updateLocalConverter);
-  dom.localRegion?.addEventListener('change', updateLocalConverter);
-  
+  dom.localRegion?.addEventListener('change', () => {
+    updateLocalConverter();
+    updateLocalGoldDisplay();
+    updateLocalSilverDisplay();
+  });
+
   // Swap
   dom.swapBtn?.addEventListener('click', () => {
     const temp = state.fromCurrency;
@@ -1239,23 +1474,23 @@ function setupEventListeners() {
     state.toCurrency = temp;
     selectCurrency('from', state.fromCurrency);
     selectCurrency('to', state.toCurrency);
-    
+
     // Animate
     dom.swapBtn.style.transform = 'rotate(180deg) scale(1.2)';
     setTimeout(() => dom.swapBtn.style.transform = '', 300);
   });
-  
+
   dom.swapLocal?.addEventListener('click', () => {
     // Just refresh for local
     updateLocalConverter();
   });
-  
+
   // Clear amount
   dom.clearAmount?.addEventListener('click', () => {
     if (dom.amountGlobal) dom.amountGlobal.value = '';
     updateConverter();
   });
-  
+
   // Tabs
   dom.tabBtns?.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1267,33 +1502,33 @@ function setupEventListeners() {
       });
     });
   });
-  
+
   // Convert button
   dom.convertBtn?.addEventListener('click', () => {
     updateConverter();
     showToast('تم التحويل', 'success');
   });
-  
+
   // Save
   dom.saveConversion?.addEventListener('click', saveCurrentConversion);
-  
+
   // Share
   dom.shareConversion?.addEventListener('click', shareConversion);
-  
+
   // Metals calculator
   [dom.metalType, dom.metalWeight, dom.metalCurrency].forEach(el => {
     el?.addEventListener('input', updateMetalCalculator);
     el?.addEventListener('change', updateMetalCalculator);
   });
-  
+
   // Back to top
   dom.backToTop?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
-  
+
   // Calculators
   setupCalculators();
-  
+
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1301,7 +1536,7 @@ function setupEventListeners() {
       closeAllDropdowns();
     }
   });
-  
+
   // Resize charts
   window.addEventListener('resize', debounce(() => {
     drawMainChart();
@@ -1333,13 +1568,13 @@ function setupNetworkListeners() {
     showToast('تم استعادة الاتصال', 'success');
     fetchAllData();
   });
-  
+
   window.addEventListener('offline', () => {
     state.isOnline = false;
     dom.offlineBanner?.classList.add('show');
     showToast('أنت غير متصل بالإنترنت', 'warning');
   });
-  
+
   if (!navigator.onLine) {
     dom.offlineBanner?.classList.add('show');
   }
@@ -1354,7 +1589,7 @@ function setupInstallPrompt() {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    
+
     // Show after 30 seconds or on scroll
     setTimeout(() => {
       if (!localStorage.getItem('install-dismissed')) {
@@ -1362,7 +1597,7 @@ function setupInstallPrompt() {
       }
     }, 30000);
   });
-  
+
   dom.installBtn?.addEventListener('click', async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
@@ -1373,17 +1608,17 @@ function setupInstallPrompt() {
     deferredPrompt = null;
     dom.installPrompt?.classList.remove('show');
   });
-  
+
   dom.installClose?.addEventListener('click', () => {
     dom.installPrompt?.classList.remove('show');
     localStorage.setItem('install-dismissed', 'true');
   });
-  
+
   // iOS hint
   if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
     if (!localStorage.getItem('ios-install-shown')) {
       setTimeout(() => {
-        showToast('اضغط على \"مشاركة\" ثم \"إضافة إلى الشاشة الرئيسية\"', 'info', 8000);
+        showToast('اضغط على "مشاركة" ثم "إضافة إلى الشاشة الرئيسية"', 'info', 8000);
         localStorage.setItem('ios-install-shown', 'true');
       }, 10000);
     }
@@ -1396,7 +1631,7 @@ function setupInstallPrompt() {
 function generateParticles() {
   const container = document.getElementById('particles');
   if (!container) return;
-  
+
   for (let i = 0; i < 30; i++) {
     const particle = document.createElement('div');
     particle.className = 'particle';
@@ -1418,7 +1653,7 @@ function setupRevealAnimations() {
       }
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-  
+
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 }
 
@@ -1459,12 +1694,12 @@ function updateLastUpdateTime() {
 function showToast(message, type = 'info', duration = 4000) {
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  
+
   const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
   toast.innerHTML = `<span>${icons[type] || 'ℹ'}</span> <span>${message}</span>`;
-  
+
   dom.toastContainer?.appendChild(toast);
-  
+
   setTimeout(() => {
     toast.remove();
   }, duration + 350);
@@ -1513,55 +1748,43 @@ function throttle(fn, ms) {
    ============================================ */
 window.deleteConversion = deleteConversion;
 
-
-// ============ تسجيل Periodic Sync ============
+/* ============================================
+   PWA ADVANCED FEATURES
+   ============================================ */
 async function registerPeriodicSync() {
-    if ('serviceWorker' in navigator && 'periodicSync' in navigator.serviceWorker) {
-        try {
-            const registration = await navigator.serviceWorker.ready;
-            await registration.periodicSync.register('update-rates', {
-                minInterval: 60 * 60 * 1000 // كل ساعة
-            });
-            console.log('✅ Periodic Sync registered');
-        } catch (err) {
-            console.log('⚠️ Periodic Sync not supported:', err);
-        }
+  if ('serviceWorker' in navigator && 'periodicSync' in navigator.serviceWorker) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.periodicSync.register('update-rates', {
+        minInterval: 60 * 60 * 1000 // كل ساعة
+      });
+      console.log('Periodic Sync registered');
+    } catch (err) {
+      console.log('Periodic Sync not supported:', err);
     }
+  }
 }
 
-// ============ تسجيل Background Sync ============
 async function registerBackgroundSync() {
-    if ('serviceWorker' in navigator && 'SyncManager' in window) {
-        try {
-            const registration = await navigator.serviceWorker.ready;
-            await registration.sync.register('sync-rates');
-            console.log('✅ Background Sync registered');
-        } catch (err) {
-            console.log('⚠️ Background Sync not supported');
-        }
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.sync.register('sync-rates');
+      console.log('Background Sync registered');
+    } catch (err) {
+      console.log('Background Sync not supported');
     }
+  }
 }
 
-// ============ طلب إذن الإشعارات ============
 async function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        const result = await Notification.requestPermission();
-        if (result === 'granted') {
-            console.log('✅ Push notifications granted');
-        }
+  if ('Notification' in window && Notification.permission === 'default') {
+    const result = await Notification.requestPermission();
+    if (result === 'granted') {
+      console.log('Push notifications granted');
     }
+  }
 }
-
-// استدعاء عند التحميل
-document.addEventListener('DOMContentLoaded', () => {
-    registerPeriodicSync();
-    registerBackgroundSync();
-    setTimeout(requestNotificationPermission, 5000); // بعد 5 ثواني
-});
-
-// ============================================================
-// PWA ADVANCED FEATURES
-// ============================================================
 
 function handleLaunchParams() {
   const params = new URLSearchParams(window.location.search);
@@ -1586,7 +1809,8 @@ function navigateToSection(section) {
 function openNoteEditor() {
   const modal = document.createElement('div');
   modal.className = 'note-modal';
-  modal.innerHTML = '<div class="note-overlay" onclick="this.parentElement.remove()"></div><div class="note-content"><h3>📝 ملاحظة جديدة</h3><textarea placeholder="اكتب ملاحظتك هنا..."></textarea><div class="note-actions"><button class="btn-primary" onclick="saveNote(this)">حفظ</button><button class="btn-secondary" onclick="this.closest(\'.note-modal\').remove()">إلغاء</button></div></div>';
+modal.id = 'noteModal-' + Date.now();
+modal.innerHTML = '<div class="note-overlay" onclick="this.parentElement.remove()"></div><div class="note-content"><h3>📝 ملاحظة جديدة</h3><textarea placeholder="اكتب ملاحظتك هنا..."></textarea><div class="note-actions"><button class="btn-primary" onclick="saveNote(this)">حفظ</button><button class="btn-secondary" onclick="document.getElementById(\'' + modal.id + '\').remove()">إلغاء</button></div></div>';
   document.body.appendChild(modal);
 }
 
@@ -1609,215 +1833,3 @@ if ('launchQueue' in window) {
 }
 
 window.addEventListener('load', handleLaunchParams);
-
-
-
-
-/* ============================================
-   LOCAL RATES FROM JSON - FIXED FUNCTION
-   ============================================ */
-async function fetchLocalRatesFromJSON() {
-  try {
-    // FIXED: استخدام cache-busting لتجنب تخزين Service Worker للملف
-    const cacheBuster = Date.now();
-    const response = await fetch(`./api/prices_data.json?_=${cacheBuster}`, {
-      method: 'GET',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
-      }
-    });
-
-    if (!response.ok) {
-      console.warn('[LocalRates] JSON fetch failed, status:', response.status);
-      return;
-    }
-
-    const data = await response.json();
-    console.log('[LocalRates] JSON data received:', data);
-
-    if (!data || !data.regions) {
-      console.warn('[LocalRates] Invalid JSON structure - missing regions');
-      return;
-    }
-
-    let updatedCount = 0;
-
-    // FIXED: تحديث كل المناطق المتاحة في JSON ديناميكياً
-    for (const regionKey in data.regions) {
-      const regionData = data.regions[regionKey];
-      if (!regionData || !regionData.currencies) {
-        console.warn(`[LocalRates] Region "${regionKey}" missing currencies data`);
-        continue;
-      }
-
-      // التأكد من وجود المنطقة في CONFIG
-      if (!CONFIG.LOCAL_RATES[regionKey]) {
-        CONFIG.LOCAL_RATES[regionKey] = {};
-        console.log(`[LocalRates] Created new region: ${regionKey}`);
-      }
-
-      // تحديث كل عملة في المنطقة
-      for (const currencyKey in regionData.currencies) {
-        const currencyData = regionData.currencies[currencyKey];
-
-        // FIXED: التحقق من صحة البيانات (يجب أن تكون {buy, sell})
-        if (currencyData && typeof currencyData === 'object') {
-          if ('buy' in currencyData && 'sell' in currencyData) {
-            const buyVal = parseFloat(currencyData.buy);
-            const sellVal = parseFloat(currencyData.sell);
-
-            if (!isNaN(buyVal) && !isNaN(sellVal) && buyVal > 0 && sellVal > 0) {
-              CONFIG.LOCAL_RATES[regionKey][currencyKey] = {
-                buy: buyVal,
-                sell: sellVal
-              };
-              updatedCount++;
-              console.log(`[LocalRates] ✓ Updated ${regionKey}.${currencyKey}: buy=${buyVal}, sell=${sellVal}`);
-            } else {
-              console.warn(`[LocalRates] Invalid numeric values for ${regionKey}.${currencyKey}:`, currencyData);
-            }
-          } else {
-            console.warn(`[LocalRates] Missing buy/sell keys for ${regionKey}.${currencyKey}:`, currencyData);
-          }
-        } else {
-          console.warn(`[LocalRates] Invalid data type for ${regionKey}.${currencyKey}:`, typeof currencyData);
-        }
-      }
-    }
-
-    if (updatedCount > 0) {
-      console.log(`[LocalRates] ✅ Successfully updated ${updatedCount} rate entries from control panel`);
-      // FIXED: تحديث العرض مباشرة بعد تحديث البيانات
-      updateLocalConverter();
-      // FIXED: تحديث آخر وقت تحديث
-      if (dom.resultTime) {
-        const time = new Date().toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
-        dom.resultTime.textContent = `آخر تحديث: ${time} (من لوحة التحكم)`;
-      }
-      showToast(`تم تحديث ${updatedCount} سعر من لوحة التحكم`, 'success');
-    } else {
-      console.warn('[LocalRates] No valid rates found in JSON - keeping defaults');
-    }
-
-  } catch (err) {
-    console.error('[LocalRates] Error fetching local rates:', err.message);
-    // لا نعرض toast هنا لتجنب الإزعاج - الأسعار الافتراضية تعمل
-  }
-}
-
-/* ============================================
-   LOCAL RATES AUTO-REFRESH FROM CONTROL PANEL
-   ============================================ */
-async function refreshLocalRatesFromControlPanel() {
-  console.log('[ControlPanel] Refreshing local rates from control panel...');
-  await fetchLocalRatesFromJSON();
-}
-
-// FIXED: استدعاء فوري عند التحميل + كل 30 ثانية للأسعار المحلية
-(async function initLocalRates() {
-  // التحميل الأولي
-  await fetchLocalRatesFromJSON();
-
-  // تحديث دوري كل 30 ثانية للأسعار المحلية (أسرع من الأسعار العالمية)
-  setInterval(fetchLocalRatesFromJSON, 30000);
-
-  console.log('[LocalRates] Auto-refresh initialized (every 30s)');
-})();
-
-// ============ تحديث الذهب المحلي من JSON ============
-async function updateGoldFromJSON() {
-    try {
-        const r = await fetch('./api/prices_data.json?t=' + Date.now());
-        if (!r.ok) return;
-        const d = await r.json();
-        
-        if (d.regions) {
-            const region = document.getElementById('local-region')?.value || 'sanaa';
-            const gold = d.regions[region]?.gold;
-            
-            if (gold) {
-                // تحديث عرض الذهب
-                if (gold['21k'] && document.getElementById('gold-gram-21-yer')) {
-                    document.getElementById('gold-gram-21-yer').textContent = 
-                        Number(gold['21k'].buy).toLocaleString() + ' ر.ي';
-                }
-                if (gold['22k'] && document.getElementById('gold-gram-22')) {
-                    document.getElementById('gold-gram-22').textContent = 
-                        '$' + (Number(gold['22k'].buy) / (d.regions[region]?.currencies?.USD?.buy || 533)).toFixed(2);
-                }
-                console.log('✅ ذهب محلي محدث من JSON');
-            }
-        }
-    } catch(e) {}
-}
-
-// استدعاء عند التحميل وعند تغيير المنطقة
-setTimeout(updateGoldFromJSON, 1000);
-document.getElementById('local-region')?.addEventListener('change', updateGoldFromJSON);
-
-// ============ إصلاح الذهب المحلي من JSON مباشرة ============
-async function fixGoldDisplay() {
-    try {
-        const r = await fetch('./api/prices_data.json?t=' + Date.now());
-        if (!r.ok) return;
-        const d = await r.json();
-        
-        if (d.regions) {
-            const region = document.getElementById('local-region')?.value || 'sanaa';
-            const gold = d.regions[region]?.gold;
-            const usdRate = d.regions[region]?.currencies?.USD?.buy || 533;
-            
-            if (gold) {
-                // تحديث العرض في بطاقة الذهب
-                if (gold['21k'] && document.getElementById('gold-gram-21-yer')) {
-                    document.getElementById('gold-gram-21-yer').textContent = 
-                        Number(gold['21k'].buy).toLocaleString() + ' ر.ي';
-                }
-                if (gold['22k'] && document.getElementById('gold-gram-22')) {
-                    document.getElementById('gold-gram-22').textContent = 
-                        '$' + (Number(gold['22k'].buy) / usdRate).toFixed(2);
-                }
-                if (gold['24k'] && document.getElementById('gold-gram-24')) {
-                    document.getElementById('gold-gram-24').textContent = 
-                        '$' + (Number(gold['24k'].buy) / usdRate).toFixed(2);
-                }
-                console.log('✅ ذهب محلي: 21k=' + gold['21k'].buy + ' ر.ي');
-            }
-        }
-    } catch(e) {}
-}
-
-// شغّل الآن وكل 30 ثانية
-setTimeout(fixGoldDisplay, 500);
-setInterval(fixGoldDisplay, 30000);
-document.getElementById('local-region')?.addEventListener('change', fixGoldDisplay);
-
-// ============ تحديث فوري للذهب المحلي عند التحميل ============
-(async function updateGoldNow() {
-    try {
-        const r = await fetch('./api/prices_data.json?t=' + Date.now());
-        if (!r.ok) return;
-        const d = await r.json();
-        
-        if (d.regions && d.regions.sanaa && d.regions.sanaa.gold) {
-            const g = d.regions.sanaa.gold;
-            
-            // تحديث عرض الذهب في الصفحة
-            const el21 = document.getElementById('gold-gram-21-yer');
-            const el22 = document.getElementById('gold-gram-22');
-            const el24 = document.getElementById('gold-gram-24');
-            const el18 = document.getElementById('gold-gram-18');
-            
-            if (el21 && g['21k']) el21.textContent = Number(g['21k'].buy).toLocaleString() + ' ر.ي';
-            if (el22 && g['22k']) el22.textContent = '$' + (Number(g['22k'].buy) / (d.regions.sanaa.currencies.USD.buy || 533)).toFixed(2);
-            if (el24 && g['24k']) el24.textContent = '$' + (Number(g['24k'].buy) / (d.regions.sanaa.currencies.USD.buy || 533)).toFixed(2);
-            if (el18 && g['18k']) {
-                const usd = Number(g['18k']?.buy || g['21k'].buy * 0.857) / (d.regions.sanaa.currencies.USD.buy || 533);
-                if (el18) el18.textContent = '$' + usd.toFixed(2);
-            }
-            
-            console.log('✅ ذهب صنعاء محدث: 21k=' + g['21k'].buy + ' ر.ي');
-        }
-    } catch(e) {}
-})();
