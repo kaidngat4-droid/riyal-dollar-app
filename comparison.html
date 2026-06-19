@@ -2,9 +2,840 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>مقارنة المحافظات | ريال ودولار</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقارنة المحافظات - ريال ودولار</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Regional Comparison Styles */
+        .comparison-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Currency Selector Bar */
+        .currency-bar {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .currency-chip {
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-full);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .currency-chip:hover {
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .currency-chip.active {
+            background: linear-gradient(135deg, var(--primary), var(--gold));
+            border-color: var(--primary);
+            color: var(--text-inverse);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Comparison Table */
+        .comparison-table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-2xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+        }
+
+        .comparison-table-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comparison-table-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .last-update {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .comparison-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .comparison-table th {
+            padding: 1rem 1.5rem;
+            text-align: right;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .comparison-table th:first-child {
+            width: 200px;
+        }
+
+        .comparison-table td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 1rem;
+        }
+
+        .comparison-table tbody tr {
+            transition: all var(--transition-fast);
+        }
+
+        .comparison-table tbody tr:hover {
+            background: var(--border-light);
+        }
+
+        .comparison-table tbody tr.best-buy {
+            background: rgba(16, 185, 129, 0.08);
+            border-left: 3px solid var(--success);
+        }
+
+        .comparison-table tbody tr.best-sell {
+            background: rgba(239, 68, 68, 0.08);
+            border-left: 3px solid var(--danger);
+        }
+
+        .region-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .region-flag {
+            font-size: 1.5rem;
+        }
+
+        .region-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .region-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .region-code {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .price-cell {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .price-cell.buy {
+            color: var(--success);
+        }
+
+        .price-cell.sell {
+            color: var(--danger);
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--danger);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-best-buy {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .badge-best-sell {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .badge-spread {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--primary);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-fast);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card.best-buy-card {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .stat-card.best-sell-card {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .stat-card.spread-card {
+            border-color: var(--primary);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .stat-card-title {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .stat-card-region {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Spread Analysis */
+        .spread-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 2rem;
+        }
+
+        .spread-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .spread-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            height: 200px;
+            padding: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .spread-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 80px;
+        }
+
+        .spread-bar-visual {
+            width: 60px;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        .spread-bar-visual:hover {
+            filter: brightness(1.2);
+        }
+
+        .spread-bar-value {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .spread-bar-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Gold Comparison */
+        .gold-comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .gold-comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .gold-karat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            transition: all var(--transition-fast);
+        }
+
+        .gold-karat-card:hover {
+            border-color: var(--gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .gold-karat-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--gold);
+        }
+
+        .gold-karat-table {
+            width: 100%;
+        }
+
+        .gold-karat-table td {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .gold-karat-table td:first-child {
+            color: var(--text-muted);
+        }
+
+        .gold-karat-table td:last-child {
+            font-weight: 700;
+            text-align: left;
+        }
+
+        /* Export Button */
+        .export-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-export {
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-export:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: var(--text-inverse);
+        }
+
+        /* Loading shimmer */
+        .shimmer {
+            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-md);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
 </head>
 <body>
-    <h1>مقارنة المحافظات</h1>
+    <div class="comparison-container">
+        <div class="comparison-header">
+            <h1>📍 مقارنة المحافظات</h1>
+            <p>قارن أسعار الصرف والذهب بين جميع المحافظات اليمنية</p>
+        </div>
+
+        <!-- Currency Selector -->
+        <div class="currency-bar" id="currency-bar">
+            <button class="currency-chip active" data-currency="USD">🇺🇸 USD</button>
+            <button class="currency-chip" data-currency="SAR">🇸🇦 SAR</button>
+            <button class="currency-chip" data-currency="EUR">🇪🇺 EUR</button>
+            <button class="currency-chip" data-currency="AED">🇦🇪 AED</button>
+            <button class="currency-chip" data-currency="GBP">🇬🇧 GBP</button>
+            <button class="currency-chip" data-currency="KWD">🇰🇼 KWD</button>
+            <button class="currency-chip" data-currency="gold-21">🥇 ذهب 21</button>
+            <button class="currency-chip" data-currency="gold-24">🥇 ذهب 24</button>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card best-buy-card">
+                <div class="stat-card-title">✅ أفضل سعر شراء</div>
+                <div class="stat-card-value" id="best-buy-price">--</div>
+                <div class="stat-card-region" id="best-buy-region">--</div>
+            </div>
+            <div class="stat-card best-sell-card">
+                <div class="stat-card-title">💰 أفضل سعر بيع</div>
+                <div class="stat-card-value" id="best-sell-price">--</div>
+                <div class="stat-card-region" id="best-sell-region">--</div>
+            </div>
+            <div class="stat-card spread-card">
+                <div class="stat-card-title">📊 أقل فارق سعري</div>
+                <div class="stat-card-value" id="best-spread">--</div>
+                <div class="stat-card-region" id="best-spread-region">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-title">📈 متوسط السعر</div>
+                <div class="stat-card-value" id="avg-price">--</div>
+                <div class="stat-card-region">جميع المحافظات</div>
+            </div>
+        </div>
+
+        <!-- Export Bar -->
+        <div class="export-bar">
+            <button class="btn-export" onclick="comparison.exportCSV()">📥 CSV</button>
+            <button class="btn-export" onclick="comparison.shareComparison()">📤 مشاركة</button>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-table-card">
+            <div class="comparison-table-header">
+                <h2 class="comparison-table-title" id="table-title">الدولار الأمريكي (USD)</h2>
+                <span class="last-update" id="last-update">آخر تحديث: --</span>
+            </div>
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>المحافظة</th>
+                            <th>سعر الشراء</th>
+                            <th>سعر البيع</th>
+                            <th>الفارق</th>
+                            <th>الاتجاه</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-tbody">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Spread Analysis Chart -->
+        <div class="spread-card">
+            <h2 class="spread-title">📊 تحليل الفروق السعرية</h2>
+            <div class="spread-chart" id="spread-chart">
+                <!-- Dynamic bars -->
+            </div>
+        </div>
+
+        <!-- Gold Comparison (if gold selected) -->
+        <div class="gold-comparison-grid" id="gold-comparison" style="display: none;">
+            <div class="gold-karat-card">
+                <h3 class="gold-karat-title">🥇 ذهب عيار 21</h3>
+                <table class="gold-karat-table" id="gold-21-table"></table>
+            </div>
+            <div class="gold-karat-card">
+                <h3 class="gold-karat-title">🥇 ذهب عيار 22</h3>
+                <table class="gold-karat-table" id="gold-22-table"></table>
+            </div>
+            <div class="gold-karat-card">
+                <h3 class="gold-karat-title">🥇 ذهب عيار 24</h3>
+                <table class="gold-karat-table" id="gold-24-table"></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // REGIONAL COMPARISON SYSTEM - v2.0
+        // ============================================
+
+        class RegionalComparison {
+            constructor() {
+                this.currentCurrency = 'USD';
+                this.data = this.getMockData();
+                this.init();
+            }
+
+            init() {
+                this.cacheDOM();
+                this.bindEvents();
+                this.render();
+            }
+
+            cacheDOM() {
+                this.dom = {
+                    currencyBar: document.getElementById('currency-bar'),
+                    statsGrid: document.getElementById('stats-grid'),
+                    bestBuyPrice: document.getElementById('best-buy-price'),
+                    bestBuyRegion: document.getElementById('best-buy-region'),
+                    bestSellPrice: document.getElementById('best-sell-price'),
+                    bestSellRegion: document.getElementById('best-sell-region'),
+                    bestSpread: document.getElementById('best-spread'),
+                    bestSpreadRegion: document.getElementById('best-spread-region'),
+                    avgPrice: document.getElementById('avg-price'),
+                    tableTitle: document.getElementById('table-title'),
+                    lastUpdate: document.getElementById('last-update'),
+                    tbody: document.getElementById('comparison-tbody'),
+                    spreadChart: document.getElementById('spread-chart'),
+                    goldComparison: document.getElementById('gold-comparison')
+                };
+            }
+
+            bindEvents() {
+                this.dom.currencyBar.addEventListener('click', (e) => {
+                    const chip = e.target.closest('.currency-chip');
+                    if (!chip) return;
+
+                    this.dom.currencyBar.querySelectorAll('.currency-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    this.currentCurrency = chip.dataset.currency;
+                    this.render();
+                });
+            }
+
+            getMockData() {
+                return {
+                    USD: {
+                        sanaa: { buy: 533, sell: 535, trend: 'stable', change: 0 },
+                        aden: { buy: 1550, sell: 1558, trend: 'up', change: 2.5 },
+                        taiz: { buy: 530, sell: 535, trend: 'down', change: -1.2 },
+                        hodeidah: { buy: 530, sell: 535, trend: 'stable', change: 0 },
+                        ibb: { buy: 530, sell: 535, trend: 'stable', change: 0 },
+                        marib: { buy: 535, sell: 540, trend: 'up', change: 1.0 },
+                        hadramout: { buy: 1555, sell: 1565, trend: 'up', change: 1.8 }
+                    },
+                    SAR: {
+                        sanaa: { buy: 140, sell: 141, trend: 'stable', change: 0 },
+                        aden: { buy: 409, sell: 410, trend: 'up', change: 1.2 },
+                        taiz: { buy: 140, sell: 141, trend: 'stable', change: 0 },
+                        hodeidah: { buy: 140, sell: 141, trend: 'stable', change: 0 },
+                        ibb: { buy: 140, sell: 141, trend: 'stable', change: 0 },
+                        marib: { buy: 142, sell: 143, trend: 'up', change: 0.8 },
+                        hadramout: { buy: 410, sell: 412, trend: 'up', change: 1.5 }
+                    },
+                    EUR: {
+                        sanaa: { buy: 620, sell: 625, trend: 'up', change: 2.1 },
+                        aden: { buy: 1790, sell: 1805, trend: 'up', change: 3.2 },
+                        taiz: { buy: 618, sell: 623, trend: 'up', change: 1.8 },
+                        hodeidah: { buy: 618, sell: 623, trend: 'up', change: 1.8 },
+                        ibb: { buy: 618, sell: 623, trend: 'up', change: 1.8 },
+                        marib: { buy: 623, sell: 628, trend: 'up', change: 2.5 },
+                        hadramout: { buy: 1795, sell: 1810, trend: 'up', change: 3.5 }
+                    },
+                    'gold-21': {
+                        sanaa: { buy: 63203, sell: 64708, trend: 'up', change: 150 },
+                        aden: { buy: 183799, sell: 188440, trend: 'up', change: 420 },
+                        taiz: { buy: 63000, sell: 64500, trend: 'up', change: 120 },
+                        hodeidah: { buy: 63000, sell: 64500, trend: 'up', change: 120 },
+                        ibb: { buy: 63000, sell: 64500, trend: 'up', change: 120 },
+                        marib: { buy: 63500, sell: 65000, trend: 'up', change: 180 },
+                        hadramout: { buy: 184200, sell: 188900, trend: 'up', change: 450 }
+                    }
+                };
+            }
+
+            render() {
+                const data = this.data[this.currentCurrency] || {};
+                const regions = Object.keys(data);
+
+                if (regions.length === 0) {
+                    this.dom.tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;">لا توجد بيانات</td></tr>';
+                    return;
+                }
+
+                // Calculate stats
+                const buyPrices = regions.map(r => ({ region: r, price: data[r].buy }));
+                const sellPrices = regions.map(r => ({ region: r, price: data[r].sell }));
+                const spreads = regions.map(r => ({ region: r, spread: data[r].sell - data[r].buy }));
+
+                const bestBuy = buyPrices.reduce((min, curr) => curr.price < min.price ? curr : min);
+                const bestSell = sellPrices.reduce((max, curr) => curr.price > max.price ? curr : max);
+                const bestSpread = spreads.reduce((min, curr) => curr.spread < min.spread ? curr : min);
+                const avgBuy = buyPrices.reduce((sum, curr) => sum + curr.price, 0) / buyPrices.length;
+
+                // Update stats
+                this.dom.bestBuyPrice.textContent = bestBuy.price.toLocaleString('ar-YE') + ' ر.ي';
+                this.dom.bestBuyRegion.textContent = this.getRegionName(bestBuy.region);
+
+                this.dom.bestSellPrice.textContent = bestSell.price.toLocaleString('ar-YE') + ' ر.ي';
+                this.dom.bestSellRegion.textContent = this.getRegionName(bestSell.region);
+
+                this.dom.bestSpread.textContent = bestSpread.spread.toLocaleString('ar-YE') + ' ر.ي';
+                this.dom.bestSpreadRegion.textContent = this.getRegionName(bestSpread.region);
+
+                this.dom.avgPrice.textContent = Math.round(avgBuy).toLocaleString('ar-YE') + ' ر.ي';
+
+                // Update table
+                const currencyNames = {
+                    USD: 'الدولار الأمريكي', SAR: 'الريال السعودي', EUR: 'اليورو',
+                    AED: 'الدرهم الإماراتي', GBP: 'الجنيه الإسترليني', KWD: 'الدينار الكويتي',
+                    'gold-21': 'ذهب عيار 21', 'gold-24': 'ذهب عيار 24'
+                };
+
+                this.dom.tableTitle.textContent = currencyNames[this.currentCurrency] || this.currentCurrency;
+                this.dom.lastUpdate.textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-YE');
+
+                // Render table rows
+                this.dom.tbody.innerHTML = regions.map(region => {
+                    const d = data[region];
+                    const isBestBuy = region === bestBuy.region;
+                    const isBestSell = region === bestSell.region;
+                    const spread = d.sell - d.buy;
+
+                    let rowClass = '';
+                    if (isBestBuy) rowClass = 'best-buy';
+                    else if (isBestSell) rowClass = 'best-sell';
+
+                    const trendIcon = d.trend === 'up' ? '▲' : d.trend === 'down' ? '▼' : '—';
+                    const trendClass = d.trend === 'up' ? 'trend-up' : d.trend === 'down' ? 'trend-down' : '';
+
+                    return `
+                        <tr class="${rowClass}">
+                            <td>
+                                <div class="region-cell">
+                                    <span class="region-flag">📍</span>
+                                    <div class="region-info">
+                                        <span class="region-name">${this.getRegionName(region)}</span>
+                                        <span class="region-code">${region.toUpperCase()}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="price-cell buy">${d.buy.toLocaleString('ar-YE')}</td>
+                            <td class="price-cell sell">${d.sell.toLocaleString('ar-YE')}</td>
+                            <td>
+                                <span class="badge badge-spread">${spread.toLocaleString('ar-YE')}</span>
+                            </td>
+                            <td>
+                                <span class="trend-indicator ${trendClass}">
+                                    ${trendIcon} ${Math.abs(d.change).toFixed(1)}%
+                                </span>
+                            </td>
+                            <td>
+                                ${isBestBuy ? '<span class="badge badge-best-buy">✅ أفضل شراء</span>' : ''}
+                                ${isBestSell ? '<span class="badge badge-best-sell">💰 أفضل بيع</span>' : ''}
+                                ${!isBestBuy && !isBestSell ? '<span class="badge badge-spread">عادي</span>' : ''}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                // Render spread chart
+                this.renderSpreadChart(regions, data, bestSpread.spread);
+
+                // Show/hide gold comparison
+                const isGold = this.currentCurrency.startsWith('gold');
+                this.dom.goldComparison.style.display = isGold ? 'grid' : 'none';
+                if (isGold) this.renderGoldComparison(data);
+            }
+
+            renderSpreadChart(regions, data, maxSpread) {
+                const colors = [
+                    'linear-gradient(180deg, #f59e0b, #d97706)',
+                    'linear-gradient(180deg, #10b981, #059669)',
+                    'linear-gradient(180deg, #3b82f6, #2563eb)',
+                    'linear-gradient(180deg, #8b5cf6, #7c3aed)',
+                    'linear-gradient(180deg, #ef4444, #dc2626)',
+                    'linear-gradient(180deg, #ec4899, #db2777)',
+                    'linear-gradient(180deg, #06b6d4, #0891b2)'
+                ];
+
+                this.dom.spreadChart.innerHTML = regions.map((region, i) => {
+                    const spread = data[region].sell - data[region].buy;
+                    const height = Math.max((spread / maxSpread) * 180, 20);
+
+                    return `
+                        <div class="spread-bar">
+                            <div class="spread-bar-visual" style="height: ${height}px; background: ${colors[i % colors.length]};"></div>
+                            <span class="spread-bar-value">${spread.toLocaleString('ar-YE')}</span>
+                            <span class="spread-bar-label">${this.getRegionName(region)}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderGoldComparison(data) {
+                const karats = ['21', '22', '24'];
+                const karatData = {
+                    '21': { sanaa: 63203, aden: 183799, taiz: 63000, hodeidah: 63000, ibb: 63000, marib: 63500, hadramout: 184200 },
+                    '22': { sanaa: 66000, aden: 192000, taiz: 65800, hodeidah: 65800, ibb: 65800, marib: 66300, hadramout: 192500 },
+                    '24': { sanaa: 72000, aden: 209000, taiz: 71800, hodeidah: 71800, ibb: 71800, marib: 72300, hadramout: 209500 }
+                };
+
+                karats.forEach(karat => {
+                    const table = document.getElementById(`gold-${karat}-table`);
+                    if (!table) return;
+
+                    const prices = karatData[karat];
+                    table.innerHTML = Object.entries(prices).map(([region, price]) => `
+                        <tr>
+                            <td>${this.getRegionName(region)}</td>
+                            <td>${price.toLocaleString('ar-YE')} ر.ي</td>
+                        </tr>
+                    `).join('');
+                });
+            }
+
+            getRegionName(code) {
+                const names = {
+                    sanaa: 'صنعاء', aden: 'عدن', taiz: 'تعز', hodeidah: 'الحديدة',
+                    ibb: 'إب', marib: 'مأرب', hadramout: 'حضرموت'
+                };
+                return names[code] || code;
+            }
+
+            exportCSV() {
+                const data = this.data[this.currentCurrency];
+                if (!data) return;
+
+                let csv = 'المحافظة,سعر الشراء,سعر البيع,الفارق,الاتجاه\n';
+                Object.entries(data).forEach(([region, d]) => {
+                    csv += `${this.getRegionName(region)},${d.buy},${d.sell},${d.sell - d.buy},${d.trend}\n`;
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `comparison-${this.currentCurrency}-${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+
+                this.showToast('✅ تم تصدير البيانات بنجاح', 'success');
+            }
+
+            shareComparison() {
+                const data = this.data[this.currentCurrency];
+                if (!data) return;
+
+                const bestBuy = Object.entries(data).reduce((min, [region, d]) => 
+                    d.buy < min[1].buy ? [region, d] : min, [null, { buy: Infinity }]);
+
+                const text = `مقارنة أسعار ${this.currentCurrency} في اليمن 🇾🇪\n` +
+                    `✅ أفضل سعر شراء: ${this.getRegionName(bestBuy[0])} — ${bestBuy[1].buy.toLocaleString('ar-YE')} ر.ي\n` +
+                    `📊 عبر ريال ودولار`;
+
+                if (navigator.share) {
+                    navigator.share({ title: 'مقارنة الأسعار', text });
+                } else {
+                    navigator.clipboard.writeText(text);
+                    this.showToast('✅ تم نسخ المقارنة', 'success');
+                }
+            }
+
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: ${type === 'success' ? '#10b981' : '#3b82f6'};
+                    color: white;
+                    padding: 1rem 2rem;
+                    border-radius: 1rem;
+                    font-weight: 600;
+                    z-index: 10000;
+                    animation: fadeIn 0.3s ease;
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        }
+
+        // Initialize
+        const comparison = new RegionalComparison();
+    </script>
 </body>
 </html>
