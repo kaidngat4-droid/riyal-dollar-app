@@ -1,41 +1,94 @@
 {
-  "id": "riyal-dollar-app",
-  "name": "ريال ودولار",
+  "name": "ريال ودولار - أسعار الصرف والذهب",
   "short_name": "ريال ودولار",
-  "description": "أسعار الصرف والذهب والفضة - تطبيق شامل للعملات والمعادن الثمينة",
-  "start_url": "/riyal-dollar-app/",
-  "scope": "/riyal-dollar-app/",
+  "description": "تطبيق احترافي لأسعار الصرف والذهب والفضة في اليمن",
+  "start_url": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "orientation": "portrait-primary",
   "background_color": "#0f172a",
   "theme_color": "#f59e0b",
-  "categories": ["finance", "utilities"],
+  "orientation": "portrait",
+  "scope": "/",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
-    {"src": "images/icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any"},
-    {"src": "images/icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any"},
-    {"src": "images/icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any"},
-    {"src": "images/icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any"},
-    {"src": "images/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any"},
-    {"src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
-    {"src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+    {
+      "src": "images/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business"],
+  "screenshots": [
+    {
+      "src": "images/screenshot-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "images/screenshot-2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
   ],
   "shortcuts": [
-    {"name": "محول العملات", "short_name": "محول", "url": "/riyal-dollar-app/?shortcut=converter", "icons": [{"src": "images/icon-96.png", "sizes": "96x96"}]},
-    {"name": "أسعار الذهب", "short_name": "ذهب", "url": "/riyal-dollar-app/?shortcut=gold", "icons": [{"src": "images/icon-96.png", "sizes": "96x96"}]},
-    {"name": "أسعار الصرف", "short_name": "صرف", "url": "/riyal-dollar-app/?shortcut=rates", "icons": [{"src": "images/icon-96.png", "sizes": "96x96"}]}
-  ],
-  "file_handlers": [{"action": "/riyal-dollar-app/?file=open", "accept": {"text/csv": [".csv"], "application/json": [".json"]}, "launch_type": "single-client"}],
-  "launch_handler": {"client_mode": ["navigate-existing", "auto"]},
-  "protocol_handlers": [{"protocol": "web+riyaldollar", "url": "/riyal-dollar-app/?protocol=%s"}],
-  "share_target": {"action": "/riyal-dollar-app/?share=true", "method": "POST", "enctype": "multipart/form-data", "params": {"title": "name", "text": "description", "url": "link"}},
-  "note_taking": {"new_note_url": "/riyal-dollar-app/?note=new"},
-  "screenshots": [
-    {"src": "images/screenshot-1.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "محول العملات"},
-    {"src": "images/screenshot-2.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "أسعار الذهب"}
-  ],
-  "related_applications": [],
-  "prefer_related_applications": false
+    {
+      "name": "محول العملات",
+      "short_name": "محول",
+      "description": "تحويل فوري بين العملات",
+      "url": "/#converter",
+      "icons": [{ "src": "images/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "الذهب والفضة",
+      "short_name": "ذهب",
+      "description": "أسعار المعادن الثمينة",
+      "url": "/#gold-silver",
+      "icons": [{ "src": "images/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "التنبيهات",
+      "short_name": "تنبيهات",
+      "description": "تنبيهات الأسعار",
+      "url": "/alerts.html",
+      "icons": [{ "src": "images/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
 }
