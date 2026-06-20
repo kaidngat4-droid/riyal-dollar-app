@@ -56,7 +56,6 @@ class DataFetcher {
             // Notify listeners
             this.listeners.forEach(cb => cb(data));
 
-            console.log('[DataFetcher] Data updated at', new Date().toLocaleTimeString('ar-YE'));
             return data;
 
         } catch (err) {
@@ -225,3 +224,71 @@ document.addEventListener('DOMContentLoaded', () => {
         window.dataFetcher.init();
     }
 });
+/* ============================================
+   FETCHER - Global Rates Fetcher
+   ============================================ */
+
+const GLOBAL_API_URL = './api/prices_data.json';
+const FALLBACK_APIS = {
+  exchange: 'https://api.frankfurter.app/latest?from=USD',
+  gold: 'https://api.gold-api.com/price/XAU',
+  silver: 'https://api.gold-api.com/price/XAG'
+};
+
+async function fetchGlobalRates() {
+  try {
+    // المحاولة 1: من prices_data.json (أسرع - محلي)
+    const localRes = await fetch(`${GLOBAL_API_URL}?_=${Date.now()}`, {
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    
+    if (localRes.ok) {
+      const data = await localRes.json();
+      if (data.global) {
+        console.log('[Fetcher] Loaded from local JSON');
+        return data.global;
+      }
+    }
+
+    // المحاولة 2: من APIs خارجية (fallback)
+    console.log('[Fetcher] Falling back to external APIs...');
+    return await fetchFromExternalAPIs();
+
+  } catch (err) {
+    console.error('[Fetcher] Error:', err);
+    return null;
+  }
+}
+
+async function fetchFromExternalAPIs() {
+  try {
+    const [exchangeRes, goldRes, silverRes] = await Promise.all([
+      fetch(FALLBACK_APIS.exchange),
+      fetch(FALLBACK_APIS.gold),
+      fetch(FALLBACK_APIS.silver)
+    ]);
+
+    const exchangeData = exchangeRes.ok ? await exchangeRes.json() : null;
+    const goldData = goldRes.ok ? await goldRes.json() : null;
+    const silverData = silverRes.ok ? await silverRes.json() : null;
+
+    return {
+      last_update: new Date().toISOString(),
+      source: 'external-apis',
+      exchange: exchangeData?.rates || {},
+      metals: {
+        gold: { price: goldData?.price || 2344, change: 0, changePct: 0 },
+        silver: { price: silverData?.price || 28.8, change: 0, changePct: 0 },
+        platinum: { price: 1031, change: 0, changePct: 0 },
+        palladium: { price: 961, change: 0, changePct: 0 }
+      }
+    };
+
+  } catch (err) {
+    console.error('[Fetcher] External APIs failed:', err);
+    return null;
+  }
+}
+
+// تصدير للاستخدام في app.js
+window.fetchGlobalRates = fetchGlobalRates;
