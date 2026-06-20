@@ -18,13 +18,15 @@ const STATIC_ASSETS = [
     '/js/app.js',
     '/js/history-system.js',
     '/js/app-v2-patch.js',
-    '/manifest.json',
-    '/api/prices_data.json'
+    '/manifest.json'
+    // ملاحظة: prices_data.json ليس هنا لأنه Network First فقط
 ];
 
 const OFFLINE_PAGE = '/offline.html';
 
-// Install - Cache static assets
+// ============================================
+// INSTALL
+// ============================================
 self.addEventListener('install', event => {
     console.log('[SW] Installing v2.0...');
 
@@ -39,7 +41,9 @@ self.addEventListener('install', event => {
     );
 });
 
-// Activate - Clean old caches
+// ============================================
+// ACTIVATE
+// ============================================
 self.addEventListener('activate', event => {
     console.log('[SW] Activating v2.0...');
 
@@ -57,7 +61,9 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Fetch - Stale-While-Revalidate strategy
+// ============================================
+// FETCH
+// ============================================
 self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
@@ -67,6 +73,23 @@ self.addEventListener('fetch', event => {
 
     // Skip chrome-extension and other non-http requests
     if (!url.protocol.startsWith('http')) return;
+
+    // ⭐ NEW: Network First لـ prices_data.json - لا تخزن أبداً
+    if (url.pathname.includes('prices_data.json')) {
+        event.respondWith(
+            fetch(event.request, {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' }
+            }).catch(() => {
+                return new Response(JSON.stringify({
+                    error: 'Offline - using cached data'
+                }), {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            })
+        );
+        return;
+    }
 
     // Strategy for HTML pages
     if (request.mode === 'navigate') {
@@ -96,7 +119,10 @@ self.addEventListener('fetch', event => {
     event.respondWith(networkWithCacheFallback(request));
 });
 
-// Navigation handler - Show offline page when offline
+// ============================================
+// STRATEGY HANDLERS
+// ============================================
+
 async function handleNavigation(request) {
     try {
         const networkResponse = await fetch(request);
@@ -111,13 +137,11 @@ async function handleNavigation(request) {
             return cachedResponse;
         }
 
-        // Return offline page
         const offlineResponse = await cache.match(OFFLINE_PAGE);
         if (offlineResponse) {
             return offlineResponse;
         }
 
-        // Last resort
         return new Response(
             '<h1>غير متصل</h1><p>الرجاء التحقق من الاتصال بالإنترنت</p>',
             { headers: { 'Content-Type': 'text/html' } }
@@ -125,7 +149,6 @@ async function handleNavigation(request) {
     }
 }
 
-// Stale-While-Revalidate: Return cache immediately, update in background
 async function staleWhileRevalidate(request, cacheName) {
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
@@ -140,7 +163,6 @@ async function staleWhileRevalidate(request, cacheName) {
     return cachedResponse || fetchPromise;
 }
 
-// Cache First: For images
 async function cacheFirst(request, cacheName) {
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
@@ -156,7 +178,6 @@ async function cacheFirst(request, cacheName) {
         }
         return networkResponse;
     } catch (err) {
-        // Return placeholder for images
         if (request.destination === 'image') {
             return new Response(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="#334155" width="100" height="100"/></svg>',
@@ -167,7 +188,6 @@ async function cacheFirst(request, cacheName) {
     }
 }
 
-// Network First: For API calls
 async function networkFirst(request, cacheName) {
     const cache = await caches.open(cacheName);
 
@@ -186,7 +206,6 @@ async function networkFirst(request, cacheName) {
     }
 }
 
-// Network with Cache Fallback
 async function networkWithCacheFallback(request) {
     try {
         const networkResponse = await fetch(request);
@@ -211,12 +230,9 @@ async function networkWithCacheFallback(request) {
 
 self.addEventListener('sync', event => {
     if (event.tag === 'sync-rates') {
-        console.log('[SW] Background sync: sync-rates');
         event.waitUntil(syncRates());
     }
-
     if (event.tag === 'sync-alerts') {
-        console.log('[SW] Background sync: sync-alerts');
         event.waitUntil(syncAlerts());
     }
 });
@@ -232,7 +248,6 @@ async function syncRates() {
 }
 
 async function syncAlerts() {
-    // Check alerts in background
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
         client.postMessage({
@@ -248,29 +263,24 @@ async function syncAlerts() {
 
 self.addEventListener('periodicsync', event => {
     if (event.tag === 'update-rates') {
-        console.log('[SW] Periodic sync: update-rates');
         event.waitUntil(updateRatesPeriodic());
     }
 });
 
 async function updateRatesPeriodic() {
     try {
-        // Update rates cache
         const cache = await caches.open(DYNAMIC_CACHE);
 
-        // Fetch global rates
         const ratesResponse = await fetch('https://open.er-api.com/v6/latest/USD');
         if (ratesResponse.ok) {
             cache.put('/api/rates-global', ratesResponse.clone());
         }
 
-        // Fetch local rates
         const localResponse = await fetch('/api/prices_data.json?_=' + Date.now());
         if (localResponse.ok) {
             cache.put('/api/prices_data.json', localResponse.clone());
         }
 
-        // Notify clients
         const clients = await self.clients.matchAll();
         clients.forEach(client => {
             client.postMessage({
@@ -289,8 +299,6 @@ async function updateRatesPeriodic() {
 // ============================================
 
 self.addEventListener('push', event => {
-    console.log('[SW] Push received:', event);
-
     let data = {};
     try {
         data = event.data.json();
@@ -329,13 +337,11 @@ self.addEventListener('notificationclick', event => {
 
     event.waitUntil(
         clients.matchAll({ type: 'window' }).then(clientList => {
-            // Focus existing client
             for (const client of clientList) {
                 if (client.url.includes('riyal-dollar') && 'focus' in client) {
                     return client.focus();
                 }
             }
-            // Open new window
             if (clients.openWindow) {
                 return clients.openWindow('/');
             }
@@ -344,7 +350,7 @@ self.addEventListener('notificationclick', event => {
 });
 
 // ============================================
-// MESSAGE HANDLING (from main thread)
+// MESSAGE HANDLING
 // ============================================
 
 self.addEventListener('message', event => {
