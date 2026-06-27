@@ -1,6 +1,6 @@
 /* ============================================
    ريال ودولار - Currency, Gold & Silver App
-   Main Application JavaScript - FIXED v2.0.0
+   Main Application JavaScript - FIXED v2.1.0
    ============================================ */
 
 'use strict';
@@ -9,12 +9,20 @@
    CONFIGURATION
    ============================================ */
 const CONFIG = {
-  VERSION: '2.0.0',
+  VERSION: '2.1.0',
+  // ⭐ PROXY URLs (route everything through Vercel to avoid CORS)
+  PROXY_BASE: 'https://oanda-proxy-green.vercel.app',
+  OANDA_PROXY: 'https://oanda-proxy-green.vercel.app/api/oanda-pricing',
+  METALS_PROXY: 'https://oanda-proxy-green.vercel.app/api/metals',
+  RATES_PROXY: 'https://oanda-proxy-green.vercel.app/api/rates',
+  // Direct fallbacks (used only if proxy fails)
   API_BASE: 'https://open.er-api.com/v6/latest',
   FALLBACK_API: 'https://api.exchangerate-api.com/v4/latest',
-  GOLD_API: 'https://api.gold-api.com/price/XAU',
-  SILVER_API: 'https://api.gold-api.com/price/XAG',
-  UPDATE_INTERVAL: 60000,
+  // ⭐ FIXED: Use plain commas, NOT %2C
+  OANDA_INSTRUMENTS: 'EUR_USD,USD_JPY,GBP_USD,USD_CHF,AUD_USD,USD_CAD,NZD_USD,EUR_GBP,EUR_JPY,GBP_JPY',
+  DATA_URL: './api/prices_data.json',
+  UPDATE_INTERVAL: 30000,      // 30 seconds for OANDA
+  METALS_INTERVAL: 120000,     // 2 minutes for metals
   CACHE_DURATION: 300000,
   DEFAULT_FROM: 'USD',
   DEFAULT_TO: 'YER',
@@ -76,34 +84,34 @@ const CURRENCIES = {
 };
 
 const RATES_TABLE_DATA = [
-  { code: 'USD', rate: 1, change: 0.0014, changePct: 0.14 },
-  { code: 'EUR', rate: 0.861314, change: -0.0008, changePct: -0.09 },
-  { code: 'GBP', rate: 0.744885, change: 0.0005, changePct: 0.06 },
-  { code: 'SAR', rate: 3.75, change: 0.0, changePct: 0.0 },
-  { code: 'AED', rate: 3.6725, change: 0.0, changePct: 0.0 },
-  { code: 'KWD', rate: 0.308318, change: 0.0001, changePct: 0.03 },
-  { code: 'QAR', rate: 3.64, change: 0.0, changePct: 0.0 },
-  { code: 'OMR', rate: 0.384497, change: 0.0, changePct: 0.0 },
-  { code: 'BHD', rate: 0.376, change: 0.0, changePct: 0.0 },
-  { code: 'JOD', rate: 0.709, change: 0.0, changePct: 0.0 },
-  { code: 'EGP', rate: 50.202783, change: -0.2410, changePct: -0.48 },
-  { code: 'TRY', rate: 46.33978, change: -0.6396, changePct: -1.38 },
-  { code: 'CNY', rate: 6.769763, change: 0.0190, changePct: 0.28 },
-  { code: 'JPY', rate: 160.357421, change: 0.8980, changePct: 0.56 },
-  { code: 'INR', rate: 94.617681, change: 0.1325, changePct: 0.14 },
-  { code: 'CAD', rate: 1.399083, change: -0.0102, changePct: -0.73 },
-  { code: 'AUD', rate: 1.414641, change: 0.0028, changePct: 0.20 },
-  { code: 'CHF', rate: 0.793474, change: -0.0017, changePct: -0.22 },
-  { code: 'RUB', rate: 72.447516, change: 0.9491, changePct: 1.31 },
-  { code: 'ZAR', rate: 16.185724, change: -0.1262, changePct: -0.78 },
-  { code: 'BRL', rate: 5.067231, change: 0.0081, changePct: 0.16 },
-  { code: 'MXN', rate: 17.205389, change: -0.0516, changePct: -0.30 },
-  { code: 'SGD', rate: 1.281946, change: 0.0009, changePct: 0.07 },
-  { code: 'HKD', rate: 7.83281, change: 0.0, changePct: 0.0 },
-  { code: 'KRW', rate: 1508.825189, change: 5.5827, changePct: 0.37 },
-  { code: 'PKR', rate: 278.335735, change: -0.5010, changePct: -0.18 },
-  { code: 'LBP', rate: 89500, change: 0.0, changePct: 0.0 },
-  { code: 'IQD', rate: 1311.63285, change: 0.0, changePct: 0.0 },
+  { code: 'USD', rate: 1, change: 0, changePct: 0 },
+  { code: 'EUR', rate: 0.8613, change: -0.0008, changePct: -0.09 },
+  { code: 'GBP', rate: 0.7449, change: 0.0005, changePct: 0.06 },
+  { code: 'SAR', rate: 3.75, change: 0, changePct: 0 },
+  { code: 'AED', rate: 3.6725, change: 0, changePct: 0 },
+  { code: 'KWD', rate: 0.3083, change: 0.0001, changePct: 0.03 },
+  { code: 'QAR', rate: 3.64, change: 0, changePct: 0 },
+  { code: 'OMR', rate: 0.3845, change: 0, changePct: 0 },
+  { code: 'BHD', rate: 0.376, change: 0, changePct: 0 },
+  { code: 'JOD', rate: 0.709, change: 0, changePct: 0 },
+  { code: 'EGP', rate: 50.20, change: -0.241, changePct: -0.48 },
+  { code: 'TRY', rate: 46.34, change: -0.64, changePct: -1.38 },
+  { code: 'CNY', rate: 6.77, change: 0.019, changePct: 0.28 },
+  { code: 'JPY', rate: 160.36, change: 0.898, changePct: 0.56 },
+  { code: 'INR', rate: 94.62, change: 0.133, changePct: 0.14 },
+  { code: 'CAD', rate: 1.399, change: -0.010, changePct: -0.73 },
+  { code: 'AUD', rate: 1.415, change: 0.003, changePct: 0.20 },
+  { code: 'CHF', rate: 0.793, change: -0.002, changePct: -0.22 },
+  { code: 'RUB', rate: 72.45, change: 0.949, changePct: 1.31 },
+  { code: 'ZAR', rate: 16.19, change: -0.126, changePct: -0.78 },
+  { code: 'BRL', rate: 5.067, change: 0.008, changePct: 0.16 },
+  { code: 'MXN', rate: 17.21, change: -0.052, changePct: -0.30 },
+  { code: 'SGD', rate: 1.282, change: 0.001, changePct: 0.07 },
+  { code: 'HKD', rate: 7.833, change: 0, changePct: 0 },
+  { code: 'KRW', rate: 1508.83, change: 5.58, changePct: 0.37 },
+  { code: 'PKR', rate: 278.34, change: -0.50, changePct: -0.18 },
+  { code: 'LBP', rate: 89500, change: 0, changePct: 0 },
+  { code: 'IQD', rate: 1311.63, change: 0, changePct: 0 },
   { code: 'BTC', rate: 0.000015, change: 0.000001, changePct: 0.68 },
   { code: 'ETH', rate: 0.00028, change: 0.00001, changePct: 0.36 }
 ];
@@ -131,8 +139,26 @@ const state = {
   chartPeriod: '1D',
   chartCurrency: 'USD',
   localRatesLoaded: false,
-  localRatesError: null
+  localRatesError: null,
+  // ⭐ SOURCE TRACKING
+  lastRateSource: 'fallback',
+  oandaConnected: false,
+  metalsSource: 'fallback',
+  // ⭐ METALS DATA
+  metalsData: null,
+  goldChange24h: 0,
+  goldChangePct24h: 0,
+  silverChange24h: 0,
+  silverChangePct24h: 0
 };
+
+/* ============================================
+   ABORT CONTROLLERS
+   ============================================ */
+let localRatesAbortController = null;
+let metalsAbortController = null;
+let oandaAbortController = null;
+let ratesAbortController = null;
 
 /* ============================================
    DOM CACHE
@@ -236,6 +262,7 @@ function cacheDOM() {
   dom.savedList = document.getElementById('saved-list');
   dom.quickGrid = document.getElementById('quick-grid');
   dom.localRatesStatus = document.getElementById('local-rates-status');
+  dom.oandaStatus = document.getElementById('oanda-status');
 }
 
 /* ============================================
@@ -259,7 +286,7 @@ async function initApp() {
         });
       });
     } catch (err) {
-      // SW registration failed silently
+      console.warn('SW registration failed:', err);
     }
   }
 
@@ -273,15 +300,34 @@ async function initApp() {
   setupTopMovers();
   renderSavedConversions();
 
-  await fetchLocalRatesFromJSON();
-  await fetchAllData();
+  // ⭐ Load data in parallel
+  await Promise.all([
+    fetchLocalRatesFromJSON(),
+    fetchAllData()
+  ]);
 
   setTimeout(() => {
     if (dom.splash) dom.splash.classList.add('hidden');
   }, 1500);
 
-  setInterval(fetchAllData, CONFIG.UPDATE_INTERVAL);
-  setInterval(fetchLocalRatesFromJSON, 30000);
+  // ⭐ Timers: OANDA every 30s, Metals every 2min, Local rates every 2min
+  setInterval(() => {
+    if (state.isOnline && document.visibilityState === 'visible') {
+      fetchRates();
+    }
+  }, CONFIG.UPDATE_INTERVAL);
+
+  setInterval(() => {
+    if (state.isOnline && document.visibilityState === 'visible') {
+      fetchMetalsViaProxy();
+    }
+  }, CONFIG.METALS_INTERVAL);
+
+  setInterval(() => {
+    if (state.isOnline && document.visibilityState === 'visible') {
+      debouncedFetchLocalRates();
+    }
+  }, 120000);
 
   setupRevealAnimations();
   setupInstallPrompt();
@@ -292,92 +338,277 @@ async function initApp() {
 }
 
 /* ============================================
-   DATA FETCHING
+   DATA FETCHING - MASTER
    ============================================ */
 async function fetchAllData() {
   try {
     showLoading(true);
     await Promise.all([
       fetchRates(),
-      fetchMetals()
+      fetchMetalsViaProxy()
     ]);
     state.lastUpdate = new Date();
     updateLastUpdateTime();
     showLoading(false);
   } catch (err) {
+    console.error('fetchAllData error:', err);
     showLoading(false);
-    showToast('تعذر تحديث البيانات العالمية. استخدام البيانات المخزنة.', 'warning');
+    showToast('تعذر تحديث بعض البيانات. استخدام البيانات المخزنة.', 'warning');
   }
 }
 
-async function fetchRates() {
+/* ============================================
+   ⭐ OANDA API - LIVE FOREX RATES (FIXED)
+   ============================================ */
+async function fetchOandaPrices() {
+  if (oandaAbortController) oandaAbortController.abort();
+  oandaAbortController = new AbortController();
+
   try {
-    const response = await fetch(`${CONFIG.API_BASE}/USD`);
-    if (!response.ok) throw new Error('Rate fetch failed');
+    const response = await fetch(CONFIG.OANDA_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        instruments: CONFIG.OANDA_INSTRUMENTS  // ⭐ Plain commas, NOT %2C
+      }),
+      signal: oandaAbortController.signal
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      console.warn('OANDA proxy error:', response.status, errData);
+      state.oandaConnected = false;
+      return null;
+    }
+
     const data = await response.json();
 
-    if (data.rates) {
-      state.rates = data.rates;
-      if (!state.rates.YER) {
-        state.rates.YER = CONFIG.YER_RATE;
-      }
-      saveChartDataPoint();
-      updateConverter();
-      updateRatesTable();
-      updateQuickConversions();
+    if (!data.success || !data.prices || data.prices.length === 0) {
+      state.oandaConnected = false;
+      return null;
     }
+
+    state.oandaConnected = true;
+    state.lastRateSource = 'oanda';
+
+    // Build rates from OANDA prices
+    // OANDA gives pairs like EUR_USD = 1.1384 means 1 EUR = 1.1384 USD
+    // We need to build a rates table relative to USD
+    const oandaRates = { USD: 1 };
+
+    data.prices.forEach(price => {
+      const { base, quote, mid } = price;
+      if (!mid || mid <= 0) return;
+
+      // EUR_USD mid = 1.1384 => 1 EUR = 1.1384 USD => EUR rate = 1/1.1384 (if base=USD)
+      // Actually: if pair is EUR_USD, mid means how many USD per 1 EUR
+      // So: rate[EUR] relative to USD = mid
+      // And: rate[USD] relative to EUR = 1/mid
+
+      if (quote === 'USD') {
+        // EUR_USD => EUR rate = mid (USD per 1 EUR)
+        oandaRates[base] = mid;
+      } else if (base === 'USD') {
+        // USD_JPY => JPY rate = mid (JPY per 1 USD)
+        oandaRates[quote] = mid;
+      }
+
+      // Also update RATES_TABLE_DATA for display
+      const existing = RATES_TABLE_DATA.find(r => r.code === base);
+      if (existing && quote === 'USD') {
+        const oldRate = existing.rate;
+        existing.rate = mid;
+        existing.change = parseFloat((mid - oldRate).toFixed(5));
+        existing.changePct = oldRate !== 0 ? parseFloat((((mid - oldRate) / oldRate) * 100).toFixed(2)) : 0;
+      }
+    });
+
+    // Derive cross rates
+    if (oandaRates.EUR && !oandaRates.GBP && data.prices.find(p => p.instrument === 'EUR_GBP')) {
+      const eurGbp = data.prices.find(p => p.instrument === 'EUR_GBP');
+      if (eurGbp && eurGbp.mid) {
+        oandaRates.GBP = oandaRates.EUR / eurGbp.mid;
+      }
+    }
+
+    // Merge with existing rates (OANDA overrides)
+    Object.assign(state.rates, oandaRates);
+
+    // Ensure YER exists
+    if (!state.rates.YER) state.rates.YER = CONFIG.YER_RATE;
+
+    // Update OANDA status indicator
+    updateOandaStatus(true, data.environment || 'practice');
+
+    return data.prices;
+
   } catch (err) {
-    state.rates = {
-      USD: 1, EUR: 0.861314, GBP: 0.744885, JPY: 160.357421, CNY: 6.769763,
-      SAR: 3.75, AED: 3.6725, KWD: 0.308318, QAR: 3.64, OMR: 0.384497,
-      BHD: 0.376, JOD: 0.709, EGP: 50.202783, TRY: 46.33978, INR: 94.617681,
-      CAD: 1.399083, AUD: 1.414641, CHF: 0.793474, RUB: 72.447516, ZAR: 16.185724,
-      BRL: 5.067231, MXN: 17.205389, SGD: 1.281946, HKD: 7.83281, KRW: 1508.825189,
-      PKR: 278.335735, LBP: 89500, IQD: 1311.63285, YER: 238.767864
-    };
+    if (err.name === 'AbortError') return null;
+    console.error('OANDA fetch error:', err);
+    state.oandaConnected = false;
+    updateOandaStatus(false);
+    return null;
+  }
+}
+
+function updateOandaStatus(connected, env) {
+  if (!dom.oandaStatus) return;
+  if (connected) {
+    dom.oandaStatus.innerHTML = `<span style="color:var(--success)">🦊 OANDA ${env === 'live' ? 'Live' : 'Practice'} متصل</span>`;
+  } else {
+    dom.oandaStatus.innerHTML = `<span style="color:var(--warning)">⚠️ OANDA غير متصل</span>`;
+  }
+}
+
+/* ============================================
+   ⭐ ENHANCED fetchRates (Proxy + Fallbacks)
+   ============================================ */
+async function fetchRates() {
+  // Attempt 1: OANDA (most accurate, live)
+  const oandaResult = await fetchOandaPrices();
+  if (oandaResult) {
     saveChartDataPoint();
     updateConverter();
     updateRatesTable();
     updateQuickConversions();
+    updateLastUpdateTime();
+    return;
   }
+
+  // Attempt 2: Vercel Rates Proxy (avoids CORS)
+  try {
+    if (ratesAbortController) ratesAbortController.abort();
+    ratesAbortController = new AbortController();
+
+    const response = await fetch(`${CONFIG.RATES_PROXY}?base=USD`, {
+      signal: ratesAbortController.signal
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.rates) {
+        state.rates = data.rates;
+        state.lastRateSource = data.source || 'proxy';
+        if (!state.rates.YER) state.rates.YER = CONFIG.YER_RATE;
+        saveChartDataPoint();
+        updateConverter();
+        updateRatesTable();
+        updateQuickConversions();
+        updateLastUpdateTime();
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn('Rates proxy failed:', err.message);
+  }
+
+  // Attempt 3: Direct ExchangeRate API (may fail due to CORS on localhost)
+  try {
+    const response = await fetch(CONFIG.FALLBACK_API + '/USD', { timeout: 5000 });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.rates) {
+        state.rates = data.rates;
+        state.lastRateSource = 'exchangerate';
+        if (!state.rates.YER) state.rates.YER = CONFIG.YER_RATE;
+        saveChartDataPoint();
+        updateConverter();
+        updateRatesTable();
+        updateQuickConversions();
+        updateLastUpdateTime();
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn('Direct API failed:', err.message);
+  }
+
+  // Ultimate Fallback: static data
+  state.rates = {
+    USD: 1, EUR: 0.86, GBP: 0.75, JPY: 160, CNY: 6.77,
+    SAR: 3.75, AED: 3.67, KWD: 0.31, QAR: 3.64, OMR: 0.38,
+    BHD: 0.38, JOD: 0.71, YER: CONFIG.YER_RATE
+  };
+  state.lastRateSource = 'fallback';
+  saveChartDataPoint();
+  updateConverter();
+  updateRatesTable();
+  updateQuickConversions();
+  updateLastUpdateTime();
 }
 
-function fetchMetals() {
-  fetch('api/prices_data.json')
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      if (data.gold?.ounce) {
-        state.goldPrice = data.gold.ounce.price_usd || data.gold.ounce.price || 2344;
-      }
-      if (data.silver?.price_usd) {
-        state.silverPrice = data.silver.price_usd || 28.8;
-      }
-      if (data.metals) {
-        data.metals.forEach(metal => {
-          if (metal.code === 'XPT') state.platinumPrice = metal.price_usd;
-          if (metal.code === 'XPD') state.palladiumPrice = metal.price_usd;
-          if (metal.code === 'HG') state.copperPrice = metal.price_usd;
-          if (metal.code === 'AL') state.aluminumPrice = metal.price_usd;
-        });
-      }
-      updateMetalsDisplay();
-    })
-    .catch(err => {
-      updateMetalsDisplay();
+/* ============================================
+   ⭐ METALS - GOLD & SILVER (Via Proxy)
+   ============================================ */
+async function fetchMetalsViaProxy() {
+  if (metalsAbortController) metalsAbortController.abort();
+  metalsAbortController = new AbortController();
+
+  try {
+    const response = await fetch(CONFIG.METALS_PROXY, {
+      signal: metalsAbortController.signal
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error || 'Metals API returned error');
+    }
+
+    // Update gold
+    if (data.gold?.ounce?.price_usd) {
+      state.goldPrice = data.gold.ounce.price_usd;
+      state.goldChange24h = data.gold.ounce.change_24h || 0;
+      state.goldChangePct24h = data.gold.ounce.change_pct || 0;
+    }
+
+    // Update silver
+    if (data.silver?.ounce?.price_usd) {
+      state.silverPrice = data.silver.ounce.price_usd;
+      state.silverChange24h = data.silver.ounce.change_24h || 0;
+      state.silverChangePct24h = data.silver.ounce.change_pct || 0;
+    }
+
+    // Update platinum
+    if (data.platinum?.ounce?.price_usd) {
+      state.platinumPrice = data.platinum.ounce.price_usd;
+    }
+
+    // Update palladium
+    if (data.palladium?.ounce?.price_usd) {
+      state.palladiumPrice = data.palladium.ounce.price_usd;
+    }
+
+    state.metalsSource = data.source || 'proxy';
+    state.metalsData = data;
+
+    updateMetalsDisplay();
+    return data;
+
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    console.warn('Metals proxy failed:', err.message);
+    // Keep existing values, don't break UI
+    updateMetalsDisplay();
+  }
 }
 
 /* ============================================
    LOCAL RATES FROM JSON
    ============================================ */
 async function fetchLocalRatesFromJSON() {
+  if (localRatesAbortController) localRatesAbortController.abort();
+  localRatesAbortController = new AbortController();
+
   try {
     const cacheBuster = Date.now();
-    const response = await fetch(`./api/prices_data.json?_=${cacheBuster}`, {
+    const response = await fetch(`${CONFIG.DATA_URL}?_=${cacheBuster}`, {
       method: 'GET',
+      signal: localRatesAbortController.signal,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache'
@@ -400,6 +631,8 @@ async function fetchLocalRatesFromJSON() {
 
     let updatedCount = 0;
     let newRegions = 0;
+    let goldUpdated = false;
+    let silverUpdated = false;
 
     for (const regionKey in data.regions) {
       const regionData = data.regions[regionKey];
@@ -412,36 +645,24 @@ async function fetchLocalRatesFromJSON() {
 
       for (const currencyKey in regionData.currencies) {
         const currencyData = regionData.currencies[currencyKey];
-
-        if (currencyData && typeof currencyData === 'object') {
-          if ('buy' in currencyData && 'sell' in currencyData) {
-            const buyVal = parseFloat(currencyData.buy);
-            const sellVal = parseFloat(currencyData.sell);
-
-            if (!isNaN(buyVal) && !isNaN(sellVal) && buyVal > 0 && sellVal > 0) {
-              CONFIG.LOCAL_RATES[regionKey][currencyKey] = {
-                buy: buyVal,
-                sell: sellVal
-              };
-              saveLocalRateHistory(regionKey, currencyKey, buyVal, sellVal);
-              updatedCount++;
-            }
+        if (currencyData && typeof currencyData === 'object' && 'buy' in currencyData && 'sell' in currencyData) {
+          const buyVal = parseFloat(currencyData.buy);
+          const sellVal = parseFloat(currencyData.sell);
+          if (!isNaN(buyVal) && !isNaN(sellVal) && buyVal > 0 && sellVal > 0) {
+            CONFIG.LOCAL_RATES[regionKey][currencyKey] = { buy: buyVal, sell: sellVal };
+            saveLocalRateHistory(regionKey, currencyKey, buyVal, sellVal);
+            updatedCount++;
           }
         }
       }
 
-      if (regionData.gold) {
-        CONFIG.LOCAL_RATES[regionKey].gold = regionData.gold;
-      }
-      if (regionData.silver) {
-        CONFIG.LOCAL_RATES[regionKey].silver = regionData.silver;
-      }
+      if (regionData.gold) { CONFIG.LOCAL_RATES[regionKey].gold = regionData.gold; goldUpdated = true; }
+      if (regionData.silver) { CONFIG.LOCAL_RATES[regionKey].silver = regionData.silver; silverUpdated = true; }
     }
 
-    if (updatedCount > 0 || newRegions > 0) {
+    if (updatedCount > 0 || newRegions > 0 || goldUpdated || silverUpdated) {
       state.localRatesLoaded = true;
       state.localRatesError = null;
-
       updateLocalConverter();
       updateLocalGoldDisplay();
       updateLocalSilverDisplay();
@@ -451,19 +672,23 @@ async function fetchLocalRatesFromJSON() {
         dom.resultTime.textContent = `آخر تحديث: ${time} (من لوحة التحكم)`;
       }
 
-      updateLocalRatesStatus('success', `تم تحديث ${updatedCount} سعر من لوحة التحكم`);
+      const totalUpdates = updatedCount + (goldUpdated ? 1 : 0) + (silverUpdated ? 1 : 0);
+      updateLocalRatesStatus('success', `تم تحديث ${totalUpdates} سعر من لوحة التحكم`);
     } else {
       updateLocalRatesStatus('warning', 'لا توجد بيانات صالحة في لوحة التحكم');
     }
 
   } catch (err) {
+    if (err.name === 'AbortError') return;
     state.localRatesError = err.message;
     updateLocalRatesStatus('error', 'خطأ في الاتصال بلوحة التحكم');
   }
 }
 
+const debouncedFetchLocalRates = debounce(fetchLocalRatesFromJSON, 5000);
+
 /* ============================================
-   LOCAL RATES HISTORY (for trend calculation)
+   LOCAL RATES HISTORY
    ============================================ */
 function saveLocalRateHistory(region, currency, buyRate, sellRate) {
   const storageKey = `local_rate_history_${region}_${currency}`;
@@ -477,9 +702,7 @@ function saveLocalRateHistory(region, currency, buyRate, sellRate) {
     history.push({ buy: buyRate, sell: sellRate, timestamp: Date.now() });
     if (history.length > 50) history.splice(0, history.length - 50);
     localStorage.setItem(storageKey, JSON.stringify(history));
-  } catch (e) {
-    // Storage full or unavailable
-  }
+  } catch (e) {}
 }
 
 function getLocalRateTrend(region, currency) {
@@ -520,9 +743,7 @@ function saveChartDataPoint() {
     history.push({ rate: currentRate, timestamp: Date.now() });
     if (history.length > 90) history.splice(0, history.length - 90);
     localStorage.setItem(historyKey, JSON.stringify(history));
-  } catch (e) {
-    // Storage full or unavailable
-  }
+  } catch (e) {}
 }
 
 /* ============================================
@@ -547,7 +768,6 @@ function setupCurrencyDropdowns() {
 
   [dom.fromCurrency, dom.toCurrency].forEach((dropdown, index) => {
     if (!dropdown) return;
-    const type = index === 0 ? 'from' : 'to';
     dropdown.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpen = dropdown.classList.contains('open');
@@ -555,12 +775,6 @@ function setupCurrencyDropdowns() {
       if (!isOpen) {
         dropdown.classList.add('open');
         dropdown.setAttribute('aria-expanded', 'true');
-      }
-    });
-    dropdown.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        dropdown.click();
       }
     });
   });
@@ -679,42 +893,27 @@ function updateLocalConverter() {
   if (dom.totalYer) dom.totalYer.textContent = formatNumber(buyTotal, '﷼');
 
   const trendData = getLocalRateTrend(region, currency);
-  if (dom.buyTrend) {
-    dom.buyTrend.textContent = trendData.buyIcon;
-    dom.buyTrend.style.color = trendData.buyColor;
-  }
-  if (dom.sellTrend) {
-    dom.sellTrend.textContent = trendData.sellIcon;
-    dom.sellTrend.style.color = trendData.sellColor;
-  }
+  if (dom.buyTrend) { dom.buyTrend.textContent = trendData.buyIcon; dom.buyTrend.style.color = trendData.buyColor; }
+  if (dom.sellTrend) { dom.sellTrend.textContent = trendData.sellIcon; dom.sellTrend.style.color = trendData.sellColor; }
 }
 
 /* ============================================
-   METALS DISPLAY
+   METALS DISPLAY (PROFESSIONAL & ACCURATE)
    ============================================ */
 function updateMetalsDisplay() {
   const gold = state.goldPrice;
   const silver = state.silverPrice;
   const yerRate = state.rates.YER || CONFIG.YER_RATE;
 
+  // Gold Price USD
   if (dom.goldPriceUsd) dom.goldPriceUsd.textContent = formatNumber(gold, '$');
+
+  // Gold Change (24h) with real data from proxy
   if (dom.goldChange) {
-    dom.goldChange.textContent = '';
-    const iconSpan = document.createElement('span');
-    iconSpan.className = 'change-icon';
-    iconSpan.textContent = '◆';
-    dom.goldChange.appendChild(iconSpan);
-    const valueSpan = document.createElement('span');
-    valueSpan.className = 'change-value';
-    valueSpan.style.color = 'var(--text-muted)';
-    valueSpan.textContent = ' 0.00';
-    dom.goldChange.appendChild(valueSpan);
-    const pctSpan = document.createElement('span');
-    pctSpan.className = 'change-percent';
-    pctSpan.textContent = ' (0.00%)';
-    dom.goldChange.appendChild(pctSpan);
+    updateChangeElement(dom.goldChange, state.goldChange24h, state.goldChangePct24h);
   }
 
+  // Gold per gram calculations
   const gram24 = gold / 31.1035;
   if (dom.goldGram24) dom.goldGram24.textContent = formatNumber(gram24, '$');
   if (dom.goldGram22) dom.goldGram22.textContent = formatNumber(gram24 * 0.916, '$');
@@ -722,35 +921,57 @@ function updateMetalsDisplay() {
   if (dom.goldGram18) dom.goldGram18.textContent = formatNumber(gram24 * 0.750, '$');
   if (dom.goldGram21Yer) dom.goldGram21Yer.textContent = formatNumber(gram24 * 0.875 * yerRate, '﷼');
 
+  // Silver Price USD
   if (dom.silverPriceUsd) dom.silverPriceUsd.textContent = formatNumber(silver, '$');
+
+  // Silver Change (24h)
   if (dom.silverChange) {
-    dom.silverChange.textContent = '';
-    const iconSpan = document.createElement('span');
-    iconSpan.className = 'change-icon';
-    iconSpan.textContent = '◆';
-    dom.silverChange.appendChild(iconSpan);
-    const valueSpan = document.createElement('span');
-    valueSpan.className = 'change-value';
-    valueSpan.style.color = 'var(--text-muted)';
-    valueSpan.textContent = ' 0.00';
-    dom.silverChange.appendChild(valueSpan);
-    const pctSpan = document.createElement('span');
-    pctSpan.className = 'change-percent';
-    pctSpan.textContent = ' (0.00%)';
-    dom.silverChange.appendChild(pctSpan);
+    updateChangeElement(dom.silverChange, state.silverChange24h, state.silverChangePct24h);
   }
 
+  // Silver per gram/kg
   const silverGram = silver / 31.1035;
   if (dom.silverGram) dom.silverGram.textContent = formatNumber(silverGram, '$');
   if (dom.silverKg) dom.silverKg.textContent = formatNumber(silverGram * 1000, '$');
   if (dom.silverGramYer) dom.silverGramYer.textContent = formatNumber(silverGram * yerRate, '﷼');
 
+  // Other metals
   if (dom.platinumPrice) dom.platinumPrice.textContent = formatNumber(state.platinumPrice, '$');
   if (dom.palladiumPrice) dom.palladiumPrice.textContent = formatNumber(state.palladiumPrice, '$');
   if (dom.copperPrice) dom.copperPrice.textContent = formatNumber(state.copperPrice, '$');
   if (dom.aluminumPrice) dom.aluminumPrice.textContent = formatNumber(state.aluminumPrice, '$');
 
   updateMetalCalculator();
+}
+
+function updateChangeElement(container, changeValue, changePct) {
+  if (!container) return;
+  let iconSpan = container.querySelector('.change-icon');
+  let valueSpan = container.querySelector('.change-value');
+  let pctSpan = container.querySelector('.change-percent');
+
+  if (!iconSpan) {
+    container.textContent = '';
+    iconSpan = document.createElement('span');
+    iconSpan.className = 'change-icon';
+    valueSpan = document.createElement('span');
+    valueSpan.className = 'change-value';
+    pctSpan = document.createElement('span');
+    pctSpan.className = 'change-percent';
+    container.appendChild(iconSpan);
+    container.appendChild(valueSpan);
+    container.appendChild(pctSpan);
+  }
+
+  const isUp = changeValue >= 0;
+  const color = isUp ? 'var(--success)' : 'var(--danger)';
+  const icon = isUp ? '▲' : '▼';
+
+  iconSpan.textContent = icon;
+  valueSpan.style.color = color;
+  valueSpan.textContent = ` ${Math.abs(changeValue).toFixed(2)}`;
+  pctSpan.textContent = ` (${Math.abs(changePct).toFixed(2)}%)`;
+  pctSpan.style.color = color;
 }
 
 /* ============================================
@@ -762,12 +983,7 @@ function updateLocalGoldDisplay() {
   if (!regionData || !regionData.gold) return;
 
   const gold = regionData.gold;
-  const elements = {
-    '21k': dom.goldGram21Yer,
-    '22k': dom.goldGram22Yer,
-    '24k': dom.goldGram24Yer,
-    '18k': dom.goldGram18Yer
-  };
+  const elements = { '21k': dom.goldGram21Yer, '22k': dom.goldGram22Yer, '24k': dom.goldGram24Yer, '18k': dom.goldGram18Yer };
 
   for (const [karat, el] of Object.entries(elements)) {
     if (el && gold[karat]) {
@@ -814,7 +1030,7 @@ function updateMetalCalculator() {
   let total = pricePerGram * weight;
   if (currency === 'YER') total *= (state.rates.YER || CONFIG.YER_RATE);
   else if (currency === 'SAR') total *= (state.rates.SAR || 3.75);
-  else if (currency === 'EUR') { total /= (state.rates.USD || 1); total *= (state.rates.EUR || 0.92); }
+  else if (currency === 'EUR') total /= (state.rates.EUR || 0.8613);
 
   const symbols = { USD: '$', YER: '﷼', SAR: '﷼', EUR: '€' };
   if (dom.metalCalcResult) {
@@ -970,7 +1186,7 @@ function updateRatesTable() {
     });
 
     pageRates.forEach(rate => saveSparkData(rate.code, rate.rate));
-    setTimeout(() => drawSparklines(pageRates), 100);
+    requestAnimationFrame(() => drawSparklines(pageRates));
   }
 
   if (dom.pageInfo) dom.pageInfo.textContent = `صفحة ${state.currentPage} من ${totalPages}`;
@@ -1027,9 +1243,7 @@ function getHistoricalSparkData() {
       });
       return validData;
     }
-  } catch (e) {
-    // Corrupted data
-  }
+  } catch (e) {}
   return {};
 }
 
@@ -1061,9 +1275,7 @@ function saveSparkData(code, rate) {
     data[code].push({ rate: rate, timestamp: Date.now() });
     if (data[code].length > 30) data[code] = data[code].slice(-30);
     localStorage.setItem('spark_history', JSON.stringify(data));
-  } catch (e) {
-    // Storage full or unavailable
-  }
+  } catch (e) {}
 }
 
 /* ============================================
@@ -1159,11 +1371,31 @@ function drawMainChart() {
   const points = generateChartData(state.chartPeriod, 50);
   const min = Math.min(...points);
   const max = Math.max(...points);
-  const range = max - min || 1;
+  const range = max - min;
 
   ctx.clearRect(0, 0, w, h);
 
-  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || 'rgba(148,163,184,0.12)';
+  if (range === 0) {
+    ctx.strokeStyle = 'rgba(148,163,184,0.12)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (i / 4) * (h - 2 * padding);
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(w - padding, y);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 3;
+    const midY = h / 2;
+    ctx.moveTo(padding, midY);
+    ctx.lineTo(w - padding, midY);
+    ctx.stroke();
+    return;
+  }
+
+  ctx.strokeStyle = 'rgba(148,163,184,0.12)';
   ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y = padding + (i / 4) * (h - 2 * padding);
@@ -1243,11 +1475,21 @@ function drawGoldChart() {
     gradient.addColorStop(1, 'rgba(251, 191, 36, 0.2)');
 
     ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, barWidth, barHeight);
+
     ctx.beginPath();
-    ctx.roundRect(x, y, barWidth, barHeight, 4);
+    ctx.moveTo(x + 4, y);
+    ctx.lineTo(x + barWidth - 4, y);
+    ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + 4);
+    ctx.lineTo(x + barWidth, y + barHeight);
+    ctx.lineTo(x, y + barHeight);
+    ctx.lineTo(x, y + 4);
+    ctx.quadraticCurveTo(x, y, x + 4, y);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
     ctx.fill();
 
-    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8';
+    ctx.fillStyle = '#94a3b8';
     ctx.font = '12px Cairo';
     ctx.textAlign = 'center';
     ctx.fillText(curr, x + barWidth / 2, h - 10);
@@ -1267,9 +1509,7 @@ function generateChartData(period, count) {
         if (recent.length >= 2) return recent.map(entry => entry.rate);
       }
     }
-  } catch (e) {
-    // Corrupted data
-  }
+  } catch (e) {}
   const currentRate = state.rates?.YER || CONFIG.YER_RATE;
   return Array(count).fill(currentRate);
 }
@@ -1468,9 +1708,7 @@ function renderSavedConversions() {
     deleteBtn.setAttribute('aria-label', 'حذف');
     deleteBtn.textContent = '🗑️';
     deleteBtn.dataset.id = c.id;
-    deleteBtn.addEventListener('click', () => {
-      deleteConversion(parseInt(deleteBtn.dataset.id));
-    });
+    deleteBtn.addEventListener('click', () => deleteConversion(parseInt(deleteBtn.dataset.id)));
 
     item.appendChild(info);
     item.appendChild(deleteBtn);
@@ -1498,14 +1736,8 @@ async function shareConversion() {
 
   if (navigator.share) {
     try {
-      await navigator.share({
-        title: 'ريال ودولار - تحويل عملات',
-        text: text,
-        url: window.location.href
-      });
-    } catch (err) {
-      // Share cancelled
-    }
+      await navigator.share({ title: 'ريال ودولار - تحويل عملات', text, url: window.location.href });
+    } catch (err) {}
   } else {
     await navigator.clipboard.writeText(text);
     showToast('تم نسخ النتيجة إلى الحافظة', 'success');
@@ -1573,6 +1805,11 @@ function setupEventListeners() {
     updateLocalSilverDisplay();
   });
 
+  dom.localGoldRegion?.addEventListener('change', () => {
+    updateLocalGoldDisplay();
+    updateLocalSilverDisplay();
+  });
+
   dom.swapBtn?.addEventListener('click', () => {
     const temp = state.fromCurrency;
     state.fromCurrency = state.toCurrency;
@@ -1583,7 +1820,15 @@ function setupEventListeners() {
     setTimeout(() => dom.swapBtn.style.transform = '', 300);
   });
 
-  dom.swapLocal?.addEventListener('click', () => updateLocalConverter());
+  dom.swapLocal?.addEventListener('click', () => {
+    if (dom.localCurrency && dom.localCurrency.tagName === 'SELECT') {
+      const options = Array.from(dom.localCurrency.options);
+      const currentIndex = dom.localCurrency.selectedIndex;
+      const nextIndex = (currentIndex + 1) % options.length;
+      dom.localCurrency.selectedIndex = nextIndex;
+      updateLocalConverter();
+    }
+  });
 
   dom.clearAmount?.addEventListener('click', () => {
     if (dom.amountGlobal) dom.amountGlobal.value = '';
@@ -1595,9 +1840,7 @@ function setupEventListeners() {
       dom.tabBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const tab = btn.dataset.tab;
-      dom.panels?.forEach(p => {
-        p.classList.toggle('active', p.id === `panel-${tab}`);
-      });
+      dom.panels?.forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
     });
   });
 
@@ -1756,11 +1999,26 @@ function showLoading(show) {
   if (dom.loading) dom.loading.classList.toggle('hidden', !show);
 }
 
+/* ============================================
+   ⭐ ENHANCED updateLastUpdateTime
+   ============================================ */
 function updateLastUpdateTime() {
-  if (dom.resultTime && state.lastUpdate) {
-    const time = state.lastUpdate.toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
-    dom.resultTime.textContent = `آخر تحديث: ${time}`;
-  }
+  if (!dom.resultTime || !state.lastUpdate) return;
+
+  const time = state.lastUpdate.toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
+
+  let sourceName = '';
+  let sourceIcon = '';
+  if (state.lastRateSource === 'oanda') { sourceName = 'OANDA Live'; sourceIcon = '🦊'; }
+  else if (state.lastRateSource === 'proxy') { sourceName = 'Proxy'; sourceIcon = '🔗'; }
+  else if (state.lastRateSource === 'exchangerate') { sourceName = 'ExchangeRate'; sourceIcon = '💱'; }
+  else if (state.lastRateSource === 'open-er') { sourceName = 'Open ER'; sourceIcon = '🌐'; }
+  else { sourceName = 'محلي'; sourceIcon = '💾'; }
+
+  const isStale = state.lastRateSource === 'fallback';
+  const staleWarning = isStale ? ' ⚠️ غير محدّث' : '';
+
+  dom.resultTime.textContent = `${sourceIcon} ${sourceName} | آخر تحديث: ${time}${staleWarning}`;
 }
 
 /* ============================================
@@ -1846,9 +2104,7 @@ async function registerPeriodicSync() {
     try {
       const registration = await navigator.serviceWorker.ready;
       await registration.periodicSync.register('update-rates', { minInterval: 60 * 60 * 1000 });
-    } catch (err) {
-      // Silent fail
-    }
+    } catch (err) {}
   }
 }
 
@@ -1857,18 +2113,13 @@ async function registerBackgroundSync() {
     try {
       const registration = await navigator.serviceWorker.ready;
       await registration.sync.register('sync-rates');
-    } catch (err) {
-      // Silent fail
-    }
+    } catch (err) {}
   }
 }
 
 async function requestNotificationPermission() {
   if ('Notification' in window && Notification.permission === 'default') {
     const result = await Notification.requestPermission();
-    if (result === 'granted') {
-      // Notifications granted
-    }
   }
 }
 
@@ -1891,7 +2142,7 @@ function navigateToSection(section) {
 }
 
 /* ============================================
-   NOTE EDITOR - XSS SAFE
+   NOTE EDITOR
    ============================================ */
 function openNoteEditor() {
   const modal = document.createElement('div');
