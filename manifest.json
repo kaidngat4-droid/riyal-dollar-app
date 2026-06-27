@@ -2,14 +2,18 @@
   "name": "ريال ودولار - أسعار الصرف والذهب",
   "short_name": "ريال ودولار",
   "description": "تطبيق احترافي لأسعار الصرف والذهب والفضة في اليمن",
-  "start_url": "/",
+
+  "start_url": "/riyal-dollar-app/",
+  "scope": "/riyal-dollar-app/",
+
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#f59e0b",
   "orientation": "portrait",
-  "scope": "/",
+
   "lang": "ar",
   "dir": "rtl",
+
   "icons": [
     {
       "src": "images/icon-72.png",
@@ -53,7 +57,12 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["finance", "business"],
+
+  "categories": [
+    "finance",
+    "business"
+  ],
+
   "screenshots": [
     {
       "src": "images/screenshot-1.png",
@@ -68,27 +77,43 @@
       "form_factor": "narrow"
     }
   ],
+
   "shortcuts": [
     {
       "name": "محول العملات",
       "short_name": "محول",
       "description": "تحويل فوري بين العملات",
-      "url": "/#converter",
-      "icons": [{ "src": "images/icon-96.png", "sizes": "96x96" }]
+      "url": "/riyal-dollar-app/#converter",
+      "icons": [
+        {
+          "src": "images/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "الذهب والفضة",
       "short_name": "ذهب",
       "description": "أسعار المعادن الثمينة",
-      "url": "/#gold-silver",
-      "icons": [{ "src": "images/icon-96.png", "sizes": "96x96" }]
+      "url": "/riyal-dollar-app/#gold-silver",
+      "icons": [
+        {
+          "src": "images/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "التنبيهات",
       "short_name": "تنبيهات",
       "description": "تنبيهات الأسعار",
-      "url": "/alerts.html",
-      "icons": [{ "src": "images/icon-96.png", "sizes": "96x96" }]
+      "url": "/riyal-dollar-app/alerts.html",
+      "icons": [
+        {
+          "src": "images/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ]
 }
