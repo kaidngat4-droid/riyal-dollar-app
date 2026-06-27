@@ -1,12 +1,13 @@
 /* ============================================
-   SERVICE WORKER - ريال ودولار v2.0
-   Enhanced with Offline Support & Background Sync
+   SERVICE WORKER - ريال ودولار v2.1 (FIXED)
+   Enhanced with Debug Console Logging
+   (مُعدَّل للإنتاج مع دعم الإشعارات)
    ============================================ */
 
-const CACHE_NAME = 'riyal-dollar-v2';
-const STATIC_CACHE = 'riyal-dollar-static-v2';
-const DYNAMIC_CACHE = 'riyal-dollar-dynamic-v2';
-const IMAGE_CACHE = 'riyal-dollar-images-v2';
+const CACHE_NAME = 'riyal-dollar-v2-1';
+const STATIC_CACHE = 'riyal-dollar-static-v2-1';
+const DYNAMIC_CACHE = 'riyal-dollar-dynamic-v2-1';
+const IMAGE_CACHE = 'riyal-dollar-images-v2-1';
 
 const STATIC_ASSETS = [
     '/',
@@ -14,30 +15,59 @@ const STATIC_ASSETS = [
     '/offline.html',
     '/alerts.html',
     '/comparison.html',
+    '/terms.html',
+    '/privacy-policy.html',   
     '/css/styles.css',
     '/js/app.js',
     '/js/history-system.js',
     '/js/app-v2-patch.js',
     '/manifest.json'
-    // ملاحظة: prices_data.json ليس هنا لأنه Network First فقط
 ];
 
 const OFFLINE_PAGE = '/offline.html';
 
 // ============================================
+// ⭐ NEW: API hosts that must NEVER be cached
+// ============================================
+const NEVER_CACHE_HOSTS = [
+    'oanda-proxy-green.vercel.app',
+    'gold-api.com',
+    'api.exchangerate-api.com',
+    'open.er-api.com',
+    'api.frankfurter.app'
+];
+
+// ============================================
+// DEBUG LOGGING (غيّر إلى false قبل الرفع للمتجر)
+// ============================================
+const DEBUG = true;   // 🔧 اجعلها false عند النشر النهائي
+
+function log(...args) {
+    if (DEBUG) console.log('[SW v2.1]', ...args);
+}
+function warn(...args) {
+    if (DEBUG) console.warn('[SW v2.1]', ...args);
+}
+function error(...args) {
+    if (DEBUG) console.error('[SW v2.1]', ...args);
+}
+
+// ============================================
 // INSTALL
 // ============================================
 self.addEventListener('install', event => {
-    console.log('[SW] Installing v2.0...');
-
+    log('Installing...');
     event.waitUntil(
         caches.open(STATIC_CACHE)
             .then(cache => {
-                console.log('[SW] Caching static assets');
+                log('Caching static assets');
                 return cache.addAll(STATIC_ASSETS);
             })
-            .then(() => self.skipWaiting())
-            .catch(err => console.warn('[SW] Cache failed:', err))
+            .then(() => {
+                log('Install complete');
+                return self.skipWaiting();
+            })
+            .catch(err => error('Install failed', err))
     );
 });
 
@@ -45,19 +75,21 @@ self.addEventListener('install', event => {
 // ACTIVATE
 // ============================================
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating v2.0...');
-
+    log('Activating...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
                     if (![STATIC_CACHE, DYNAMIC_CACHE, IMAGE_CACHE].includes(cacheName)) {
-                        console.log('[SW] Deleting old cache:', cacheName);
+                        log('Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
-        }).then(() => self.clients.claim())
+        }).then(() => {
+            log('Activation complete');
+            return self.clients.claim();
+        }).catch(err => error('Activation failed', err))
     );
 });
 
@@ -68,21 +100,52 @@ self.addEventListener('fetch', event => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Skip non-GET requests
-    if (request.method !== 'GET') return;
+    if (request.method !== 'GET') {
+        // ⭐ NEW: Handle POST requests (like OANDA pricing)
+        if (request.method === 'POST' && NEVER_CACHE_HOSTS.some(h => url.hostname.includes(h))) {
+            event.respondWith(
+                fetch(request).catch(err => {
+                    warn('POST API failed:', url.hostname, err.message);
+                    return new Response(JSON.stringify({
+                        success: false,
+                        error: 'Network error - API unavailable',
+                        timestamp: new Date().toISOString()
+                    }), {
+                        status: 503,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                })
+            );
+        }
+        return;
+    }
 
-    // Skip chrome-extension and other non-http requests
     if (!url.protocol.startsWith('http')) return;
 
-    // ⭐ NEW: Network First لـ prices_data.json - لا تخزن أبداً
+    // ⭐ NEW: Bypass cache for API hosts (GET requests)
+    if (NEVER_CACHE_HOSTS.some(h => url.hostname.includes(h))) {
+        event.respondWith(
+            fetch(request).catch(err => {
+                warn('API fetch failed:', url.hostname, err.message);
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: 'Network error'
+                }), { status: 503, headers: { 'Content-Type': 'application/json' }});
+            })
+        );
+        return;
+    }
+
+    // prices_data.json → Network First (no cache storage)
     if (url.pathname.includes('prices_data.json')) {
         event.respondWith(
-            fetch(event.request, {
+            fetch(request, {
                 cache: 'no-store',
                 headers: { 'Cache-Control': 'no-cache' }
-            }).catch(() => {
+            }).catch(err => {
+                warn('Offline prices_data.json fallback');
                 return new Response(JSON.stringify({
-                    error: 'Offline - using cached data'
+                    error: 'Offline - cached fallback not used'
                 }), {
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -91,38 +154,37 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Strategy for HTML pages
+    // Navigation
     if (request.mode === 'navigate') {
         event.respondWith(handleNavigation(request));
         return;
     }
 
-    // Strategy for CSS/JS
+    // CSS / JS
     if (url.pathname.match(/\.(css|js)$/)) {
         event.respondWith(staleWhileRevalidate(request, STATIC_CACHE));
         return;
     }
 
-    // Strategy for images
+    // Images
     if (url.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico)$/)) {
         event.respondWith(cacheFirst(request, IMAGE_CACHE));
         return;
     }
 
-    // Strategy for API calls
+    // API (local /api/ endpoints)
     if (url.pathname.includes('/api/')) {
         event.respondWith(networkFirst(request, DYNAMIC_CACHE));
         return;
     }
 
-    // Default: network with cache fallback
+    // Default
     event.respondWith(networkWithCacheFallback(request));
 });
 
 // ============================================
-// STRATEGY HANDLERS
+// STRATEGIES
 // ============================================
-
 async function handleNavigation(request) {
     try {
         const networkResponse = await fetch(request);
@@ -130,20 +192,16 @@ async function handleNavigation(request) {
         cache.put(request, networkResponse.clone());
         return networkResponse;
     } catch (err) {
+        warn('Navigation failed, using cache', err);
         const cache = await caches.open(STATIC_CACHE);
-        const cachedResponse = await cache.match(request);
+        const cached = await cache.match(request);
+        if (cached) return cached;
 
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-
-        const offlineResponse = await cache.match(OFFLINE_PAGE);
-        if (offlineResponse) {
-            return offlineResponse;
-        }
+        const offline = await cache.match(OFFLINE_PAGE);
+        if (offline) return offline;
 
         return new Response(
-            '<h1>غير متصل</h1><p>الرجاء التحقق من الاتصال بالإنترنت</p>',
+            '<h1>Offline</h1><p>Check your internet connection</p>',
             { headers: { 'Content-Type': 'text/html' } }
         );
     }
@@ -151,36 +209,35 @@ async function handleNavigation(request) {
 
 async function staleWhileRevalidate(request, cacheName) {
     const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
+    const cached = await cache.match(request);
 
-    const fetchPromise = fetch(request).then(networkResponse => {
-        if (networkResponse.ok) {
-            cache.put(request, networkResponse.clone());
-        }
-        return networkResponse;
-    }).catch(() => cachedResponse);
+    const fetchPromise = fetch(request)
+        .then(res => {
+            if (res.ok) cache.put(request, res.clone());
+            return res;
+        })
+        .catch(err => {
+            warn('SWR fetch failed', err);
+            return cached;
+        });
 
-    return cachedResponse || fetchPromise;
+    return cached || fetchPromise;
 }
 
 async function cacheFirst(request, cacheName) {
     const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
-
-    if (cachedResponse) {
-        return cachedResponse;
-    }
+    const cached = await cache.match(request);
+    if (cached) return cached;
 
     try {
-        const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
-            cache.put(request, networkResponse.clone());
-        }
-        return networkResponse;
+        const res = await fetch(request);
+        if (res.ok) cache.put(request, res.clone());
+        return res;
     } catch (err) {
+        error('CacheFirst failed', err);
         if (request.destination === 'image') {
             return new Response(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="#334155" width="100" height="100"/></svg>',
+                '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#444"/></svg>',
                 { headers: { 'Content-Type': 'image/svg+xml' } }
             );
         }
@@ -190,36 +247,31 @@ async function cacheFirst(request, cacheName) {
 
 async function networkFirst(request, cacheName) {
     const cache = await caches.open(cacheName);
-
     try {
-        const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
-            cache.put(request, networkResponse.clone());
-        }
-        return networkResponse;
+        const res = await fetch(request);
+        if (res.ok) cache.put(request, res.clone());
+        return res;
     } catch (err) {
-        const cachedResponse = await cache.match(request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
+        warn('NetworkFirst fallback', err);
+        const cached = await cache.match(request);
+        if (cached) return cached;
         throw err;
     }
 }
 
 async function networkWithCacheFallback(request) {
     try {
-        const networkResponse = await fetch(request);
-        if (networkResponse.ok) {
+        const res = await fetch(request);
+        if (res.ok) {
             const cache = await caches.open(DYNAMIC_CACHE);
-            cache.put(request, networkResponse.clone());
+            cache.put(request, res.clone());
         }
-        return networkResponse;
+        return res;
     } catch (err) {
+        error('Network failed, using cache', err);
         const cache = await caches.open(DYNAMIC_CACHE);
-        const cachedResponse = await cache.match(request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
+        const cached = await cache.match(request);
+        if (cached) return cached;
         throw err;
     }
 }
@@ -227,40 +279,31 @@ async function networkWithCacheFallback(request) {
 // ============================================
 // BACKGROUND SYNC
 // ============================================
-
 self.addEventListener('sync', event => {
-    if (event.tag === 'sync-rates') {
-        event.waitUntil(syncRates());
-    }
-    if (event.tag === 'sync-alerts') {
-        event.waitUntil(syncAlerts());
-    }
+    log('Sync event:', event.tag);
+    if (event.tag === 'sync-rates') event.waitUntil(syncRates());
+    if (event.tag === 'sync-alerts') event.waitUntil(syncAlerts());
 });
 
 async function syncRates() {
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
-        client.postMessage({
-            type: 'SYNC_RATES',
-            timestamp: Date.now()
-        });
+        client.postMessage({ type: 'SYNC_RATES', timestamp: Date.now() });
     });
+    log('Rates synced');
 }
 
 async function syncAlerts() {
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
-        client.postMessage({
-            type: 'CHECK_ALERTS',
-            timestamp: Date.now()
-        });
+        client.postMessage({ type: 'CHECK_ALERTS', timestamp: Date.now() });
     });
+    log('Alerts synced');
 }
 
 // ============================================
 // PERIODIC SYNC
 // ============================================
-
 self.addEventListener('periodicsync', event => {
     if (event.tag === 'update-rates') {
         event.waitUntil(updateRatesPeriodic());
@@ -270,39 +313,30 @@ self.addEventListener('periodicsync', event => {
 async function updateRatesPeriodic() {
     try {
         const cache = await caches.open(DYNAMIC_CACHE);
-
-        const ratesResponse = await fetch('https://open.er-api.com/v6/latest/USD');
-        if (ratesResponse.ok) {
-            cache.put('/api/rates-global', ratesResponse.clone());
-        }
-
-        const localResponse = await fetch('/api/prices_data.json?_=' + Date.now());
-        if (localResponse.ok) {
-            cache.put('/api/prices_data.json', localResponse.clone());
-        }
+        const rates = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (rates.ok) cache.put('/api/rates-global', rates.clone());
+        const local = await fetch('/api/prices_data.json?_=' + Date.now());
+        if (local.ok) cache.put('/api/prices_data.json', local.clone());
 
         const clients = await self.clients.matchAll();
         clients.forEach(client => {
-            client.postMessage({
-                type: 'RATES_UPDATED',
-                timestamp: Date.now()
-            });
+            client.postMessage({ type: 'RATES_UPDATED', timestamp: Date.now() });
         });
-
+        log('Periodic update complete');
     } catch (err) {
-        console.warn('[SW] Periodic update failed:', err);
+        warn('Periodic sync failed', err);
     }
 }
 
 // ============================================
 // PUSH NOTIFICATIONS
 // ============================================
-
 self.addEventListener('push', event => {
     let data = {};
     try {
         data = event.data.json();
-    } catch (e) {
+    } catch (err) {
+        warn('Push parse failed', err);
         data = {
             title: 'ريال ودولار',
             body: 'تحديث جديد متاح!',
@@ -312,33 +346,36 @@ self.addEventListener('push', event => {
     }
 
     const options = {
-        body: data.body || 'تحديث جديد',
-        icon: data.icon || '/images/icon-192.png',
-        badge: data.badge || '/images/badge-72.png',
-        tag: data.tag || 'general',
-        requireInteraction: data.requireInteraction || false,
-        vibrate: data.vibrate || [200, 100, 200],
-        data: data.data || {},
+        body: data.body,
+        icon: data.icon,
+        badge: data.badge,
+        tag: data.tag,
+        data: data.data,
         actions: data.actions || [
-            { action: 'open', title: 'فتح التطبيق' },
+            { action: 'open', title: 'فتح' },
             { action: 'dismiss', title: 'تجاهل' }
-        ]
+        ],
+        vibrate: data.vibrate || [200, 100, 200],
+        requireInteraction: data.requireInteraction || false
     };
 
     event.waitUntil(
-        self.registration.showNotification(data.title || 'ريال ودولار', options)
+        self.registration.showNotification(
+            data.title || 'ريال ودولار',
+            options
+        )
     );
 });
 
+// ✅ NEW: معالج النقر على الإشعار
 self.addEventListener('notificationclick', event => {
     event.notification.close();
-
     if (event.action === 'dismiss') return;
 
     event.waitUntil(
         clients.matchAll({ type: 'window' }).then(clientList => {
             for (const client of clientList) {
-                if (client.url.includes('riyal-dollar') && 'focus' in client) {
+                if (client.url.includes(self.location.hostname) && 'focus' in client) {
                     return client.focus();
                 }
             }
@@ -352,29 +389,27 @@ self.addEventListener('notificationclick', event => {
 // ============================================
 // MESSAGE HANDLING
 // ============================================
-
 self.addEventListener('message', event => {
     if (event.data === 'SKIP_WAITING') {
+        log('Skip waiting triggered');
         self.skipWaiting();
     }
-
-    if (event.data.type === 'CACHE_URLS') {
+    if (event.data?.type === 'CACHE_URLS') {
         event.waitUntil(
             caches.open(DYNAMIC_CACHE).then(cache => {
+                log('Caching URLs manually');
                 return cache.addAll(event.data.urls);
             })
         );
     }
-
-    if (event.data.type === 'CLEAR_CACHE') {
+    if (event.data?.type === 'CLEAR_CACHE') {
         event.waitUntil(
-            caches.keys().then(cacheNames => {
-                return Promise.all(
-                    cacheNames.map(cacheName => caches.delete(cacheName))
-                );
+            caches.keys().then(names => {
+                log('Clearing all caches');
+                return Promise.all(names.map(name => caches.delete(name)));
             })
         );
     }
 });
 
-console.log('[SW] Service Worker v2.0 loaded');
+log('Service Worker v2.1 loaded – FIXED (API bypass enabled)');
