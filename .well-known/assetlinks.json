@@ -1,8 +1,8 @@
 [{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.kaidngat4.riyaldollar",
-    "sha256_cert_fingerprints": ["38:1B:E2:12:44:E0:76:92:ED:31:B6:6C:A0:01:1A:26:60:7B:79:1A:EF:6E:9E:CB:03:D0:32:B5:76:BE:CD:A9"]
-  }
-}]
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.kaidngat4_droid.twa",
+        "sha256_cert_fingerprints": ["58:C8:7C:56:BA:A2:A8:6D:89:62:D0:3F:59:9D:DF:A7:81:4F:26:46:C2:69:94:A2:A9:DA:0E:79:11:95:C9:25"]
+      }
+    }]
