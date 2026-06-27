@@ -7,51 +7,599 @@
   <title>ريال ودولار - لوحة جانبية</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 16px; min-height: 100vh; }
-    .header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #334155; }
+    body { 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      background: #0f172a; 
+      color: #e2e8f0; 
+      padding: 16px; 
+      min-height: 100vh; 
+    }
+    .header { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      margin-bottom: 16px; 
+      padding-bottom: 12px; 
+      border-bottom: 1px solid #334155; 
+    }
     .header-icon { font-size: 24px; }
     .header-title { font-size: 16px; font-weight: bold; color: #f59e0b; }
+    .source-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      margin-right: auto;
+    }
+    .source-badge.live { background: #166534; color: #4ade80; border-color: #22c55e; }
+    .source-badge.fallback { background: #7f1d1d; color: #f87171; border-color: #ef4444; }
     .rate-list { display: flex; flex-direction: column; gap: 8px; }
-    .rate-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155; }
-    .rate-name { font-size: 13px; color: #94a3b8; }
-    .rate-value { font-size: 16px; font-weight: bold; color: #f59e0b; }
-    .rate-change { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-top: 4px; }
-    .rate-change.up { background: #166534; color: #4ade80; }
-    .rate-change.down { background: #7f1d1d; color: #f87171; }
-    .refresh-btn { background: #f59e0b; color: #0f172a; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 12px; }
-    .update-time { text-align: center; margin-top: 16px; font-size: 11px; color: #64748b; }
+    .rate-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 12px 14px; 
+      background: #1e293b; 
+      border-radius: 10px; 
+      border: 1px solid #334155;
+      transition: all 0.2s ease;
+    }
+    .rate-item:hover { border-color: #f59e0b; background: #1e293b; }
+    .rate-info { display: flex; flex-direction: column; gap: 4px; }
+    .rate-name { font-size: 13px; color: #94a3b8; font-weight: 500; }
+    .rate-pair { font-size: 11px; color: #64748b; }
+    .rate-value { font-size: 18px; font-weight: bold; color: #f59e0b; }
+    .rate-change { 
+      font-size: 11px; 
+      padding: 3px 8px; 
+      border-radius: 6px; 
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .rate-change.up { background: rgba(22, 101, 52, 0.3); color: #4ade80; }
+    .rate-change.down { background: rgba(127, 29, 29, 0.3); color: #f87171; }
+    .rate-change.neutral { background: rgba(100, 116, 139, 0.3); color: #94a3b8; }
+    .refresh-btn { 
+      background: #f59e0b; 
+      color: #0f172a; 
+      border: none; 
+      padding: 10px 16px; 
+      border-radius: 8px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      width: 100%; 
+      margin-top: 14px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .refresh-btn:hover { background: #fbbf24; }
+    .refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .refresh-btn.spinning .refresh-icon { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .update-time { text-align: center; margin-top: 12px; font-size: 11px; color: #64748b; }
+    .loading { text-align: center; color: #64748b; padding: 20px; font-size: 13px; }
+    .error-msg { 
+      text-align: center; 
+      color: #f87171; 
+      padding: 16px; 
+      font-size: 12px; 
+      background: rgba(127, 29, 29, 0.2);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 12px;
+      color: #64748b;
+      margin: 16px 0 8px 0;
+      padding-right: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .region-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .region-tab {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .region-tab.active {
+      background: #f59e0b;
+      color: #0f172a;
+      border-color: #f59e0b;
+      font-weight: bold;
+    }
+    .region-tab:hover:not(.active) { border-color: #475569; }
+    .divider { height: 1px; background: #334155; margin: 12px 0; }
   </style>
 </head>
 <body>
   <div class="header">
     <span class="header-icon">🪙</span>
     <span class="header-title">أسعار سريعة</span>
+    <span class="source-badge" id="source-badge">جاري التحميل...</span>
   </div>
-  <div id="rates-container"><div style="text-align:center;color:#64748b">جاري التحميل...</div></div>
-  <button class="refresh-btn" onclick="loadRates()">🔄 تحديث</button>
+
+  <div class="region-tabs">
+    <button class="region-tab active" data-region="sanaa" onclick="selectRegion('sanaa')">صنعاء</button>
+    <button class="region-tab" data-region="aden" onclick="selectRegion('aden')">عدن</button>
+  </div>
+
+  <div id="rates-container">
+    <div class="loading">جاري تحميل البيانات الحية...</div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-title">الذهب والفضة</div>
+  <div id="metals-container"></div>
+
+  <button class="refresh-btn" id="refresh-btn" onclick="loadAllData()">
+    <span class="refresh-icon">🔄</span>
+    <span>تحديث</span>
+  </button>
   <div class="update-time" id="update-time"></div>
+
   <script>
-    const defaultRates = [
-      { name: 'الدولار الأمريكي', pair: 'USD/YER', value: '1,250.00', change: '+0.5', up: true },
-      { name: 'الريال السعودي', pair: 'SAR/YER', value: '333.33', change: '+0.2', up: true },
-      { name: 'اليورو', pair: 'EUR/YER', value: '1,350.00', change: '-0.3', up: false },
-      { name: 'ذهب عيار 21', pair: 'XAU', value: '85,000', change: '+1.2', up: true },
-      { name: 'الفضة', pair: 'XAG', value: '1,200', change: '-0.5', up: false }
-    ];
-    async function loadRates() {
-      const c = document.getElementById('rates-container');
-      c.innerHTML = defaultRates.map(r => `
-        <div class="rate-item">
-          <div>
-            <div class="rate-name">${r.name}</div>
-            <span class="rate-change ${r.up?'up':'down'}">${r.up?'▲':'▼'} ${r.change}%</span>
-          </div>
-          <span class="rate-value">${r.value}</span>
-        </div>`).join('');
-      document.getElementById('update-time').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-SA');
+    /* ============================================
+       CONFIGURATION
+       ============================================ */
+    const CONFIG = {
+      PROXY_BASE: 'https://oanda-proxy-green.vercel.app',
+      OANDA_PROXY: 'https://oanda-proxy-green.vercel.app/api/oanda-pricing',
+      METALS_PROXY: 'https://oanda-proxy-green.vercel.app/api/metals',
+      RATES_PROXY: 'https://oanda-proxy-green.vercel.app/api/rates',
+      DATA_URL: './api/prices_data.json',
+      OANDA_INSTRUMENTS: 'EUR_USD,USD_JPY,GBP_USD,USD_CHF,AUD_USD,USD_CAD,NZD_USD,EUR_GBP,EUR_JPY,GBP_JPY',
+      YER_RATE: 238.77,
+      LOCAL_RATES: {
+        sanaa: { 
+          USD: { buy: 533, sell: 535 }, 
+          SAR: { buy: 140, sell: 141 }, 
+          EUR: { buy: 620, sell: 625 }, 
+          GBP: { buy: 730, sell: 738 },
+          AED: { buy: 142.5, sell: 145 },
+          gold: { '21k': { buy: 63203, sell: 64708 }, '22k': { buy: 66000, sell: 67500 }, '24k': { buy: 72000, sell: 73500 } },
+          silver: { buy: 28.5, sell: 29 }
+        },
+        aden: { 
+          USD: { buy: 1550, sell: 1558 }, 
+          SAR: { buy: 409, sell: 410 }, 
+          EUR: { buy: 1790, sell: 1805 }, 
+          GBP: { buy: 2110, sell: 2130 },
+          AED: { buy: 420, sell: 423 },
+          gold: { '21k': { buy: 183799, sell: 188440 }, '22k': { buy: 192000, sell: 197000 }, '24k': { buy: 209000, sell: 214000 } },
+          silver: { buy: 9.5, sell: 9.8 }
+        }
+      }
+    };
+
+    /* ============================================
+       STATE
+       ============================================ */
+    let currentRegion = 'sanaa';
+    let ratesData = {};
+    let metalsData = {};
+    let lastSource = 'fallback';
+    let abortControllers = {};
+
+    /* ============================================
+       CHANGE TRACKING HELPERS
+       ============================================ */
+    function getPreviousValue(key) {
+      try {
+        const stored = localStorage.getItem('sidepanel_prev_' + key);
+        return stored ? parseFloat(stored) : null;
+      } catch (e) { return null; }
     }
-    loadRates();
-    setInterval(loadRates, 60000);
+
+    function saveCurrentValue(key, value) {
+      try {
+        localStorage.setItem('sidepanel_prev_' + key, String(value));
+      } catch (e) {}
+    }
+
+    function computeAndSaveChange(key, newValue) {
+      const oldValue = getPreviousValue(key);
+      saveCurrentValue(key, newValue);
+      if (oldValue === null || oldValue === 0) {
+        return { value: 0, pct: 0 };
+      }
+      const change = newValue - oldValue;
+      const pct = (change / oldValue) * 100;
+      return { value: change, pct: pct };
+    }
+
+    /* ============================================
+       MAIN FUNCTIONS
+       ============================================ */
+    async function loadAllData() {
+      const btn = document.getElementById('refresh-btn');
+      btn.disabled = true;
+      btn.classList.add('spinning');
+
+      try {
+        await Promise.all([
+          fetchLiveRates(),
+          fetchMetals(),
+          fetchLocalRatesFromJSON()
+        ]);
+        renderRates();
+        renderMetals();
+        updateTime();
+      } catch (err) {
+        console.error('Load error:', err);
+        renderRates();
+        renderMetals();
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('spinning');
+      }
+    }
+
+    /* ============================================
+       FETCH LIVE RATES
+       ============================================ */
+    async function fetchLiveRates() {
+      try {
+        if (abortControllers.oanda) abortControllers.oanda.abort();
+        abortControllers.oanda = new AbortController();
+
+        const res = await fetch(CONFIG.OANDA_PROXY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ instruments: CONFIG.OANDA_INSTRUMENTS }),
+          signal: abortControllers.oanda.signal
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.prices) {
+            ratesData = buildRatesFromOanda(data.prices);
+            lastSource = 'oanda';
+            updateSourceBadge('live', '🦊 OANDA Live');
+            return;
+          }
+        }
+      } catch (e) { if (e.name !== 'AbortError') console.warn('OANDA failed:', e.message); }
+
+      try {
+        if (abortControllers.rates) abortControllers.rates.abort();
+        abortControllers.rates = new AbortController();
+
+        const res = await fetch(`${CONFIG.RATES_PROXY}?base=USD`, {
+          signal: abortControllers.rates.signal
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.rates) {
+            ratesData = data.rates;
+            if (!ratesData.YER) ratesData.YER = CONFIG.YER_RATE;
+            lastSource = 'proxy';
+            updateSourceBadge('live', '🔗 Proxy');
+            return;
+          }
+        }
+      } catch (e) { if (e.name !== 'AbortError') console.warn('Rates proxy failed:', e.message); }
+
+      ratesData = {
+        USD: 1, EUR: 0.86, GBP: 0.75, JPY: 160, CNY: 6.77,
+        SAR: 3.75, AED: 3.67, KWD: 0.31, QAR: 3.64, OMR: 0.38,
+        BHD: 0.38, JOD: 0.71, YER: CONFIG.YER_RATE
+      };
+      lastSource = 'fallback';
+      updateSourceBadge('fallback', '💾 بيانات محلية');
+    }
+
+    function buildRatesFromOanda(prices) {
+      const rates = { USD: 1 };
+      prices.forEach(price => {
+        const { base, quote, mid } = price;
+        if (!mid || mid <= 0) return;
+        if (quote === 'USD') rates[base] = mid;
+        else if (base === 'USD') rates[quote] = mid;
+      });
+      if (!rates.YER) rates.YER = CONFIG.YER_RATE;
+      return rates;
+    }
+
+    /* ============================================
+       FETCH METALS
+       ============================================ */
+    async function fetchMetals() {
+      try {
+        if (abortControllers.metals) abortControllers.metals.abort();
+        abortControllers.metals = new AbortController();
+
+        const res = await fetch(CONFIG.METALS_PROXY, {
+          signal: abortControllers.metals.signal
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            metalsData = data;
+            return;
+          }
+        }
+      } catch (e) { if (e.name !== 'AbortError') console.warn('Metals failed:', e.message); }
+
+      metalsData = {
+        gold: { ounce: { price_usd: 2344, change_24h: 12, change_pct: 0.5 } },
+        silver: { ounce: { price_usd: 28.8, change_24h: -0.3, change_pct: -1.0 } }
+      };
+    }
+
+    /* ============================================
+       FETCH LOCAL RATES FROM JSON
+       ============================================ */
+    async function fetchLocalRatesFromJSON() {
+      try {
+        if (abortControllers.local) abortControllers.local.abort();
+        abortControllers.local = new AbortController();
+
+        const cacheBuster = Date.now();
+        const res = await fetch(`${CONFIG.DATA_URL}?_=${cacheBuster}`, {
+          signal: abortControllers.local.signal,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
+
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || !data.regions) return;
+
+        for (const regionKey in data.regions) {
+          const regionData = data.regions[regionKey];
+          if (!regionData || !regionData.currencies) continue;
+          if (!CONFIG.LOCAL_RATES[regionKey]) CONFIG.LOCAL_RATES[regionKey] = {};
+
+          for (const currencyKey in regionData.currencies) {
+            const currencyData = regionData.currencies[currencyKey];
+            if (currencyData && typeof currencyData === 'object' && 'buy' in currencyData && 'sell' in currencyData) {
+              const buyVal = parseFloat(currencyData.buy);
+              const sellVal = parseFloat(currencyData.sell);
+              if (!isNaN(buyVal) && !isNaN(sellVal) && buyVal > 0 && sellVal > 0) {
+                CONFIG.LOCAL_RATES[regionKey][currencyKey] = { buy: buyVal, sell: sellVal };
+              }
+            }
+          }
+          if (regionData.gold) CONFIG.LOCAL_RATES[regionKey].gold = regionData.gold;
+          if (regionData.silver) CONFIG.LOCAL_RATES[regionKey].silver = regionData.silver;
+        }
+      } catch (e) { /* silent */ }
+    }
+
+    /* ============================================
+       RENDER RATES (with change tracking)
+       ============================================ */
+    function renderRates() {
+      const container = document.getElementById('rates-container');
+      const local = CONFIG.LOCAL_RATES[currentRegion];
+      const yerRate = ratesData.YER || CONFIG.YER_RATE;
+      const items = [];
+
+      // USD
+      if (local.USD) {
+        const change = computeAndSaveChange(`${currentRegion}_USD_sell`, local.USD.sell);
+        items.push(createRateItem({
+          name: 'الدولار الأمريكي',
+          pair: 'USD/YER',
+          value: formatNumber(local.USD.sell, ''),
+          change: change,
+          isLocal: true
+        }));
+      }
+
+      // SAR
+      if (local.SAR) {
+        const change = computeAndSaveChange(`${currentRegion}_SAR_sell`, local.SAR.sell);
+        items.push(createRateItem({
+          name: 'الريال السعودي',
+          pair: 'SAR/YER',
+          value: formatNumber(local.SAR.sell, ''),
+          change: change,
+          isLocal: true
+        }));
+      }
+
+      // EUR
+      const eurSell = local.EUR ? local.EUR.sell : (ratesData.EUR ? (ratesData.EUR * yerRate) : null);
+      if (eurSell) {
+        const change = computeAndSaveChange(`${currentRegion}_EUR_sell`, parseFloat(eurSell));
+        items.push(createRateItem({
+          name: 'اليورو',
+          pair: 'EUR/YER',
+          value: formatNumber(parseFloat(eurSell), ''),
+          change: change,
+          isLocal: !!local.EUR
+        }));
+      }
+
+      // GBP
+      const gbpSell = local.GBP ? local.GBP.sell : (ratesData.GBP ? (ratesData.GBP * yerRate) : null);
+      if (gbpSell) {
+        const change = computeAndSaveChange(`${currentRegion}_GBP_sell`, parseFloat(gbpSell));
+        items.push(createRateItem({
+          name: 'الجنيه الإسترليني',
+          pair: 'GBP/YER',
+          value: formatNumber(parseFloat(gbpSell), ''),
+          change: change,
+          isLocal: !!local.GBP
+        }));
+      }
+
+      // AED
+      const aedSell = local.AED ? local.AED.sell : (ratesData.AED ? (ratesData.AED * yerRate) : null);
+      if (aedSell) {
+        const change = computeAndSaveChange(`${currentRegion}_AED_sell`, parseFloat(aedSell));
+        items.push(createRateItem({
+          name: 'الدرهم الإماراتي',
+          pair: 'AED/YER',
+          value: formatNumber(parseFloat(aedSell), ''),
+          change: change,
+          isLocal: !!local.AED
+        }));
+      }
+
+      container.innerHTML = items.join('');
+    }
+
+    function createRateItem({ name, pair, value, change, isLocal }) {
+      const up = change.pct > 0;
+      const changeClass = change.pct > 0.01 ? 'up' : change.pct < -0.01 ? 'down' : 'neutral';
+      const icon = change.pct > 0.01 ? '▲' : change.pct < -0.01 ? '▼' : '—';
+      const sourceLabel = isLocal ? '' : '<span style="font-size:10px;color:#64748b;margin-top:2px">(OANDA)</span>';
+
+      return `
+        <div class="rate-item">
+          <div class="rate-info">
+            <div class="rate-name">${name} ${sourceLabel}</div>
+            <div class="rate-pair">${pair}</div>
+            <span class="rate-change ${changeClass}">${icon} ${Math.abs(change.pct).toFixed(2)}%</span>
+          </div>
+          <span class="rate-value">${value}</span>
+        </div>`;
+    }
+
+    /* ============================================
+       RENDER METALS (with change tracking)
+       ============================================ */
+    function renderMetals() {
+      const container = document.getElementById('metals-container');
+      const local = CONFIG.LOCAL_RATES[currentRegion];
+      const items = [];
+
+      // Gold 21k local
+      if (local.gold && local.gold['21k']) {
+        const change = computeAndSaveChange(`${currentRegion}_gold_21k_sell`, local.gold['21k'].sell);
+        items.push(createRateItem({
+          name: 'ذهب عيار 21',
+          pair: 'جرام',
+          value: formatNumber(local.gold['21k'].sell, ''),
+          change: change,
+          isLocal: true
+        }));
+      }
+
+      // Gold 22k local
+      if (local.gold && local.gold['22k']) {
+        const change = computeAndSaveChange(`${currentRegion}_gold_22k_sell`, local.gold['22k'].sell);
+        items.push(createRateItem({
+          name: 'ذهب عيار 22',
+          pair: 'جرام',
+          value: formatNumber(local.gold['22k'].sell, ''),
+          change: change,
+          isLocal: true
+        }));
+      }
+
+      // Global Gold 24k
+      if (metalsData.gold && metalsData.gold.ounce) {
+        const gold = metalsData.gold.ounce;
+        const gramPrice = gold.price_usd / 31.1035;
+        const change = computeAndSaveChange('global_gold_24k_gram', gramPrice);
+        items.push(createRateItem({
+          name: 'ذهب عيار 24 (عالمي)',
+          pair: 'جرام / $',
+          value: '$' + formatNumber(gramPrice, ''),
+          change: change,
+          isLocal: false
+        }));
+      }
+
+      // Global Silver
+      if (metalsData.silver && metalsData.silver.ounce) {
+        const silver = metalsData.silver.ounce;
+        const gramPrice = silver.price_usd / 31.1035;
+        const change = computeAndSaveChange('global_silver_gram', gramPrice);
+        items.push(createRateItem({
+          name: 'الفضة (عالمية)',
+          pair: 'جرام / $',
+          value: '$' + formatNumber(gramPrice, ''),
+          change: change,
+          isLocal: false
+        }));
+      }
+
+      // Local Silver
+      if (local.silver) {
+        const change = computeAndSaveChange(`${currentRegion}_silver_sell`, local.silver.sell);
+        items.push(createRateItem({
+          name: 'الفضة (محلية)',
+          pair: 'جرام',
+          value: formatNumber(local.silver.sell, ''),
+          change: change,
+          isLocal: true
+        }));
+      }
+
+      container.innerHTML = items.join('');
+    }
+
+    /* ============================================
+       REGION SELECTOR
+       ============================================ */
+    function selectRegion(region) {
+      currentRegion = region;
+      document.querySelectorAll('.region-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.region === region);
+      });
+      renderRates();
+      renderMetals();
+    }
+
+    /* ============================================
+       UI HELPERS
+       ============================================ */
+    function updateSourceBadge(type, text) {
+      const badge = document.getElementById('source-badge');
+      badge.className = 'source-badge ' + type;
+      badge.textContent = text;
+    }
+
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('update-time').textContent = 
+        'آخر تحديث: ' + now.toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    function formatNumber(num, symbol) {
+      if (isNaN(num)) return '--';
+      const abs = Math.abs(num);
+      let formatted;
+      if (abs >= 1000000) formatted = (num / 1000000).toFixed(2) + 'M';
+      else if (abs >= 1000) formatted = num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      else if (abs >= 1) formatted = num.toFixed(2);
+      else formatted = num.toFixed(4);
+      return symbol ? `${symbol}${formatted}` : formatted + ' ر.ي';
+    }
+
+    /* ============================================
+       INIT
+       ============================================ */
+    loadAllData();
+    setInterval(loadAllData, 6000);
   </script>
 </body>
 </html>
