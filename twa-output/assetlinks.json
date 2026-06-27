@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "io.github.kaidngat4_droid.twa",
-        "sha256_cert_fingerprints": ["58:C8:7C:56:BA:A2:A8:6D:89:62:D0:3F:59:9D:DF:A7:81:4F:26:46:C2:69:94:A2:A9:DA:0E:79:11:95:C9:25"]
+        "sha256_cert_fingerprints": ["DB:F1:37:5D:F9:0D:50:A7:35:A9:4C:12:1B:EB:67:BB:81:58:88:31:14:BB:4C:91:77:71:E7:4F:6B:9C:F1:CB"]
       }
     }]
